@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="21507" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina6_12" orientation="landscape" appearance="light"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="21505"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="KeeVideoPlayerSettingsViewController" customModule="KeeCustomPlayer" customModuleProvider="target">
+            <connections>
+                <outlet property="mainStack" destination="0K4-Qh-lW9" id="qql-1U-1JV"/>
+                <outlet property="view" destination="i5M-Pr-FkT" id="sfx-zR-JGt"/>
+            </connections>
+        </placeholder>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <view clearsContextBeforeDrawing="NO" contentMode="scaleToFill" id="i5M-Pr-FkT">
+            <rect key="frame" x="0.0" y="0.0" width="852" height="393"/>
+            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+            <subviews>
+                <visualEffectView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="UXg-ED-C5R">
+                    <rect key="frame" x="0.0" y="0.0" width="852" height="393"/>
+                    <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO" id="GMz-Po-IM0">
+                        <rect key="frame" x="0.0" y="0.0" width="852" height="393"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="16" translatesAutoresizingMaskIntoConstraints="NO" id="0K4-Qh-lW9">
+                                <rect key="frame" x="256" y="0.0" width="340" height="393"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="300" id="msi-4K-cqt"/>
+                                </constraints>
+                            </stackView>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="KlV-Md-KeW">
+                                <rect key="frame" x="32" y="32" width="50" height="50"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="50" id="0pu-LT-qhZ"/>
+                                    <constraint firstAttribute="width" constant="50" id="vmh-qK-kZf"/>
+                                </constraints>
+                                <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
+                                <state key="normal" image="ic_player_settings_close"/>
+                                <connections>
+                                    <action selector="dismissView" destination="-1" eventType="touchUpInside" id="lee-cb-rHe"/>
+                                </connections>
+                            </button>
+                        </subviews>
+                        <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        <constraints>
+                            <constraint firstItem="KlV-Md-KeW" firstAttribute="top" secondItem="GMz-Po-IM0" secondAttribute="top" constant="32" id="0qW-X8-RtM"/>
+                            <constraint firstItem="0K4-Qh-lW9" firstAttribute="top" secondItem="GMz-Po-IM0" secondAttribute="top" placeholder="YES" id="dM0-Y4-jY1"/>
+                            <constraint firstItem="KlV-Md-KeW" firstAttribute="leading" secondItem="GMz-Po-IM0" secondAttribute="leading" constant="32" id="fcP-nj-CSj"/>
+                            <constraint firstItem="0K4-Qh-lW9" firstAttribute="leading" secondItem="GMz-Po-IM0" secondAttribute="leading" constant="256" placeholder="YES" id="nqN-iI-Sjj"/>
+                            <constraint firstItem="0K4-Qh-lW9" firstAttribute="centerX" secondItem="GMz-Po-IM0" secondAttribute="centerX" id="tfs-Go-u9s"/>
+                            <constraint firstItem="0K4-Qh-lW9" firstAttribute="centerY" secondItem="GMz-Po-IM0" secondAttribute="centerY" id="zKO-C8-13b"/>
+                        </constraints>
+                    </view>
+                    <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                    <blurEffect style="dark"/>
+                </visualEffectView>
+            </subviews>
+            <viewLayoutGuide key="safeArea" id="fnl-2z-Ty3"/>
+            <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+            <constraints>
+                <constraint firstItem="UXg-ED-C5R" firstAttribute="top" secondItem="i5M-Pr-FkT" secondAttribute="top" id="2xS-ae-4oC"/>
+                <constraint firstAttribute="bottom" secondItem="UXg-ED-C5R" secondAttribute="bottom" id="STW-9u-60K"/>
+                <constraint firstItem="UXg-ED-C5R" firstAttribute="trailing" secondItem="i5M-Pr-FkT" secondAttribute="trailing" id="SZe-Mo-l1X"/>
+                <constraint firstItem="UXg-ED-C5R" firstAttribute="leading" secondItem="i5M-Pr-FkT" secondAttribute="leading" id="VIF-g3-S29"/>
+            </constraints>
+            <point key="canvasLocation" x="14.788732394366198" y="-12.977099236641221"/>
+        </view>
+    </objects>
+    <resources>
+        <image name="ic_player_settings_close" width="26" height="26"/>
+    </resources>
+</document>
