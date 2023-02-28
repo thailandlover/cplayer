@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "ic_player_forwarde.pdf",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}

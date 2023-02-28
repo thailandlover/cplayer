@@ -1,6 +1,13 @@
+//
+//  Media.swift
+//  KeeCustomPlayer
+//
+//  Created by Ahmed Qazzaz on 11/11/2022.
+//
+
 import UIKit
 
-struct Media {
+public struct Media {
     var title : String
     var subTitle : String?
     var urlToPlay : String
@@ -15,14 +22,14 @@ struct Media {
     var startAt : Float = 0
 }
 
-struct KeeUser {
+public struct KeeUser {
     var userID : String
     var profileID : String
     
     static var debuging = KeeUser(userID: "0", profileID: "-1")
 }
 
-struct HostAppSettings {
+public struct HostAppSettings {
     var lang : String
     var baseURL : String?
     

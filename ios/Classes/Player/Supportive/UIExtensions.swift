@@ -1,3 +1,10 @@
+//
+//  UIExtensions.swift
+//  KeeCustomPlayer
+//
+//  Created by Ahmed Qazzaz on 14/11/2022.
+//
+
 import UIKit
 
 
@@ -111,7 +118,7 @@ extension UIView {
 public protocol NibLoadable {
     // Name of the nib file
     static var nibName: String { get }
-    static func createFromNib(in bundle: Bundle) -> Self?
+    static func createFromNib(in bundle: Bundle?) -> Self?
 }
 
 
@@ -122,8 +129,9 @@ public extension NibLoadable where Self: UIView {
         return String(describing: Self.self)
     }
 
-    static func createFromNib(in bundle: Bundle = Bundle.main) -> Self? {
-        if let topLevelArray = bundle.loadNibNamed(nibName, owner: self){
+    static func createFromNib(in bundle: Bundle?) -> Self? {
+        let useBundle = bundle ?? .main
+        if let topLevelArray = useBundle.loadNibNamed(nibName, owner: self){
             let views = Array<Any>(topLevelArray).filter { $0 is Self }
             return views.last as? Self
         }

@@ -1,7 +1,15 @@
+//
+//  MeidaManager.swift
+//  KeeCustomPlayer
+//
+//  Created by Ahmed Qazzaz on 04/01/2023.
+//
+
 import UIKit
 
 
-class MediaManager {
+
+public class MediaManager {
     
     static var `default` = MediaManager()
     private var currentPlayer : KeeVideoPlayerController?
@@ -12,8 +20,9 @@ class MediaManager {
     
     //MARK: -Media Player Functions.
     @discardableResult
-    func openMediaPlayer(usingMediaList list : [Media], forViewController mvc: UIViewController)->KeeVideoPlayerController {
-        let vc = KeeVideoPlayerController(nibName: "KeeVideoPlayerController", bundle: nil)
+    public func openMediaPlayer(usingMediaList list : [Media], forViewController mvc: UIViewController)->KeeVideoPlayerController {
+        
+        let vc = KeeVideoPlayerController(nibName: "KeeVideoPlayerController", bundle: .packageBundle)
         vc.setMediaList(mediaList: list)
         if let nvc = mvc.navigationController {
             nvc.pushViewController(vc, animated: true)
@@ -23,7 +32,7 @@ class MediaManager {
         return vc
     }
     
-    func mediaPlayerApplyAction(_ action : MediaAction){
+    public func mediaPlayerApplyAction(_ action : MediaAction){
         guard let player = currentPlayer else {return}
         switch(action){
         case .play:
@@ -43,11 +52,11 @@ class MediaManager {
     
     //MARK: -Downloaded Media Functions. (Fetching)
         
-    func getDownloaded(ForMediaIdentifier identifier: String, type: MediaType)->DownloadedMedia?{
+    public func getDownloaded(ForMediaIdentifier identifier: String, type: MediaType)->DownloadedMedia?{
         return try? FilesManager.shared.getDownloadeMediaById(identifier,type: type)
     }
     
-    func getMetaData(ForMediaIdentifier identifier: String, type: MediaType)->[String:Any]?{
+    public func getMetaData(ForMediaIdentifier identifier: String, type: MediaType)->[String:Any]?{
         if let media = getDownloaded(ForMediaIdentifier: identifier, type: type) {
             return media.object
         }
@@ -60,11 +69,11 @@ class MediaManager {
     }
     
     
-    func getDownloadedList(type: MediaType)->[DownloadedMedia]{
+    public func getDownloadedList(type: MediaType)->[DownloadedMedia]{
         return (try? FilesManager.shared.getDownloadList(type: type)) ?? []
     }
     
-    func getDownloadingList(type: MediaType)->[[String:Any]]{
+    public func getDownloadingList(type: MediaType)->[[String:Any]]{
         let results = DownloadManager.shared.getAllDownloadingTasks(forType: type).map({ object in
             if !(object.state == .canceling || object.state == .completed){
                 if let data = UserDefaults.standard.object(forKey: object.mediaId ?? "") as? Data {
@@ -80,7 +89,7 @@ class MediaManager {
     
     
     
-    enum MediaAction {
+    public enum MediaAction {
         case play
         case pause
         case jumpForeward
@@ -89,7 +98,7 @@ class MediaManager {
         case previousMediaFile
     }
     
-    enum MediaType : String, Codable{
+    public enum MediaType : String, Codable{
         case movie = "movies"
         case series = "series"
     }

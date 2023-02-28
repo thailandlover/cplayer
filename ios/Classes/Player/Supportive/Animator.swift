@@ -1,3 +1,11 @@
+//
+//  Animator.swift
+//  UnitOneFramework
+//
+//  Created by Ahmed Qazzaz on 6/29/20.
+//  Copyright © 2020 unitone. All rights reserved.
+//
+
 import UIKit
 
 

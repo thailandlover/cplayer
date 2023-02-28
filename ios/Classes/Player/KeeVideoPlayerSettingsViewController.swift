@@ -1,7 +1,14 @@
+//
+//  KeeVideoPlayerSettingsViewController.swift
+//  KeeCustomPlayer
+//
+//  Created by Ahmed Qazzaz on 21/11/2022.
+//
+
 import UIKit
 import AVFoundation
 
-class KeeVideoPlayerSettingsViewController: UIViewController {
+public class KeeVideoPlayerSettingsViewController: UIViewController {
 
     @IBOutlet weak private var mainStack : UIStackView!
     
@@ -16,7 +23,7 @@ class KeeVideoPlayerSettingsViewController: UIViewController {
     var didChangeSpeedOption : ((_:Double)->Void)!
     
     
-    override func viewDidLoad() {
+    public override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
     }
@@ -24,7 +31,7 @@ class KeeVideoPlayerSettingsViewController: UIViewController {
     func playerSetOptions(){
         guard !itemsHasBeenSet else {return}
         itemsHasBeenSet = true
-        if let audioGroup = SettingsGroup.createFromNib(), (audioGroupList?.options.count ?? 0) > 0 {
+        if let audioGroup = SettingsGroup.createFromNib(in: .packageBundle), (audioGroupList?.options.count ?? 0) > 0 {
             audioGroup.headerTitle = "Audio"
             audioGroup.optionsList = audioGroupList?.options.map({SettingsOption(name: $0.displayName, selected: $0 == audioGroupList?.defaultOption)}).compactMap({$0}) ?? []
             
@@ -39,7 +46,7 @@ class KeeVideoPlayerSettingsViewController: UIViewController {
             mainStack.addArrangedSubview(getSeparator())
         }
         
-        if let subTitleGroup = SettingsGroup.createFromNib(), (subTitlesGroupList?.options.count ?? 0) > 0 {
+        if let subTitleGroup = SettingsGroup.createFromNib(in: .packageBundle), (subTitlesGroupList?.options.count ?? 0) > 0 {
             subTitleGroup.headerTitle = "SubTitle"
             subTitleGroup.optionsList = subTitlesGroupList?.options.map({SettingsOption(name: $0.displayName, selected: $0 == audioGroupList?.defaultOption)}).compactMap({$0}) ?? []
             
@@ -53,7 +60,7 @@ class KeeVideoPlayerSettingsViewController: UIViewController {
             mainStack.addArrangedSubview(getSeparator())
         }
         
-        if let speedGroup = SettingsGroup.createFromNib() {
+        if let speedGroup = SettingsGroup.createFromNib(in: .packageBundle) {
             speedGroup.headerTitle = "Playback Speed"
             speedGroup.optionsList = speedValues.map({SettingsOption(name:"x\($0)")})
             /*[SettingsOption(name: "x0.25"),

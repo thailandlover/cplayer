@@ -1,6 +1,13 @@
+//
+//  SettingsOption.swift
+//  KeeCustomPlayer
+//
+//  Created by Ahmed Qazzaz on 22/11/2022.
+//
+
 import UIKit
 
-class SettingsOptionView : UIView, NibLoadable {
+public class SettingsOptionView : UIView, NibLoadable {
     @IBOutlet weak private var markerView : UIView!
     @IBOutlet weak private var innerMarkerView : UIView!
     @IBOutlet weak private var titleLabel : UILabel!
@@ -13,7 +20,7 @@ class SettingsOptionView : UIView, NibLoadable {
         }
     }
     
-    override func draw(_ rect: CGRect) {
+    public override func draw(_ rect: CGRect) {
         super.draw(rect)
         
         [markerView, innerMarkerView].forEach { v in
@@ -31,7 +38,7 @@ class SettingsOptionView : UIView, NibLoadable {
         
     }
     
-    override func awakeFromNib() {
+    public override func awakeFromNib() {
         super.awakeFromNib()
         self.backgroundColor = .clear
     }
@@ -46,7 +53,7 @@ class SettingsOptionView : UIView, NibLoadable {
 
 
 
-struct SettingsOption {
+public struct SettingsOption {
     var name : String
     var selected : Bool = false
 }

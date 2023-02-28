@@ -1,4 +1,8 @@
+
+
 import UIKit
+
+let globalPackageBundle = "org.cocoapods.dowplay"
 
 class SSBadgeButton: UIButton {
     
@@ -75,5 +79,31 @@ class SSBadgeButton: UIButton {
         super.init(coder: aDecoder)
         self.addBadgeToButon(badge: nil)
 //        fatalError("init(coder:) has not been implemented")
+    }
+}
+
+
+public struct AppUtility {
+
+    static func lockOrientation(_ orientation: UIInterfaceOrientationMask) {
+    
+        KeeVideoPlayerController.orientationLock = orientation
+    }
+
+    /// OPTIONAL Added method to adjust lock and rotate to the desired orientation
+    static func lockOrientation(_ orientation: UIInterfaceOrientationMask, andRotateTo rotateOrientation:UIInterfaceOrientation) {
+   
+        self.lockOrientation(orientation)
+    
+        UIDevice.current.setValue(rotateOrientation.rawValue, forKey: "orientation")
+        UINavigationController.attemptRotationToDeviceOrientation()
+    }
+
+}
+
+
+extension Bundle {
+    static var packageBundle : Bundle? {
+        return Bundle(identifier: globalPackageBundle)
     }
 }

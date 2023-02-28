@@ -1,10 +1,19 @@
+//
+//  KeeVideoPlayerController.swift
+//  KeeCustomPlayer
+//
+//  Created by Ahmed Qazzaz on 11/11/2022.
+//
+
 import UIKit
 import AVKit
 import MediaPlayer
 
 
-class KeeVideoPlayerController: UIViewController {
-    
+
+
+public class KeeVideoPlayerController: UIViewController {
+    public static var orientationLock = UIInterfaceOrientationMask.portrait
         
     var routerPickerView :  AVRoutePickerView!
     private var queuePlayer : AVQueuePlayer?
@@ -83,7 +92,7 @@ class KeeVideoPlayerController: UIViewController {
     @IBOutlet weak private var bottomView : UIView!
     @IBOutlet weak private var topView : UIView!
     
-    override func viewDidLoad() {
+    public override func viewDidLoad() {
         super.viewDidLoad()
         animator = UOAnimator(duration: 1.24, delay: 0.01,animationOptions: .curveEaseOut, damping: 0.85)
         
@@ -100,7 +109,7 @@ class KeeVideoPlayerController: UIViewController {
 //        playerView.backgroundColor = .red
         
         self.setPlayingItemInfo()
-        settingsController = KeeVideoPlayerSettingsViewController(nibName: "KeeVideoPlayerSettingsViewController", bundle: nil)
+        settingsController = KeeVideoPlayerSettingsViewController(nibName: "KeeVideoPlayerSettingsViewController", bundle: .packageBundle)
         
         
         
@@ -240,7 +249,7 @@ class KeeVideoPlayerController: UIViewController {
         item?.textStyleRules = [textStyle, textStyle1, textStyle2]
     }
     
-    override func viewWillAppear(_ animated: Bool) {
+    public override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         self.navigationController?.setNavigationBarHidden(true, animated: false)
         self.checkNextPreviousButtonStatsu()
@@ -287,7 +296,7 @@ class KeeVideoPlayerController: UIViewController {
     }
 
     
-    override func viewDidAppear(_ animated: Bool) {
+    public override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         setPlayingItem()
     }
@@ -331,7 +340,7 @@ class KeeVideoPlayerController: UIViewController {
     
     
     
-    override func viewWillDisappear(_ animated: Bool) {
+    public override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         AppUtility.lockOrientation(.portrait)
         self.updateWatchTime()
@@ -563,7 +572,7 @@ class KeeVideoPlayerController: UIViewController {
         self.settingsController.show(inView: self.view)
     }
     
-    override func observeValue(forKeyPath keyPath: String?,
+    public override func observeValue(forKeyPath keyPath: String?,
                                of object: Any?,
                                change: [NSKeyValueChangeKey : Any]?,
                                context: UnsafeMutableRawPointer?) {
@@ -771,14 +780,14 @@ class KeeVideoPlayerController: UIViewController {
         }
     }
     
-    override var shouldAutorotate: Bool {
+    public override var shouldAutorotate: Bool {
         return false
     }
     
-    override var supportedInterfaceOrientations: UIInterfaceOrientationMask {
+    public override var supportedInterfaceOrientations: UIInterfaceOrientationMask {
         return .landscape
     }
-    override var preferredInterfaceOrientationForPresentation: UIInterfaceOrientation {
+    public override var preferredInterfaceOrientationForPresentation: UIInterfaceOrientation {
         return .landscapeLeft
     }
     
@@ -847,18 +856,18 @@ class KeeVideoPlayerController: UIViewController {
 }
 
 extension KeeVideoPlayerController : AVPictureInPictureControllerDelegate {
-    func pictureInPictureController(_ pictureInPictureController: AVPictureInPictureController,
+    public func pictureInPictureController(_ pictureInPictureController: AVPictureInPictureController,
                                     restoreUserInterfaceForPictureInPictureStopWithCompletionHandler completionHandler: @escaping (Bool) -> Void) {
         // Restore the user interface.
         completionHandler(true)
     }
     
-    func pictureInPictureControllerWillStartPictureInPicture(_ pictureInPictureController: AVPictureInPictureController) {
+    public func pictureInPictureControllerWillStartPictureInPicture(_ pictureInPictureController: AVPictureInPictureController) {
         // Hide the playback controls.
         // Show the placeholder artwork.
     }
 
-    func pictureInPictureControllerDidStopPictureInPicture(_ pictureInPictureController: AVPictureInPictureController) {
+    public func pictureInPictureControllerDidStopPictureInPicture(_ pictureInPictureController: AVPictureInPictureController) {
         // Hide the placeholder artwork.
         // Show the playback controls.
     }
