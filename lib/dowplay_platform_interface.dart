@@ -1,5 +1,6 @@
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
+import 'Media.dart';
 import 'dowplay_method_channel.dart';
 
 abstract class DowplayPlatform extends PlatformInterface {
@@ -23,7 +24,7 @@ abstract class DowplayPlatform extends PlatformInterface {
     _instance = instance;
   }
 
-  Future<String?> getPlatformVersion() {
-    throw UnimplementedError('platformVersion() has not been implemented.');
+  Future<bool?> play(Media media) {
+    throw UnimplementedError('play() has not been implemented.');
   }
 }

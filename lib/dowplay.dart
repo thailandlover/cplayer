@@ -1,8 +1,9 @@
 
+import 'Media.dart';
 import 'dowplay_platform_interface.dart';
 
 class Dowplay {
-  Future<String?> getPlatformVersion() {
-    return DowplayPlatform.instance.getPlatformVersion();
+  Future<bool?> play(Media media) {
+    return DowplayPlatform.instance.play(media);
   }
 }
