@@ -11,12 +11,14 @@ public class DowplayPlugin: NSObject, FlutterPlugin {
     }
     
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
-        
         switch(call.method){
         case "play":
             self.play(call: call, result: result)
             result(true)
             break;
+        case "config_downloader":
+            DownloadManager.shared.config()
+            result(true)
         default:
             print("method wasn't found : ",call.method);
             result(false)
