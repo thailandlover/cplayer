@@ -13,8 +13,9 @@ import MediaPlayer
 
 
 public class KeeVideoPlayerController: UIViewController {
+    public var settings : HostAppSettings = .default
     public static var orientationLock = UIInterfaceOrientationMask.portrait
-        
+    public var controllersStayTime : Double = 2.5
     var routerPickerView :  AVRoutePickerView!
     private var queuePlayer : AVQueuePlayer?
     private var playerLayer : AVPlayerLayer!
@@ -350,7 +351,7 @@ public class KeeVideoPlayerController: UIViewController {
     
     private func updateWatchTime(){
         if let media = media {
-            NetworkOperatinosManager.default.updateWatchTime(forMedia: media, updateTime: player.currentTime().seconds, mediaDuration: player.currentItem?.duration.seconds ?? 0)
+            NetworkOperatinosManager.default.updateWatchTime(forMedia: media,settings: settings, updateTime: player.currentTime().seconds, mediaDuration: player.currentItem?.duration.seconds ?? 0)
         }
     }
     
@@ -358,10 +359,10 @@ public class KeeVideoPlayerController: UIViewController {
     @IBAction func playPauseAction(_ sender : UIButton?) {
         if self.player.rate == 0 {
             self.player.play()
-            self.btn_playPause.setImage(UIImage(named: "ic_player_pause"), for: .normal)
+            self.btn_playPause.setImage(UIImage(named: "ic_player_pause", in: .packageBundle,compatibleWith: .none), for: .normal)
         }else{
             self.player.pause()
-            self.btn_playPause.setImage(UIImage(named: "ic_player_play"), for: .normal)
+            self.btn_playPause.setImage(UIImage(named: "ic_player_play", in: .packageBundle,compatibleWith: .none), for: .normal)
         }
     }
     
@@ -544,7 +545,12 @@ public class KeeVideoPlayerController: UIViewController {
         if btn_download.tag == 0 {
             //        DownloadManager.shared.download(link: media?.urlToPlay ?? "")
             if let url = URL(string: media?.urlToPlay ?? "") {
-                DownloadManager.shared.startDownload(url: url,forMediaId: Int(media?.keeId ?? "") ?? -1 ,mediaName: media?.title ?? "Untitled", type: media?.type ?? .movie)
+                DownloadManager.shared.startDownload(url: url,
+                                                     forMediaId: Int(media?.keeId ?? "") ?? -1 ,
+                                                     mediaName: media?.title ?? "Untitled",
+                                                     type: media?.type ?? .movie,
+                                                     mediaGroup: media?.mediaGroup,
+                                                     object: media?.info)
                 
                 try? validateDownloadButton()
             }
@@ -665,12 +671,12 @@ public class KeeVideoPlayerController: UIViewController {
         if let value = media?.startAt, value > 0 {
             seekToSeconds(value: Double(value))
         }
-        self.btn_playPause.setImage(UIImage(named: "ic_player_pause"), for: .normal)
+            self.btn_playPause.setImage(UIImage(named: "ic_player_pause", in: .packageBundle,compatibleWith: .none), for: .normal)
     }
     
     private func pause(){
         self.player.pause()
-        self.btn_playPause.setImage(UIImage(named: "ic_player_play"), for: .normal)
+        self.btn_playPause.setImage(UIImage(named: "ic_player_play", in: .packageBundle,compatibleWith: .none), for: .normal)
     }
     
     private func hideViews(){
@@ -770,7 +776,7 @@ public class KeeVideoPlayerController: UIViewController {
     private func setTimerToHideControllers(){
         if showingControllerTime != nil {showingControllerTime?.invalidate()}
         
-        showingControllerTime = Timer.scheduledTimer(withTimeInterval: 5,
+        showingControllerTime = Timer.scheduledTimer(withTimeInterval: controllersStayTime,
                              repeats: false) { t in
             if let player = self.player {
                 if player.rate > 0 {

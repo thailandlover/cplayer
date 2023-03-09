@@ -15,4 +15,10 @@ class MethodChannelDowplay extends DowplayPlatform {
     final bool? result = await methodChannel.invokeMethod<bool>('play',media.toJson());
     return result;
   }
+
+  @override
+  Future<bool?> config() async {
+    final bool? result = await methodChannel.invokeMethod<bool>('config_downloader');
+    return result;
+  }
 }

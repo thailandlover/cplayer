@@ -20,9 +20,10 @@ public class MediaManager {
     
     //MARK: -Media Player Functions.
     @discardableResult
-    public func openMediaPlayer(usingMediaList list : [Media], forViewController mvc: UIViewController)->KeeVideoPlayerController {
+    public func openMediaPlayer(usingMediaList list : [Media], usingSettings settings: HostAppSettings, forViewController mvc: UIViewController)->KeeVideoPlayerController {
         
         let vc = KeeVideoPlayerController(nibName: "KeeVideoPlayerController", bundle: .packageBundle)
+        vc.settings = settings
         vc.setMediaList(mediaList: list)
         if let nvc = mvc.navigationController {
             nvc.pushViewController(vc, animated: true)
@@ -101,6 +102,25 @@ public class MediaManager {
     public enum MediaType : String, Codable{
         case movie = "movies"
         case series = "series"
+        
+        var version_4_value : String {
+            switch(self){
+            case .movie :
+                return "movie"
+            case .series:
+                return "episode"
+            }
+        }
+        
+        var version_3_value : String {
+            switch(self){
+            case .movie :
+                return "movies"
+            case .series:
+                return "series"
+            }
+        }
+        
     }
 }
 

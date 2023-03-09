@@ -6,4 +6,8 @@ class Dowplay {
   Future<bool?> play(Media media) {
     return DowplayPlatform.instance.play(media);
   }
+
+  Future<bool?> config() {
+    return DowplayPlatform.instance.config();
+  }
 }

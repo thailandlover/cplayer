@@ -27,4 +27,8 @@ abstract class DowplayPlatform extends PlatformInterface {
   Future<bool?> play(Media media) {
     throw UnimplementedError('play() has not been implemented.');
   }
+
+  Future<bool?> config() {
+    throw UnimplementedError('config() has not been implemented.');
+  }
 }

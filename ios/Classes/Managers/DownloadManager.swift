@@ -7,64 +7,7 @@
 
 import UIKit
 
-public struct DownloadedMedia : Codable{
-    var mediaId : String
-    var mediaURL : URL?
-    var mediaType : MediaManager.MediaType = .movie
-    var path : URL{
-        return FilesManager.shared.cache.appendingPathComponent(mediaType.rawValue, isDirectory: true).appendingPathComponent("\(name).mp4")
-    }
-    var name : String
-    var tempPath : URL
-    
-    
-    init(mediaId: String, mediaURL: URL? = nil, mediaType: MediaManager.MediaType = .movie, name: String, tempPath: URL) {
-        self.mediaId = mediaId
-        self.mediaURL = mediaURL
-        self.mediaType = mediaType
-        self.name = name
-        self.tempPath = tempPath
-    }
-    private var data : Data?
-    
-    var object : [String:Any]? {
-        set{
-            if newValue != nil{
-                self.data = try? JSONSerialization.data(withJSONObject: newValue!, options: .prettyPrinted)
-            }
-        }
-        
-        get{
-            if let data = self.data{
-                return try? JSONSerialization.jsonObject(with: data, options: .fragmentsAllowed) as? [String:Any]
-            }
-            return nil
-        }
-    }
-    
-    
-    var mediaDownloadName : String {
-        return mediaType.rawValue + "/" + "\(name)"
-    }
-    
-    func store() throws{
-        try FilesManager.shared.registerDownloadedMedia(self)
-    }
-    
-    func remove() throws{
-        try FilesManager.shared.deleteMediaBy(id: mediaId, type: self.mediaType)
-    }
-    
-    static func getByID(id : String, ofType: MediaManager.MediaType)throws->DownloadedMedia?{
-        return try FilesManager.shared.getDownloadeMediaById(id, type: ofType)
-    }
-    
-        
-    static func getAll(ofType : MediaManager.MediaType)throws->[DownloadedMedia]{
-        return try FilesManager.shared.getDownloadList(type: ofType)
-    }
-    
-}
+
 
 public class DownloadManager: NSObject/*, ObservableObject */{
     static var shared = DownloadManager()
@@ -87,9 +30,14 @@ public class DownloadManager: NSObject/*, ObservableObject */{
         updateTasks()
     }
     
-    func config(){ configed = true }
+    public func config(){ configed = true }
 
-    func startDownload(url: URL, forMediaId id :Int, mediaName: String = "", type: MediaManager.MediaType, object: [String:Any]? = nil)  {
+    public func startDownload(url: URL,
+                              forMediaId id :Int,
+                              mediaName: String = "",
+                              type: MediaManager.MediaType,
+                              mediaGroup: MediaGroup?,
+                              object: [String:Any]? = nil)  {
         if !configed {return}
         if tasks.contains(where: {$0.currentRequest?.url == url}) {
             return 
@@ -98,13 +46,15 @@ public class DownloadManager: NSObject/*, ObservableObject */{
         let task = urlSession.downloadTask(with: url)
 
         task.taskDescription = mediaName
-        task.mediaId = "\(id)_\(type.rawValue)" //mediaID format (3255_movie)
+        task.mediaId = "\(id)_\(type.rawValue)" //mediaID format (3255_movie) or (36970_series)
         task.resume()
         tasks.append(task)
         
         if let object = object, let data = try? JSONSerialization.data(withJSONObject: object, options: .prettyPrinted){
             UserDefaults.standard.set(data, forKey: "\(id)_\(type.rawValue)")
         }
+        mediaGroup?.register()
+        
     }
 
     func updateTasks() {
@@ -129,13 +79,13 @@ public class DownloadManager: NSObject/*, ObservableObject */{
         return tasks.first(where: {$0.mediaId == taskId})
     }
     
-    func getDownloadProgress(ForMediaId id: String, ofMediaType type: MediaManager.MediaType)->Double?{
+    public func getDownloadProgress(ForMediaId id: String, ofMediaType type: MediaManager.MediaType)->Double?{
         return getDownloadTask(withMediaId: id, forType: type)?.progress.fractionCompleted
     }
     
     
     //MARK: - Cancel Download Functions
-    func cancelAll(){
+    public func cancelAll(){
         if !configed {return}
         tasks.forEach({$0.cancel()})
         tasks.removeAll()
@@ -154,12 +104,12 @@ public class DownloadManager: NSObject/*, ObservableObject */{
     
     //MARK: - Pause Download Functions
     
-    func pauseDownloadForAllMedia(){
+    public func pauseDownloadForAllMedia(){
         if !configed {return}
         tasks.forEach({$0.suspend()})
     }
     
-    func pauseDownload(forMediaId id: String, ofType type: MediaManager.MediaType){
+    public func pauseDownload(forMediaId id: String, ofType type: MediaManager.MediaType){
         if !configed {return}
         let taskId = "\(id)_\(type.rawValue)"
         pauseDownload(forTaskID: taskId)
@@ -171,7 +121,7 @@ public class DownloadManager: NSObject/*, ObservableObject */{
     }
     
     //MARK: - Resume Download Functions
-    func resumeDownload(forMediaId id: String, ofType type: MediaManager.MediaType){
+    public func resumeDownload(forMediaId id: String, ofType type: MediaManager.MediaType){
         if !configed {return}
         let taskId = "\(id)_\(type.rawValue)"
         resumeDownload(forTaskID: taskId)
@@ -185,15 +135,20 @@ public class DownloadManager: NSObject/*, ObservableObject */{
     
     //MARK: - Check Download Status Functions
     ///is downloading regardless the status
-    func isDownloadingMediaWithID(_ id : String, ofType type: MediaManager.MediaType)->Bool{
+    public func isDownloadingMediaWithID(_ id : String, ofType type: MediaManager.MediaType)->Bool{
         let taskId = "\(id)_\(type.rawValue)"
         return tasks.contains(where: {taskId == "\($0.mediaId ?? "")"})
     }
     
     ///is downloading and is suspended
-    func isDownloadingMediaWithIDSuspended(_ id : String, ofType type: MediaManager.MediaType)->Bool{
+    public func isDownloadingMediaWithIDSuspended(_ id : String, ofType type: MediaManager.MediaType)->Bool{
         let taskId = "\(id)_\(type.rawValue)"
         return tasks.first(where: {taskId == "\($0.mediaId ?? "")"})?.state == .suspended
+    }
+    
+ //TODO: - Should be done...
+    func mediaIsDownloaded(_ id : String, ofType: MediaManager.MediaType)->Bool {
+        return false
     }
 }
 
@@ -206,12 +161,27 @@ extension DownloadManager: URLSessionDelegate, URLSessionDownloadDelegate {
     }
 
     public func urlSession(_: URLSession, downloadTask d: URLSessionDownloadTask, didFinishDownloadingTo location: URL) {
-        var obj = DownloadedMedia(mediaId: "\(d.mediaId ?? "")", name: d.taskDescription ?? "Untitled Media", tempPath: location)
+        
+        let  pureID = d.mediaId?.components(separatedBy: "_").first
+        let pureType = d.mediaId?.components(separatedBy: "_").last
+        
+        var obj = DownloadedMedia(mediaId: pureID ?? "", name: d.taskDescription ?? "Untitled Media", tempPath: location)
+        
+        if pureType != "movies"{
+            obj.mediaType = .series
+        }
+        
         if let data = UserDefaults.standard.object(forKey: "\(d.mediaId ?? "")") as? Data,
            let object = try? JSONSerialization.jsonObject(with: data, options: .fragmentsAllowed) as? [String:Any]{
             obj.object = object
-            UserDefaults.standard.removeObject(forKey: "\(d.mediaId ?? "")")
+            UserDefaults.standard.removeObject(forKey: "\(d.mediaId ?? "")")            
         }
+        if let  pureID = pureID {
+            var group = MediaGroup.get(usingEpisodeID: pureID)
+            obj.group = group
+            UserDefaults.standard.removeObject(forKey: "\(d.mediaId ?? "")_group")
+        }
+        
         do{
             try obj.store()
         }catch{
