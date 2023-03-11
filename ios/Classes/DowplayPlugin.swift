@@ -41,15 +41,21 @@ public class DowplayPlugin: NSObject, FlutterPlugin {
            let api_base_url : String = myArgs["api_base_url"] as? String,
            let start_at : Float = myArgs["start_at"] as? Float,
            let info : [String:Any] = myArgs["info"] as? [String:Any],
+           let media_group : [String:Any] = myArgs["media_group"] as? [String:Any],
            let lang : String = myArgs["lang"] as? String {
+            
             let keeUser = KeeUser(userID: user_id, profileID: profile_id,token: token)
             let hostAppSettings = HostAppSettings(KeeUser:keeUser, lang: lang,baseURL: api_base_url,apiVersion: 4,baseType: "mobile",baseVersion: "v4",acceptType: "ios")
             let mediaType : MediaManager.MediaType = media_type == "movie" ? .movie : .series
+            let itemsIds: [String:Any] = media_group["items_ids"] as! [String : Any];
+            let mediaGroup : MediaGroup = MediaGroup(showId: itemsIds["tv_show_id"] as! String, seasonId: itemsIds["season_id"] as! String, episodeId: itemsIds["episode_id"] as! String,data: media_group)
             var media : [Media] = []
-            var mediaItem = Media(title: title,subTitle: sub_title, urlToPlay: url,keeId: media_id,type: mediaType, startAt: start_at,info: info)
+            
+            var mediaItem = Media(title: title,subTitle: sub_title, urlToPlay: url,keeId: media_id,type: mediaType, startAt: start_at,mediaGroup: mediaGroup,info: info)
             media.append(mediaItem)
             
             MediaManager.default.openMediaPlayer(usingMediaList: media,usingSettings: hostAppSettings, forViewController: flutterViewController)
+            result(true)
             
         } else {
             print("iOS could not extract flutter arguments in method: (play)")

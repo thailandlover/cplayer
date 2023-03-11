@@ -17,6 +17,8 @@ class Media {
     required this.apiBaseUrl,
     required this.lang,
     required this.startAt,
+    required this.info,
+    required this.mediaGroup,
   });
 
   String title;
@@ -30,6 +32,8 @@ class Media {
   String apiBaseUrl;
   String lang;
   double startAt;
+  Map<String,dynamic> info;
+  Map<String,dynamic> mediaGroup;
 
   factory Media.fromJson(Map<String, dynamic> json) => Media(
     title: json["title"],
@@ -43,6 +47,8 @@ class Media {
     apiBaseUrl: json["api_base_url"],
     lang: json["lang"],
     startAt: json["start_at"],
+    info: json["info"],
+    mediaGroup: json["media_group"],
   );
 
   Map<String, dynamic> toJson() => {
@@ -57,5 +63,7 @@ class Media {
     "api_base_url": apiBaseUrl,
     "lang": lang,
     "start_at": startAt,
+    "info": info,
+    "media_group": mediaGroup,
   };
 }
