@@ -11,8 +11,12 @@ class MethodChannelDowplay extends DowplayPlatform {
   final methodChannel = const MethodChannel('dowplay');
 
   @override
-  Future<bool?> play(Media media) async {
-    final bool? result = await methodChannel.invokeMethod<bool>('play',media.toJson());
+  Future<bool?> playEpisode(Media media) async {
+    final bool? result = await methodChannel.invokeMethod<bool>('play_episode',media.toJson());
+    return result;
+  }
+  Future<bool?> playMovie(Media media) async {
+    final bool? result = await methodChannel.invokeMethod<bool>('play_movie',media.toJson());
     return result;
   }
 

@@ -134,14 +134,115 @@ class _MyAppState extends State<MyApp> {
         startAt: 10.5,
         info: episodeObject,
         mediaGroup: mediaGroup);
-    bool result = await play(media);
+    bool result = await invokePlayEpisode(media);
+  }
+  Future<void> playMovie() async {
+    Map<String, dynamic> movieObject = {
+      "id": 377530,
+      "title": "The Simpsons in Plusaversary",
+      "description": "يتبع The Simpsons أثناء استضافتهم لحفلة Disney Day مع الأصدقاء من جميع أنحاء الخدمة ، وكل شخص موجود في القائمة - باستثناء Homer\r\n\r\n\r\nFollows The Simpsons\" as they host a Disney+ Day party with friends from across the service, everyone is on the list - except Homer.",
+      "download_url": "https://s-ed1.cloud.gcore.lu/video/m-159n/English/Animation&Family/Klaus.2019.720p.mp4",
+      "hd_url": "https://site.gcdn.co/video/m-159n/English/Animation&Family/Klaus.2019.720p.mp4?md5=ipbkWahE7MGcaEAdHHRS8g&expires=1678668998",
+      "trailer_url": null,
+      "media_url": "https://site.gcdn.co/video/m-159n/English/Animation&Family/Klaus.2019.1080p.mp4?md5=shMoxWUw5sX8KK6q-QH16w&expires=1678668998",
+      "duration": "5m",
+      "language": "English",
+      "translation": "العربية",
+      "year": "2021",
+      "cover_photo": "https://thekee-m.gcdn.co/images06012022/uploads/media/movies/covers/2022-10-16/w0wGiEtcApEObeNk.png",
+      "poster_photo": "https://thekee-m.gcdn.co/images06012022/uploads/media/movies/posters/2021-11-13/cOKqU1ftE6HQbxv6.jpg",
+      "tags": [
+        {
+          "id": 57,
+          "title": "Kids"
+        },
+        {
+          "id": 2,
+          "title": "Comedy"
+        },
+        {
+          "id": 28,
+          "title": "Animation"
+        },
+        {
+          "id": 64,
+          "title": "English"
+        }
+      ],
+      "actors": [
+        {
+          "id": 6019,
+          "name": "Dan Castellaneta",
+          "image": "https://thekee-m.gcdn.co/images06012022/uploads/actors/6019/818ABOIVFVFMolTI.png"
+        },
+        {
+          "id": 25326,
+          "name": "Yeardley Smith",
+          "image": "https://thekee-m.gcdn.co/images06012022/uploads/actors/2021-11-13/X477M3hjEfXSv7Um.png"
+        },
+        {
+          "id": 10955,
+          "name": "Nancy Cartwright",
+          "image": "https://thekee-m.gcdn.co/images06012022/uploads/actors/10955/kNrav6MXJYTdvQbg.png"
+        },
+        {
+          "id": 13727,
+          "name": "Hank Azaria",
+          "image": "https://thekee-m.gcdn.co/images06012022/uploads/actors/13727/ae18InPvKS9MXDLC.png"
+        },
+        {
+          "id": 25327,
+          "name": "Tress MacNeille",
+          "image": "https://thekee-m.gcdn.co/images06012022/uploads/actors/2021-11-13/47A9foEusHXvvWv2.png"
+        }
+      ],
+      "director_info": {
+        "id": 6593,
+        "name": "David Silverman",
+        "image": "https://thekee-m.gcdn.co/images06012022/uploads/directors/2022-10-16/z16camhTHPAt1JMh.png"
+      },
+      "is_favourite": false,
+      "imdb_rating": "5.6",
+      "imdb_certificate": null,
+      "watching": null
+    };
+
+    Media media = Media(
+        title: "The Simpsons in Plusaversary",
+        subTitle: "",
+        url: "https://thekee.gcdn.co/video/m-159n/English/Animation&Family/The.Simpsons.in.Plusaversary.2021.1080.mp4?md5=QA-5PWsq9OIEaa0EM79p9A&expires=1678670074",
+        mediaId: "377530",
+        mediaType: "movie",
+        userId: "77810",
+        profileId: "741029",
+        token:
+            "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiIxMSIsImp0aSI6IjA2NTM3YjhlMjk5ZjJiYzhhOTEyMmI2ODA3OGEzYjJhNzgzNTBlZTg4ZTBjZWM5NjFmYmRhNDhiNzQ3ZGFmY2RkNGJmM2MwNjcwNmRhYjkwIiwiaWF0IjoxNjc4NjU0NDgyLjQxOTc0MiwibmJmIjoxNjc4NjU0NDgyLjQxOTc0NiwiZXhwIjoxNzEwMjc2ODgyLjQxMzUxNywic3ViIjoiNzc4MTAiLCJzY29wZXMiOltdfQ.XBS8ZLTeM3kvIAoGhOdTVPHR1sloOPvSsF7Izf27yZc7Ge3T42imnpmvGLaqffXIxKV_CW5-AbXgAoJOb91p76BRNUw48xw3NMdw98SzmgzBnIEOfHU3J0EVeK7e5202w75POmcaQhZ4U7D_aJmlnaSZqG8B_mDI8sQb9NWeZTaUHX41s8RdnfVQjI6-gm0Y4MfpZ776e4y78t259W4pQ0eumly0Rlt6UlKuK8WQLBY_JqGrdt1ssAZx8lypoZXbbwGjdHIf2oal1RNCMeHIHXLAHGFErmDCjkHJcFHU-XpuGfZ-oLFHpgrkXxdQi5G7rbKkGKsBW9TUZQKVSHU8SeIqaKnk8MA3-JNnaTcKb3wxItxXM07Y7oznKg9hzgGN_42yCMLEstG6aN7Z2UBsqNAtXseHVJ1Idms5WDeqxSQEiZDkR6Btnr7L012SotiHWP26d1Oa4GnYK0XyzwkNFvNg9_lcTfaUbCLuBtzy3nkREWDYBOR9CxFzgWHv-N0lJOacfZdrmrbQgIZCp02e-sROGNsDUl8oOi4vH9TjNRfgvlNw4OVPbKYNna9DgRVz2MtdVjmU0adXMi9Niwoztj0whTwxeiLYDn-_mC044x9RF3Ugw-EL_DjaYzRuFy3FgznW7Jq7B2vZbOVVeWtqQ83h45X_izQwxTIQP8Ddy0g",
+        apiBaseUrl: "https://v4.kaayapp.com/api/mobile/v4",
+        lang: "ar",
+        startAt: 3,
+        info: movieObject,
+        mediaGroup: null);
+    bool result = await invokePlayMovie(media);
   }
 
-  Future<bool> play(Media media) async {
-    printWrapped("play : ${media.toJson()}");
+  Future<bool> invokePlayEpisode(Media media) async {
+    printWrapped("playEpisode : ${media.toJson()}");
     bool result;
     try {
-      result = await _dowplayPlugin.play(media) ?? false;
+      result = await _dowplayPlugin.playEpisode(media) ?? false;
+      if (kDebugMode) {
+        print("result : $result");
+      }
+    } on PlatformException {
+      result = false;
+    }
+    return result;
+  }
+  Future<bool> invokePlayMovie(Media media) async {
+    printWrapped("playMovie : ${media.toJson()}");
+    bool result;
+    try {
+      result = await _dowplayPlugin.playMovie(media) ?? false;
       if (kDebugMode) {
         print("result : $result");
       }
@@ -164,9 +265,19 @@ class _MyAppState extends State<MyApp> {
           title: const Text('Plugin example app'),
         ),
         body: Center(
-          child: ElevatedButton(
-            onPressed: playEpisode,
-            child: const Text("Play Episode"),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              ElevatedButton(
+                onPressed: playEpisode,
+                child: const Text("Play Episode"),
+              ),
+              ElevatedButton(
+                onPressed: playMovie,
+                child: const Text("Play Movie"),
+              ),
+            ],
           ),
         ),
       ),

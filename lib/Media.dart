@@ -18,7 +18,7 @@ class Media {
     required this.lang,
     required this.startAt,
     required this.info,
-    required this.mediaGroup,
+    this.mediaGroup,
   });
 
   String title;
@@ -33,7 +33,7 @@ class Media {
   String lang;
   double startAt;
   Map<String,dynamic> info;
-  Map<String,dynamic> mediaGroup;
+  Map<String,dynamic>? mediaGroup;
 
   factory Media.fromJson(Map<String, dynamic> json) => Media(
     title: json["title"],
