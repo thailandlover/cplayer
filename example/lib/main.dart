@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:dowplay/EpisodeMedia.dart';
 import 'package:dowplay/Media.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -41,7 +42,9 @@ class _MyAppState extends State<MyApp> {
   }
 
   Future<void> playEpisode() async {
-    Map<String, dynamic> episodeObject = {
+
+    // Will be Episode Item model which you need to start
+    Map<String, dynamic> episodeToStart = {
       "id": 64864,
       "title": "Episode 2",
       "order": "2",
@@ -49,21 +52,101 @@ class _MyAppState extends State<MyApp> {
           "https://thekee-m.gcdn.co/images06012022/uploads/media/series/seasons/posters/2020-07-01/ZMx47Bf3sO03FprZ.jpg",
       "duration": "10 min",
       "download_url":
-          "https://s-ed1.cloud.gcore.lu/video/m-159n/English/Animation&Family/Barbie.Dreamhouse.Adventures/S01/08.mp4",
+          "https://thekee.gcdn.co/video/m-159n/English/Animation&Family/Tom.and.Jerry.1965/02.mp4?md5=eCp0VmIS_doipZ6lGVxwVg&expires=1678550892",
       "hd_url":
-          "https://site.gcdn.co/video/m-159n/English/Animation&Family/Barbie.Dreamhouse.Adventures/S01/08.mp4?md5=L77x49ZfcsyykmBfTIgcIg&expires=1678551514",
+          "https://thekee.gcdn.co/video/m-159n/English/Animation&Family/Tom.and.Jerry.1965/02.mp4?md5=eCp0VmIS_doipZ6lGVxwVg&expires=1678550892",
       "trailer_url": null,
       "media_url":
-          "https://site.gcdn.co/video/m-159n/English/Animation&Family/Barbie.Dreamhouse.Adventures/S01/08.mp4?md5=L77x49ZfcsyykmBfTIgcIg&expires=1678551514",
+          "https://thekee.gcdn.co/video/m-159n/English/Animation&Family/Tom.and.Jerry.1965/02.mp4?md5=eCp0VmIS_doipZ6lGVxwVg&expires=1678550892",
       "created_at": "2020-07-01 13:27:14",
       "release_date": "2020-07-01 00:00:00",
       "watching": null
     };
 
+    List<Map<String,dynamic>> seasonEpisodes = [
+      {
+        "id": 64863,
+        "title": "Episode 1",
+        "order": "1",
+        "poster_photo":
+        "https://thekee-m.gcdn.co/images06012022/uploads/media/series/seasons/posters/2020-07-01/ZMx47Bf3sO03FprZ.jpg",
+        "duration": "10 min",
+        "download_url":
+        "https://thekee.gcdn.co/video/m-159n/English/Animation&Family/Tom.and.Jerry.1965/01.mp4?md5=eCp0VmIS_doipZ6lGVxwVg&expires=1678550892",
+        "hd_url":
+        "https://thekee.gcdn.co/video/m-159n/English/Animation&Family/Tom.and.Jerry.1965/01.mp4?md5=eCp0VmIS_doipZ6lGVxwVg&expires=1678550892",
+        "trailer_url": null,
+        "media_url":
+        "https://thekee.gcdn.co/video/m-159n/English/Animation&Family/Tom.and.Jerry.1965/01.mp4?md5=eCp0VmIS_doipZ6lGVxwVg&expires=1678550892",
+        "created_at": "2020-07-01 13:27:14",
+        "release_date": "2020-07-01 00:00:00",
+        "watching": {
+          "current_time": "13",
+          "duration": "1380"
+        }
+      },
+      {
+        "id": 64864,
+        "title": "Episode 2",
+        "order": "2",
+        "poster_photo":
+        "https://thekee-m.gcdn.co/images06012022/uploads/media/series/seasons/posters/2020-07-01/ZMx47Bf3sO03FprZ.jpg",
+        "duration": "10 min",
+        "download_url":
+        "https://thekee.gcdn.co/video/m-159n/English/Animation&Family/Tom.and.Jerry.1965/02.mp4?md5=eCp0VmIS_doipZ6lGVxwVg&expires=1678550892",
+        "hd_url":
+        "https://thekee.gcdn.co/video/m-159n/English/Animation&Family/Tom.and.Jerry.1965/02.mp4?md5=eCp0VmIS_doipZ6lGVxwVg&expires=1678550892",
+        "trailer_url": null,
+        "media_url":
+        "https://thekee.gcdn.co/video/m-159n/English/Animation&Family/Tom.and.Jerry.1965/02.mp4?md5=eCp0VmIS_doipZ6lGVxwVg&expires=1678550892",
+        "created_at": "2020-07-01 13:27:14",
+        "release_date": "2020-07-01 00:00:00",
+        "watching": {
+          "current_time": "25",
+          "duration": "60"
+        }
+      },
+      {
+        "id": 64865,
+        "title": "Episode 3",
+        "order": "3",
+        "poster_photo":
+        "https://thekee-m.gcdn.co/images06012022/uploads/media/series/seasons/posters/2020-07-01/ZMx47Bf3sO03FprZ.jpg",
+        "duration": "10 min",
+        "download_url":
+        "https://thekee.gcdn.co/video/m-159n/English/Animation&Family/Tom.and.Jerry.1965/03.mp4?md5=eCp0VmIS_doipZ6lGVxwVg&expires=1678550892",
+        "hd_url":
+        "https://thekee.gcdn.co/video/m-159n/English/Animation&Family/Tom.and.Jerry.1965/03.mp4?md5=eCp0VmIS_doipZ6lGVxwVg&expires=1678550892",
+        "trailer_url": null,
+        "media_url":
+        "https://thekee.gcdn.co/video/m-159n/English/Animation&Family/Tom.and.Jerry.1965/03.mp4?md5=eCp0VmIS_doipZ6lGVxwVg&expires=1678550892",
+        "created_at": "2020-07-01 13:27:14",
+        "release_date": "2020-07-01 00:00:00",
+        "watching": null
+      },
+      {
+        "id": 64866,
+        "title": "Episode 4",
+        "order": "4",
+        "poster_photo":
+        "https://thekee-m.gcdn.co/images06012022/uploads/media/series/seasons/posters/2020-07-01/ZMx47Bf3sO03FprZ.jpg",
+        "duration": "10 min",
+        "download_url":
+        "https://thekee.gcdn.co/video/m-159n/English/Animation&Family/Tom.and.Jerry.1965/04.mp4?md5=eCp0VmIS_doipZ6lGVxwVg&expires=1678550892",
+        "hd_url":
+        "https://thekee.gcdn.co/video/m-159n/English/Animation&Family/Tom.and.Jerry.1965/04.mp4?md5=eCp0VmIS_doipZ6lGVxwVg&expires=1678550892",
+        "trailer_url": null,
+        "media_url":
+        "https://thekee.gcdn.co/video/m-159n/English/Animation&Family/Tom.and.Jerry.1965/04.mp4?md5=eCp0VmIS_doipZ6lGVxwVg&expires=1678550892",
+        "created_at": "2020-07-01 13:27:14",
+        "release_date": "2020-07-01 00:00:00",
+        "watching": null
+      }
+    ];
+
     Map<String, dynamic> itemIds = {
       "season_id": "3236",
       "tv_show_id": "1532",
-      "episode_id": "64864",
     };
 
     Map<String, dynamic> mediaGroup = {
@@ -115,24 +198,19 @@ class _MyAppState extends State<MyApp> {
         "season_number": "1",
         "title": "Tom and Jerry S01"
       },
-      "items_ids": itemIds
+      "items_ids": itemIds,
+      "episodes": seasonEpisodes
     };
 
-    Media media = Media(
-        title: "Tom and Jerry",
-        subTitle: "Episode 2",
-        url:
-            "https://thekee.gcdn.co/video/m-159n/English/Animation&Family/Tom.and.Jerry.1965/02.mp4?md5=eCp0VmIS_doipZ6lGVxwVg&expires=1678550892",
-        mediaId: "64864",
+    EpisodeMedia media = EpisodeMedia(
         mediaType: "series",
         userId: "77810",
         profileId: "741029",
         token:
-            "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiIxMSIsImp0aSI6IjVkM2FjZWMzNTM3YTBlNGExYTBjMDZjMGVmNDM2NTc3ZThlYjRjNjNiMjNhZDdiNGE0NjEzMTRlN2IwMDc4NWIxYTZkYTJlMmRjN2UzYWQ2IiwiaWF0IjoxNjc4NTM2NjEwLjc0NzQyNCwibmJmIjoxNjc4NTM2NjEwLjc0NzQyOCwiZXhwIjoxNzEwMTU5MDEwLjc0MDg1Mywic3ViIjoiNzc4MTAiLCJzY29wZXMiOltdfQ.AljaU6eJVwYzhauYtWwt-GjrSxTtbWn37z8KqQF1dMAXuTyCba9GqWP0dQxugTtANARhZHkunq1lcj9GdsLQciX2wr7pPDssAkX9f--CqCNN7XH491btYy5WU2ug_AtCXp47KGT9btZHZjPuYN99fXDpEuf94FtaWouKJIvNmvRwBOIzS50SRmgPHRc34MeDIzvq6hVNAB3cziok4GHAURF7BKjAgIhpcCHKefdIqdvyOy8wbcKxL2BKbiZ7wqvQSJowceyg86MySOqRDNiSvTq91ALC2rsF45jGwuHokinn806AavVngQe91i6ID_9oDeTNKmo2KUlDf9B5sWGZ3QRtM5v7qZspQGv-xLjrjf_ka0WrtQKlU7cD2fgu7mhelhG-1JA4hfJPos3SIusr6mD_x5NybDovjYH141zQJJGuYxWGLLcoiMKor4821uSDWh613w0fRWyJEadOmjEnRE2Wz52Y0BTqv7--LCeGe9nqMvi28H_6gJoi2ejLmdgnWUm64Z-YIQOj-bNJglqLJjkSs64nMAN0hStPSItqX7Qej3B6gADg573HobPu6jRdUtAHs1GXHSW-1yuxAmHrso3myFocSRYDmVPqRpTFwbbrFQ9kGOpl7dLwXrvOtAAUMNfoIcdYoVTbZB0VQXtLfpEOR_7Mi0XLD7xaW78nSRU",
-        apiBaseUrl: "https://v4.kaayapp.com/api/mobile/v4",
+            "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiIxMSIsImp0aSI6Ijk4MGJhODk4NmYyYzU1YWJiNzg1MWEwYzMwM2U1ZGEzMjI3YmQ0YWM5M2VjNGM5YjQ1NzM5NzhhNDUyMTYzMDdiYTAxZWU4M2Y0Y2Q4ZDBiIiwiaWF0IjoxNjc4NzM5NzAyLjQ0NDUzMiwibmJmIjoxNjc4NzM5NzAyLjQ0NDUzNSwiZXhwIjoxNzEwMzYyMTAyLjQzNzA2NCwic3ViIjoiNzc4MTAiLCJzY29wZXMiOltdfQ.mG9mYXSRv9JunSEFRfhk-RwvtI4KRhjB7yD3vuDWOqgW3I9mZuTfl-93Fsh8pFSMcRmYyknm9tK4npQKj436Q1WD-cRFy30qpsywCVB3zK5-B6kU4ljIMSXLHiAXiXD40mlrOdi2W38_EKB8ziC_4uu7xb-SWeqypmlFuUBHiNl5LX3N4L8YN_ujaKmXUlLw49n_iTwyY1OnU9KhEv1HJqe0LTWEhh48OZ1YWHF74G1n3pGDkZqWj0kWs3jNAmTUh6pTsXSbiAvWmYqe4zvBQZCpNjEx6MB4LPbnChtWFdmJ1UhOePo-S_j5K1OQkn_uzzzffUv4dK3VxstQBpGbBvPqZq0dZUzY_8Jj1d8e0kORV5U0McO-ED8lybW6M1rbjL0K3OvKOvOJLQynIKFPMOGvJI2zIdQHeEJxA2omgn3zqFcYJG-jVNlQb0wqy9HPkCDizW38dbL_wMXXTiljk3WDqgFOIa_sm-v3lW474_0zZw3zDjUts1LT3Xw6kn1IOfzFNBt54P0Omx9T3tXFgCmGj2cvfw3BK6j00soPpvD_HTkyo4-1IjbqeP4tsVgX-HgNpvN-1yEraYYNT236fmGAv9X-Or-_KS76PM555JWM2FVs4vgyzyJXvMr_ue8mOMBighPerO6jVucCcmtu7Il6CraPl7vpGdSEDbdohxY",
+        apiBaseUrl: "https://v4.kaayapp.com/api",
         lang: "ar",
-        startAt: 10.5,
-        info: episodeObject,
+        info: episodeToStart,
         mediaGroup: mediaGroup);
     bool result = await invokePlayEpisode(media);
   }
@@ -204,10 +282,22 @@ class _MyAppState extends State<MyApp> {
       "is_favourite": false,
       "imdb_rating": "5.6",
       "imdb_certificate": null,
-      "watching": null
+      "watching": {
+        "current_time": "3121",
+        "duration": "7576",
+        "title": "ملاذكرد 1071 - Malazgirt 1071",
+        "order": 0,
+        "description": "في العام 1071، يلتقي الجيشان السلجوقي والبيزنطي في ميدان المعركة ليخوضا مواجهة دامية في هذه اللحظة المفصلية من تاريخ الإمبراطورية البيزنطية.\r\n\r\nThe story of the war, which is the beginning of the history of Turks in Anatolia.",
+        "last_media_id": 380988,
+        "1080_url": "https://site.gcdn.co/video/m-159n/English/Animation&Family/Klaus.2019.1080p.mp4?md5=Jr7WQNNScUtlCM1AcjCN2Q&expires=1678754308",
+        "720_url": "https://site.gcdn.co/video/m-159n/English/Animation&Family/Klaus.2019.720p.mp4?md5=JSkSnlOwvrIqbPwlC8vekA&expires=1678754308",
+        "continue_type": null,
+        "next_type": null,
+        "next_episode": null
+      }
     };
 
-    Media media = Media(
+    MovieMedia media = MovieMedia(
         title: "The Simpsons in Plusaversary",
         subTitle: "",
         url: "https://thekee.gcdn.co/video/m-159n/English/Animation&Family/The.Simpsons.in.Plusaversary.2021.1080.mp4?md5=QA-5PWsq9OIEaa0EM79p9A&expires=1678670074",
@@ -216,17 +306,15 @@ class _MyAppState extends State<MyApp> {
         userId: "77810",
         profileId: "741029",
         token:
-            "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiIxMSIsImp0aSI6IjA2NTM3YjhlMjk5ZjJiYzhhOTEyMmI2ODA3OGEzYjJhNzgzNTBlZTg4ZTBjZWM5NjFmYmRhNDhiNzQ3ZGFmY2RkNGJmM2MwNjcwNmRhYjkwIiwiaWF0IjoxNjc4NjU0NDgyLjQxOTc0MiwibmJmIjoxNjc4NjU0NDgyLjQxOTc0NiwiZXhwIjoxNzEwMjc2ODgyLjQxMzUxNywic3ViIjoiNzc4MTAiLCJzY29wZXMiOltdfQ.XBS8ZLTeM3kvIAoGhOdTVPHR1sloOPvSsF7Izf27yZc7Ge3T42imnpmvGLaqffXIxKV_CW5-AbXgAoJOb91p76BRNUw48xw3NMdw98SzmgzBnIEOfHU3J0EVeK7e5202w75POmcaQhZ4U7D_aJmlnaSZqG8B_mDI8sQb9NWeZTaUHX41s8RdnfVQjI6-gm0Y4MfpZ776e4y78t259W4pQ0eumly0Rlt6UlKuK8WQLBY_JqGrdt1ssAZx8lypoZXbbwGjdHIf2oal1RNCMeHIHXLAHGFErmDCjkHJcFHU-XpuGfZ-oLFHpgrkXxdQi5G7rbKkGKsBW9TUZQKVSHU8SeIqaKnk8MA3-JNnaTcKb3wxItxXM07Y7oznKg9hzgGN_42yCMLEstG6aN7Z2UBsqNAtXseHVJ1Idms5WDeqxSQEiZDkR6Btnr7L012SotiHWP26d1Oa4GnYK0XyzwkNFvNg9_lcTfaUbCLuBtzy3nkREWDYBOR9CxFzgWHv-N0lJOacfZdrmrbQgIZCp02e-sROGNsDUl8oOi4vH9TjNRfgvlNw4OVPbKYNna9DgRVz2MtdVjmU0adXMi9Niwoztj0whTwxeiLYDn-_mC044x9RF3Ugw-EL_DjaYzRuFy3FgznW7Jq7B2vZbOVVeWtqQ83h45X_izQwxTIQP8Ddy0g",
-        apiBaseUrl: "https://v4.kaayapp.com/api/mobile/v4",
+            "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiIxMSIsImp0aSI6Ijk4MGJhODk4NmYyYzU1YWJiNzg1MWEwYzMwM2U1ZGEzMjI3YmQ0YWM5M2VjNGM5YjQ1NzM5NzhhNDUyMTYzMDdiYTAxZWU4M2Y0Y2Q4ZDBiIiwiaWF0IjoxNjc4NzM5NzAyLjQ0NDUzMiwibmJmIjoxNjc4NzM5NzAyLjQ0NDUzNSwiZXhwIjoxNzEwMzYyMTAyLjQzNzA2NCwic3ViIjoiNzc4MTAiLCJzY29wZXMiOltdfQ.mG9mYXSRv9JunSEFRfhk-RwvtI4KRhjB7yD3vuDWOqgW3I9mZuTfl-93Fsh8pFSMcRmYyknm9tK4npQKj436Q1WD-cRFy30qpsywCVB3zK5-B6kU4ljIMSXLHiAXiXD40mlrOdi2W38_EKB8ziC_4uu7xb-SWeqypmlFuUBHiNl5LX3N4L8YN_ujaKmXUlLw49n_iTwyY1OnU9KhEv1HJqe0LTWEhh48OZ1YWHF74G1n3pGDkZqWj0kWs3jNAmTUh6pTsXSbiAvWmYqe4zvBQZCpNjEx6MB4LPbnChtWFdmJ1UhOePo-S_j5K1OQkn_uzzzffUv4dK3VxstQBpGbBvPqZq0dZUzY_8Jj1d8e0kORV5U0McO-ED8lybW6M1rbjL0K3OvKOvOJLQynIKFPMOGvJI2zIdQHeEJxA2omgn3zqFcYJG-jVNlQb0wqy9HPkCDizW38dbL_wMXXTiljk3WDqgFOIa_sm-v3lW474_0zZw3zDjUts1LT3Xw6kn1IOfzFNBt54P0Omx9T3tXFgCmGj2cvfw3BK6j00soPpvD_HTkyo4-1IjbqeP4tsVgX-HgNpvN-1yEraYYNT236fmGAv9X-Or-_KS76PM555JWM2FVs4vgyzyJXvMr_ue8mOMBighPerO6jVucCcmtu7Il6CraPl7vpGdSEDbdohxY",
+        apiBaseUrl: "https://v4.kaayapp.com/api",
         lang: "ar",
         startAt: 3,
-        info: movieObject,
-        mediaGroup: null);
+        info: movieObject);
     bool result = await invokePlayMovie(media);
   }
 
-  Future<bool> invokePlayEpisode(Media media) async {
-    printWrapped("playEpisode : ${media.toJson()}");
+  Future<bool> invokePlayEpisode(EpisodeMedia media) async {
     bool result;
     try {
       result = await _dowplayPlugin.playEpisode(media) ?? false;
@@ -238,8 +326,8 @@ class _MyAppState extends State<MyApp> {
     }
     return result;
   }
-  Future<bool> invokePlayMovie(Media media) async {
-    printWrapped("playMovie : ${media.toJson()}");
+
+  Future<bool> invokePlayMovie(MovieMedia media) async {
     bool result;
     try {
       result = await _dowplayPlugin.playMovie(media) ?? false;

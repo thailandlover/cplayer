@@ -1,3 +1,4 @@
+import 'package:dowplay/EpisodeMedia.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
 import 'Media.dart';
@@ -24,10 +25,10 @@ abstract class DowplayPlatform extends PlatformInterface {
     _instance = instance;
   }
 
-  Future<bool?> playEpisode(Media media) {
+  Future<bool?> playEpisode(EpisodeMedia media) {
     throw UnimplementedError('playEpisode() has not been implemented.');
   }
-  Future<bool?> playMovie(Media media) {
+  Future<bool?> playMovie(MovieMedia media) {
     throw UnimplementedError('playMovie() has not been implemented.');
   }
 

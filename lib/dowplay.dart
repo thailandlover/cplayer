@@ -1,13 +1,15 @@
 
+import 'package:dowplay/EpisodeMedia.dart';
+
 import 'Media.dart';
 import 'dowplay_platform_interface.dart';
 
 class Dowplay {
-  Future<bool?> playEpisode(Media media) {
+  Future<bool?> playEpisode(EpisodeMedia media) {
     return DowplayPlatform.instance.playEpisode(media);
   }
 
-  Future<bool?> playMovie(Media media) {
+  Future<bool?> playMovie(MovieMedia media) {
     return DowplayPlatform.instance.playMovie(media);
   }
 
