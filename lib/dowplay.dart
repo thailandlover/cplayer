@@ -1,7 +1,7 @@
 
 import 'package:dowplay/EpisodeMedia.dart';
+import 'package:dowplay/MovieMedia.dart';
 
-import 'Media.dart';
 import 'dowplay_platform_interface.dart';
 
 class Dowplay {

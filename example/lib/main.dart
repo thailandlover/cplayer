@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:dowplay/EpisodeMedia.dart';
-import 'package:dowplay/Media.dart';
+import 'package:dowplay/MovieMedia.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';

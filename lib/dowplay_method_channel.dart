@@ -1,8 +1,8 @@
 import 'package:dowplay/EpisodeMedia.dart';
+import 'package:dowplay/MovieMedia.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
-import 'Media.dart';
 import 'dowplay_platform_interface.dart';
 
 /// An implementation of [DowplayPlatform] that uses method channels.

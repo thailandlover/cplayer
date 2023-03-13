@@ -1,7 +1,7 @@
 import 'package:dowplay/EpisodeMedia.dart';
+import 'package:dowplay/MovieMedia.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
-import 'Media.dart';
 import 'dowplay_method_channel.dart';
 
 abstract class DowplayPlatform extends PlatformInterface {
