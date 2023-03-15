@@ -20,11 +20,17 @@ public class MediaManager {
     
     //MARK: -Media Player Functions.
     @discardableResult
-    public func openMediaPlayer(usingMediaList list : [Media], usingSettings settings: HostAppSettings, forViewController mvc: UIViewController)->KeeVideoPlayerController {
+    public func openMediaPlayer(usingMediaList list : [Media],playMediaIndex: Int = 0, usingSettings settings: HostAppSettings,  forViewController mvc: UIViewController)->KeeVideoPlayerController {
+        
+        if playMediaIndex < 0 || playMediaIndex >= list.count {
+            let name = NSExceptionName("Playing index is not in the media list range")
+            NSException(name: name, reason: "Media list range is from 0 ... to \(list.count - 1), and the playing index is \(playMediaIndex)").raise()
+        }
         
         let vc = KeeVideoPlayerController(nibName: "KeeVideoPlayerController", bundle: .packageBundle)
         vc.settings = settings
         vc.setMediaList(mediaList: list)
+        vc.setPlayingIndex(playMediaIndex)
         if let nvc = mvc.navigationController {
             nvc.pushViewController(vc, animated: true)
         }else{

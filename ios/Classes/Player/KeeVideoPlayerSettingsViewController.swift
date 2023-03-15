@@ -28,6 +28,7 @@ public class KeeVideoPlayerSettingsViewController: UIViewController {
         // Do any additional setup after loading the view.
     }
     
+    
     func playerSetOptions(){
         guard !itemsHasBeenSet else {return}
         itemsHasBeenSet = true
@@ -62,7 +63,7 @@ public class KeeVideoPlayerSettingsViewController: UIViewController {
         
         if let speedGroup = SettingsGroup.createFromNib(in: .packageBundle) {
             speedGroup.headerTitle = "Playback Speed"
-            speedGroup.optionsList = speedValues.map({SettingsOption(name:"x\($0)")})
+            speedGroup.optionsList = speedValues.map({SettingsOption(name:"x\($0)", selected: $0 == 1)})
             /*[SettingsOption(name: "x0.25"),
                                       SettingsOption(name: "x0.5"),
                                       SettingsOption(name: "x1"),

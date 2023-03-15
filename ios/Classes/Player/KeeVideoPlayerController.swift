@@ -106,7 +106,7 @@ public class KeeVideoPlayerController: UIViewController {
         let sW = UIScreen.main.bounds.width
         playerLayer.frame = CGRect(origin: .zero, size: CGSize(width: sH, height: sW))
         //playerView.bounds
-        playerLayer.videoGravity = .resizeAspectFill
+        playerLayer.videoGravity = .resizeAspect
 //        playerView.backgroundColor = .red
         
         self.setPlayingItemInfo()
@@ -177,6 +177,11 @@ public class KeeVideoPlayerController: UIViewController {
             
         }
     }
+    
+    func setPlayingIndex(_ index : Int){
+        playingIndex = index
+    }
+    
     
     func setPlayingItemInfo(){
         lb_title.text = media?.title
@@ -623,6 +628,10 @@ public class KeeVideoPlayerController: UIViewController {
                 self.enableAll()
                 self.hideViews()
                 
+                if let group = self.player.currentItem?.asset.mediaSelectionGroup(forMediaCharacteristic: .audible), let f = group.options.first {
+                    self.player.currentItem?.select(f, in: group)
+                }
+                
 //                if (media?.currentWatchTime ?? 0) > 0 {
 //                    self.showContinueFromWatchingTime()
 //                }
@@ -697,7 +706,6 @@ public class KeeVideoPlayerController: UIViewController {
         self.viewsHiddenStatus = true
         
         
-        
     }
     
     private func showViews(){
@@ -730,9 +738,11 @@ public class KeeVideoPlayerController: UIViewController {
                         formatter.zeroFormattingBehavior = .pad
         let remainningTime = item.duration.seconds - item.currentTime().seconds
         guard !remainningTime.isNaN else {return}
-        self.remainingTimeLabel.text = formatter.string(from: TimeInterval(remainningTime))
-        self.currentTimeLabel.text = formatter.string(from: TimeInterval(item.currentTime().seconds))
-        self.seekTimeSlider.value = Float(item.currentTime().seconds / item.duration.seconds)
+        if self.sliderTouched == false {
+            self.remainingTimeLabel.text = formatter.string(from: TimeInterval(remainningTime))
+            self.currentTimeLabel.text = formatter.string(from: TimeInterval(item.currentTime().seconds))
+            self.seekTimeSlider.value = Float(item.currentTime().seconds / item.duration.seconds)
+        }
         
         if remainningTime < 7 && moveToNextTime == nil && hasNext{
             self.showMoveToNextEpisode()
@@ -780,7 +790,11 @@ public class KeeVideoPlayerController: UIViewController {
                              repeats: false) { t in
             if let player = self.player {
                 if player.rate > 0 {
-                    self.hideViews()
+                    if self.sliderTouched {
+                        self.setTimerToHideControllers()
+                    }else{
+                        self.hideViews()
+                    }
                 }
             }
         }

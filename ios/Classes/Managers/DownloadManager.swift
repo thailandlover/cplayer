@@ -91,7 +91,7 @@ public class DownloadManager: NSObject/*, ObservableObject */{
         tasks.removeAll()
     }
     
-    func cancelTask(withMediaId id: String, forType type: MediaManager.MediaType){
+    public func cancelTask(withMediaId id: String, forType type: MediaManager.MediaType){
         if !configed {return}
         let taskId = "\(id)_\(type.rawValue)"
         cancelTask(withID: taskId)
@@ -146,9 +146,9 @@ public class DownloadManager: NSObject/*, ObservableObject */{
         return tasks.first(where: {taskId == "\($0.mediaId ?? "")"})?.state == .suspended
     }
     
- //TODO: - Should be done...
+ 
     func mediaIsDownloaded(_ id : String, ofType: MediaManager.MediaType)->Bool {
-        return false
+        return (try? FilesManager.shared.getDownloadeMediaById(id, type: ofType) != nil) ?? false
     }
 }
 
