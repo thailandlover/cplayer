@@ -16,4 +16,8 @@ class Dowplay {
   Future<bool?> config() {
     return DowplayPlatform.instance.config();
   }
+
+  Future<dynamic> getDownloadsList() {
+    return DowplayPlatform.instance.getDownloadsList();
+  }
 }

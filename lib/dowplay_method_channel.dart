@@ -26,4 +26,10 @@ class MethodChannelDowplay extends DowplayPlatform {
     final bool? result = await methodChannel.invokeMethod<bool>('config_downloader');
     return result;
   }
+
+  @override
+  Future<dynamic> getDownloadsList() async {
+    final dynamic result = await methodChannel.invokeMethod<dynamic>('get_downloads_list');
+    return result;
+  }
 }

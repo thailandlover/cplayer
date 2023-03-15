@@ -35,4 +35,8 @@ abstract class DowplayPlatform extends PlatformInterface {
   Future<bool?> config() {
     throw UnimplementedError('config() has not been implemented.');
   }
+
+  Future<dynamic> getDownloadsList() {
+    throw UnimplementedError('get_downloads_list() has not been implemented.');
+  }
 }

@@ -2,7 +2,7 @@
 
 import UIKit
 
-let globalPackageBundle = "com.aaqsoftware.KeeCustomPlayer"
+let globalPackageBundle = "org.cocoapods.dowplay"
 
 class SSBadgeButton: UIButton {
     

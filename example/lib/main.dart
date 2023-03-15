@@ -314,6 +314,13 @@ class _MyAppState extends State<MyApp> {
     bool result = await invokePlayMovie(media);
   }
 
+  Future<dynamic> getDownloadsList() async {
+    dynamic result = await invokeGetDownloadsList();
+    if (kDebugMode) {
+      printWrapped("Downloads list : $result");
+    }
+  }
+
   Future<bool> invokePlayEpisode(EpisodeMedia media) async {
     bool result;
     try {
@@ -334,6 +341,16 @@ class _MyAppState extends State<MyApp> {
       if (kDebugMode) {
         print("result : $result");
       }
+    } on PlatformException {
+      result = false;
+    }
+    return result;
+  }
+
+  Future<dynamic> invokeGetDownloadsList() async {
+    dynamic result;
+    try {
+      result = await _dowplayPlugin.getDownloadsList();
     } on PlatformException {
       result = false;
     }
@@ -364,6 +381,14 @@ class _MyAppState extends State<MyApp> {
               ElevatedButton(
                 onPressed: playMovie,
                 child: const Text("Play Movie"),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 24.0, horizontal: 32),
+                child: SizedBox(height: 2,child: Container(color: Colors.black26,),),
+              ),
+              ElevatedButton(
+                onPressed: getDownloadsList,
+                child: const Text("Print Downloads List"),
               ),
             ],
           ),

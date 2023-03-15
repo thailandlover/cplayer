@@ -23,6 +23,8 @@ public class DowplayPlugin: NSObject, FlutterPlugin {
         case "config_downloader":
             DownloadManager.shared.config()
             result(true)
+        case "get_downloads_list":
+            getDownloadsList(call: call, result: result)
         default:
             print("method wasn't found : ",call.method);
             result(false)
@@ -106,5 +108,14 @@ public class DowplayPlugin: NSObject, FlutterPlugin {
             print("iOS could not extract flutter arguments in method: (play)")
             result(false)
         }
+    }
+    
+    func getDownloadsList(call: FlutterMethodCall,result: @escaping FlutterResult){
+        let downloadsList : [DownloadedMedia] = try! DownloadManager.shared.getAllMedia()
+        let jsonEncoder = JSONEncoder()
+        let jsonData = (try? jsonEncoder.encode(downloadsList))!
+        let json = String(data: jsonData, encoding: String.Encoding.utf8)
+        result(json)
+        
     }
 }
