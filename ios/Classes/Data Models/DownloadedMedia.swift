@@ -22,7 +22,7 @@ public struct DownloadedMedia : Codable{
         return FilesManager.shared.cache.appendingPathComponent(mediaType.rawValue, isDirectory: true).appendingPathComponent("\(mediaId).mp4")
     }
     var name : String
-    var tempPath : URL
+    var tempPath : URL!
     var group : MediaGroup?
     private var data : Data?
     var object : [String:Any]? {
@@ -42,6 +42,9 @@ public struct DownloadedMedia : Codable{
     
     var seasons : [SeasonGroup] = []
     
+    //Use only if the media is not downloaded yet (in progress)
+    var status : URLSessionTask.State = .completed
+    var progress : Double = 1
     
     enum CodingKeys: CodingKey {
         case mediaId
@@ -59,6 +62,16 @@ public struct DownloadedMedia : Codable{
         self.mediaType = mediaType
         self.name = name
         self.tempPath = tempPath
+    }
+    
+    init(mediaId: String, mediaURL: URL? = nil, mediaType: MediaManager.MediaType = .movie, name: String, status : URLSessionTask.State, progress : Double) {
+        self.mediaId = mediaId
+        self.mediaURL = mediaURL
+        self.mediaType = mediaType
+        self.name = name
+        self.status = status
+        self.progress = progress
+
     }
     
     var mediaDownloadName : String {

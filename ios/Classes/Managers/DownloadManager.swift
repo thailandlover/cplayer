@@ -100,6 +100,7 @@ public class DownloadManager: NSObject/*, ObservableObject */{
     func cancelTask(withID id: String){
         if !configed {return}
         tasks.first(where: {$0.mediaId == id})?.cancel()
+        tasks.removeAll(where: {$0.mediaId == id})
     }
     
     //MARK: - Pause Download Functions
@@ -147,8 +148,47 @@ public class DownloadManager: NSObject/*, ObservableObject */{
     }
     
  
-    func mediaIsDownloaded(_ id : String, ofType: MediaManager.MediaType)->Bool {
+    public func mediaIsDownloaded(_ id : String, ofType: MediaManager.MediaType)->Bool {
         return (try? FilesManager.shared.getDownloadeMediaById(id, type: ofType) != nil) ?? false
+    }
+    //MARK: - Hybrid Functions
+    ///Get all media (downloading, suspended, and downloaded)
+    public func getAllMedia() throws -> [DownloadedMedia]{
+        guard configed else {throw DonwloadManagerError.managerIsNotConfiged}
+        var allMedia : [DownloadedMedia] = []
+        
+        allMedia.append(contentsOf: tasks.map({ task in
+            if let t = task as? URLSessionDownloadTask {
+                return extractMedia(usingTask: t)
+            }
+            return nil
+        }).compactMap({$0}) )
+        
+        allMedia.append(contentsOf: FilesManager.shared.getAllDownloadedMedia())
+        
+        return allMedia
+    }
+    
+    
+    func extractMedia(usingTask task : URLSessionDownloadTask)->DownloadedMedia{
+        let  pureID = task.mediaId?.components(separatedBy: "_").first
+        let pureType = task.mediaId?.components(separatedBy: "_").last
+        
+        var obj = DownloadedMedia(mediaId: pureID ?? "", name: task.taskDescription ?? "Untitled Media", status: task.state, progress: task.progress.fractionCompleted)
+        
+        if pureType != "movies"{
+            obj.mediaType = .series
+        }
+        
+        if let data = UserDefaults.standard.object(forKey: "\(task.mediaId ?? "")") as? Data,
+           let object = try? JSONSerialization.jsonObject(with: data, options: .fragmentsAllowed) as? [String:Any]{
+            obj.object = object
+        }
+        if let  pureID = pureID {
+            obj.group = MediaGroup.get(usingEpisodeID: pureID)
+        }
+        
+        return obj
     }
 }
 

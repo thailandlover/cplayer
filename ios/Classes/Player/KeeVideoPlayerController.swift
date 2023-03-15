@@ -960,6 +960,17 @@ extension String{
 
 
 
+public enum DonwloadManagerError : Error {
+    case managerIsNotConfiged
+    
+    var message : String {
+        switch self {
+        case .managerIsNotConfiged:
+            return "Manager is not confied please call DownloadManager.shared.config() function before using any query function from the download manager class"
+        }
+    }
+}
+
 class DebugLabel : UILabel {
     override var text: String?{
         didSet{
