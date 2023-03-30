@@ -169,6 +169,10 @@ public class DownloadManager: NSObject/*, ObservableObject */{
         return allMedia
     }
     
+    public func getAllMediaDecoded()-> [[String:Any]] {
+        return (try? self.getAllMedia().getEncodedDictionary()) ?? []
+    }
+    
     
     func extractMedia(usingTask task : URLSessionDownloadTask)->DownloadedMedia{
         let  pureID = task.mediaId?.components(separatedBy: "_").first

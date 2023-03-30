@@ -107,3 +107,13 @@ extension Bundle {
         return Bundle(identifier: globalPackageBundle)
     }
 }
+
+
+extension [DownloadedMedia]{
+    func getEncodedDictionary()->[[String:Any]]{
+        let items = self.map({$0.getObjectAsJSONDictionary()}).compactMap({$0})
+        return items
+    }
+}
+
+
