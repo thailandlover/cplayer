@@ -25,8 +25,10 @@ public class DowplayPlugin: NSObject, FlutterPlugin {
             result(true)
         case "get_downloads_list":
             getDownloadsList(call: call, result: result)
-        case "start_download":
-            startDownload(call: call, result: result)
+        case "start_download_movie":
+            startDownloadMovie(call: call, result: result)
+        case "start_download_episode":
+            startDownloadEpisode(call: call, result: result)
         default:
             print("method wasn't found : ",call.method);
             result(false)
@@ -117,12 +119,13 @@ public class DowplayPlugin: NSObject, FlutterPlugin {
         result(downloadsList)
     }
     
-    func startDownload(call: FlutterMethodCall,result: @escaping FlutterResult){
+    func startDownloadMovie(call: FlutterMethodCall,result: @escaping FlutterResult){
         guard let args = call.arguments else {
             return
         }
         if let myArgs = args as? [String: Any],
            let media : [String : Any] = myArgs["media"] as? [String:Any] {
+            
             let url : URL = URL(string: media["url"] as! String)!
             let mediaId: Int = Int(media["media_id"] as! String)!
             
@@ -137,4 +140,35 @@ public class DowplayPlugin: NSObject, FlutterPlugin {
         }
         
     }
+    
+    func startDownloadEpisode(call: FlutterMethodCall,result: @escaping FlutterResult){
+        guard let args = call.arguments else {
+            return
+        }
+        if let myArgs = args as? [String: Any],
+           let media : [String : Any] = myArgs["media"] as? [String:Any] {
+            
+            let info : [String:Any] = (media["info"] as? [String:Any])!
+            let media_group : [String:Any] = (media["media_group"] as? [String:Any])!
+            
+            let mediaId = String(info["id"] as! Int);
+            let url : URL = URL(string: info["download_url"] as! String)!
+            
+            
+            let itemsIds: [String:Any] = media_group["items_ids"] as! [String : Any]
+            
+            let mediaGroup : MediaGroup = MediaGroup(showId: itemsIds["tv_show_id"] as! String, seasonId: itemsIds["season_id"] as! String, episodeId: mediaId ,data: media_group)
+            
+            DownloadManager.shared.startDownload(url: url, forMediaId: Int(mediaId )!, type: .series,mediaGroup: mediaGroup, object:media)
+            
+            let downloadsList : [[String : Any]] = DownloadManager.shared.getAllMediaDecoded()
+            
+            result(downloadsList)
+        } else {
+            print("iOS could not extract flutter arguments in method: (startDownload)")
+            result(false)
+        }
+        
+    }
+    
 }

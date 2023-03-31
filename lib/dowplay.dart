@@ -20,7 +20,11 @@ class Dowplay {
     return DowplayPlatform.instance.getDownloadsList();
   }
 
-  Future<dynamic> startDownload(dynamic item) {
-    return DowplayPlatform.instance.startDownload(item);
+  Future<dynamic> startDownloadMovie(dynamic item) {
+    return DowplayPlatform.instance.startDownloadMovie(item);
+  }
+
+  Future<dynamic> startDownloadEpisode(dynamic item) {
+    return DowplayPlatform.instance.startDownloadEpisode(item);
   }
 }

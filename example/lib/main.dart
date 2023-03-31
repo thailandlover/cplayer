@@ -346,6 +346,106 @@ class _MyAppState extends State<MyApp> {
     }
   }
 
+  Future<dynamic> startDownloadEpisode() async {
+    String type = "series";
+    // Will be Episode Item model which you need to download
+    Map<String, dynamic> episodeToDownload = {
+      "id": 64864,
+      "title": "Episode 2",
+      "order": "2",
+      "poster_photo":
+          "https://thekee-m.gcdn.co/images06012022/uploads/media/series/seasons/posters/2020-07-01/ZMx47Bf3sO03FprZ.jpg",
+      "duration": "10 min",
+      "download_url":
+          "https://thekee.gcdn.co/video/m-159n/English/Animation&Family/Tom.and.Jerry.1965/02.mp4?md5=eCp0VmIS_doipZ6lGVxwVg&expires=1678550892",
+      "hd_url":
+          "https://thekee.gcdn.co/video/m-159n/English/Animation&Family/Tom.and.Jerry.1965/02.mp4?md5=eCp0VmIS_doipZ6lGVxwVg&expires=1678550892",
+      "trailer_url": null,
+      "media_url":
+          "https://thekee.gcdn.co/video/m-159n/English/Animation&Family/Tom.and.Jerry.1965/02.mp4?md5=eCp0VmIS_doipZ6lGVxwVg&expires=1678550892",
+      "created_at": "2020-07-01 13:27:14",
+      "release_date": "2020-07-01 00:00:00",
+      "watching": null
+    };
+
+    Map<String, dynamic> itemIds = {
+      "season_id": "3236",
+      "tv_show_id": "1532",
+    };
+    Map<String, dynamic> mediaGroup = {
+      "tv_show": {
+        "id": 1532,
+        "title": "Tom and Jerry",
+        "description":
+            "المسلسل الكارتونى المحبب للجميع و اشهر المعارك بين القط و الفار",
+        "trailer_url": null,
+        "language": "English",
+        "translation": "-",
+        "start_year": "1967",
+        "end_year": "1967",
+        "cover_photo": null,
+        "poster_photo":
+            "https://thekee-m.gcdn.co/images06012022/uploads/media/series/posters/2020-07-01/UJP1JIdmnijsHDX2.jpg",
+        "seasons": [
+          {
+            "id": 3236,
+            "season_id": 3747,
+            "poster_photo":
+                "https://thekee-m.gcdn.co/images06012022/uploads/media/series/seasons/posters/2020-07-01/ZMx47Bf3sO03FprZ.jpg",
+            "cover_photo": null,
+            "trailer_url": null,
+            "season_number": "1",
+            "title": "Tom and Jerry S01"
+          }
+        ],
+        "tags": [
+          {"id": 57, "title": "Kids"},
+          {"id": 28, "title": "Animation"},
+          {"id": 64, "title": "English"}
+        ],
+        "actors": [],
+        "director_info": null,
+        "is_favourite": false,
+        "imdb_rating": null,
+        "imdb_certificate": null,
+        "last_watching": null,
+        "last_watching_season_id": null
+      },
+      "season": {
+        "id": 3236,
+        "season_id": 3747,
+        "poster_photo":
+            "https://thekee-m.gcdn.co/images06012022/uploads/media/series/seasons/posters/2020-07-01/ZMx47Bf3sO03FprZ.jpg",
+        "cover_photo": null,
+        "trailer_url": null,
+        "season_number": "1",
+        "title": "Tom and Jerry S01"
+      },
+      "items_ids": itemIds,
+    };
+
+    EpisodeMedia media = EpisodeMedia(
+        mediaType: "series",
+        userId: "77810",
+        profileId: "741029",
+        token: accessToken,
+        apiBaseUrl: "https://v4.kaayapp.com/api",
+        lang: "ar",
+        info: episodeToDownload,
+        mediaGroup: mediaGroup);
+
+    Map<String, dynamic> item = {
+      "type": type,
+      "media": media,
+    };
+    dynamic result = await invokeStartDownloadEpisode(item);
+    if (kDebugMode) {
+      List<dynamic> downloads = List.from(result as Iterable);
+      printWrapped(
+          "Downloads list [${downloads.length}] : ${jsonEncode(downloads)}");
+    }
+  }
+
   Future<bool> invokePlayEpisode(EpisodeMedia media) async {
     bool result;
     try {
@@ -387,7 +487,25 @@ class _MyAppState extends State<MyApp> {
     if (item['type'] == "movie" && item['media'] is MovieMedia) {
       item['media'] = (item['media'] as MovieMedia).toJson();
       try {
-        result = await _dowplayPlugin.startDownload(item);
+        result = await _dowplayPlugin.startDownloadMovie(item);
+      } on PlatformException {
+        result = false;
+      }
+    } else {
+      if (kDebugMode) {
+        print("Invalid item type");
+      }
+      result = false;
+    }
+    return result;
+  }
+
+  Future<dynamic> invokeStartDownloadEpisode(dynamic item) async {
+    dynamic result;
+    if (item['type'] == "series" && item['media'] is EpisodeMedia) {
+      item['media'] = (item['media'] as EpisodeMedia).toJson();
+      try {
+        result = await _dowplayPlugin.startDownloadEpisode(item);
       } on PlatformException {
         result = false;
       }
@@ -442,6 +560,10 @@ class _MyAppState extends State<MyApp> {
               ElevatedButton(
                 onPressed: startDownloadMovie,
                 child: const Text("Start Download Movie"),
+              ),
+              ElevatedButton(
+                onPressed: startDownloadEpisode,
+                child: const Text("Start Download Episode"),
               ),
             ],
           ),

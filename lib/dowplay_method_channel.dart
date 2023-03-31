@@ -34,8 +34,14 @@ class MethodChannelDowplay extends DowplayPlatform {
   }
 
   @override
-  Future<dynamic> startDownload(dynamic item) async {
-    final dynamic result = await methodChannel.invokeMethod<dynamic>('start_download',item);
+  Future<dynamic> startDownloadMovie(dynamic item) async {
+    final dynamic result = await methodChannel.invokeMethod<dynamic>('start_download_movie',item);
+    return result;
+  }
+
+  @override
+  Future<dynamic> startDownloadEpisode(dynamic item) async {
+    final dynamic result = await methodChannel.invokeMethod<dynamic>('start_download_episode',item);
     return result;
   }
 }

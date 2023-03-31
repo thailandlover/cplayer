@@ -40,7 +40,11 @@ abstract class DowplayPlatform extends PlatformInterface {
     throw UnimplementedError('get_downloads_list() has not been implemented.');
   }
 
-  Future<dynamic> startDownload(dynamic item) {
-    throw UnimplementedError('start_download() has not been implemented.');
+  Future<dynamic> startDownloadMovie(dynamic item) {
+    throw UnimplementedError('start_download_movie() has not been implemented.');
+  }
+
+  Future<dynamic> startDownloadEpisode(dynamic item) {
+    throw UnimplementedError('start_download_episode() has not been implemented.');
   }
 }
