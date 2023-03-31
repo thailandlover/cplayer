@@ -111,11 +111,8 @@ public class DowplayPlugin: NSObject, FlutterPlugin {
     }
     
     func getDownloadsList(call: FlutterMethodCall,result: @escaping FlutterResult){
-        let downloadsList : [DownloadedMedia] = try! DownloadManager.shared.getAllMedia()
-        let jsonEncoder = JSONEncoder()
-        let jsonData = (try? jsonEncoder.encode(downloadsList))!
-        let json = String(data: jsonData, encoding: String.Encoding.utf8)
-        result(json)
+        let downloadsList : [[String : Any]] = try! DownloadManager.shared.getAllMediaDecoded()
+        result(downloadsList)
         
     }
 }
