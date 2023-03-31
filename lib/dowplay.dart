@@ -1,4 +1,3 @@
-
 import 'package:dowplay/EpisodeMedia.dart';
 import 'package:dowplay/MovieMedia.dart';
 
@@ -19,5 +18,9 @@ class Dowplay {
 
   Future<dynamic> getDownloadsList() {
     return DowplayPlatform.instance.getDownloadsList();
+  }
+
+  Future<dynamic> startDownload(dynamic item) {
+    return DowplayPlatform.instance.startDownload(item);
   }
 }

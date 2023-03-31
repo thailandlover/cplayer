@@ -54,6 +54,7 @@ public struct DownloadedMedia : Codable{
         case tempPath
         case group
         case data
+        case progress
     }
     
     init(mediaId: String, mediaURL: URL? = nil, mediaType: MediaManager.MediaType = .movie, name: String, tempPath: URL) {
@@ -101,6 +102,7 @@ public struct DownloadedMedia : Codable{
                   dir.removeValue(forKey: "data")
                   dir["object"] = self.object
                   dir["group"] = self.group?.getObjectAsJSONDictionary()
+                  dir["status"] = self.status.rawValue
                   return dir
               }
           }

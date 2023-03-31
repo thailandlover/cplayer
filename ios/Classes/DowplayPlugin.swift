@@ -25,6 +25,8 @@ public class DowplayPlugin: NSObject, FlutterPlugin {
             result(true)
         case "get_downloads_list":
             getDownloadsList(call: call, result: result)
+        case "start_download":
+            startDownload(call: call, result: result)
         default:
             print("method wasn't found : ",call.method);
             result(false)
@@ -69,7 +71,7 @@ public class DowplayPlugin: NSObject, FlutterPlugin {
             MediaManager.default.openMediaPlayer(usingMediaList: media,playMediaIndex: playIndex,usingSettings: hostAppSettings, forViewController: flutterViewController)
             
         } else {
-            print("iOS could not extract flutter arguments in method: (play)")
+            print("iOS could not extract flutter arguments in method: (playEpisode)")
             result(false)
         }
     }
@@ -105,14 +107,34 @@ public class DowplayPlugin: NSObject, FlutterPlugin {
             result(true)
             
         } else {
-            print("iOS could not extract flutter arguments in method: (play)")
+            print("iOS could not extract flutter arguments in method: (playMovie)")
             result(false)
         }
     }
     
     func getDownloadsList(call: FlutterMethodCall,result: @escaping FlutterResult){
-        let downloadsList : [[String : Any]] = try! DownloadManager.shared.getAllMediaDecoded()
+        let downloadsList : [[String : Any]] = DownloadManager.shared.getAllMediaDecoded()
         result(downloadsList)
+    }
+    
+    func startDownload(call: FlutterMethodCall,result: @escaping FlutterResult){
+        guard let args = call.arguments else {
+            return
+        }
+        if let myArgs = args as? [String: Any],
+           let media : [String : Any] = myArgs["media"] as? [String:Any] {
+            let url : URL = URL(string: media["url"] as! String)!
+            let mediaId: Int = Int(media["media_id"] as! String)!
+            
+            DownloadManager.shared.startDownload(url: url, forMediaId: mediaId, type: .movie,mediaGroup: nil, object:media)
+            
+            let downloadsList : [[String : Any]] = DownloadManager.shared.getAllMediaDecoded()
+            
+            result(downloadsList)
+        } else {
+            print("iOS could not extract flutter arguments in method: (startDownload)")
+            result(false)
+        }
         
     }
 }

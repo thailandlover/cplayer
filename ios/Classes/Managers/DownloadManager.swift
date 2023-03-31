@@ -91,7 +91,7 @@ public class DownloadManager: NSObject/*, ObservableObject */{
         tasks.removeAll()
     }
     
-    public func cancelTask(withMediaId id: String, forType type: MediaManager.MediaType){
+    public func cancelMedia(withMediaId id: String, forType type: MediaManager.MediaType){
         if !configed {return}
         let taskId = "\(id)_\(type.rawValue)"
         cancelTask(withID: taskId)
