@@ -59,4 +59,14 @@ public struct MediaGroup : Codable{
 //    var groupID : String
 //    var itemID : String
     
+    func getObjectAsJSONDictionary() -> [String : Any]? {
+           if let data = try? JSONEncoder().encode(self) {
+               if var dir = try? JSONSerialization.jsonObject(with: data) as? [String:Any] {
+                   dir.removeValue(forKey: "data")
+                   dir["info"] = self.info
+                   return dir
+               }
+           }
+           return nil
+       }
 }

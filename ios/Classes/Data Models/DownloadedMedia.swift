@@ -95,6 +95,18 @@ public struct DownloadedMedia : Codable{
         return try FilesManager.shared.getDownloadList(type: ofType)
     }
     
+    func getObjectAsJSONDictionary() -> [String : Any]? {
+          if let data = try? JSONEncoder().encode(self) {
+              if var dir = try? JSONSerialization.jsonObject(with: data) as? [String:Any] {
+                  dir.removeValue(forKey: "data")
+                  dir["object"] = self.object
+                  dir["group"] = self.group?.getObjectAsJSONDictionary()
+                  return dir
+              }
+          }
+          return nil
+      }
+    
 }
 
 
