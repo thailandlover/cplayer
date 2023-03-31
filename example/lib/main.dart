@@ -317,7 +317,7 @@ class _MyAppState extends State<MyApp> {
   Future<dynamic> getDownloadsList() async {
     dynamic result = await invokeGetDownloadsList();
     if (kDebugMode) {
-      printWrapped("Downloads list : $result");
+      printWrapped("Downloads list : ${jsonEncode(result)}");
     }
   }
 
