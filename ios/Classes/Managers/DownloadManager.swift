@@ -163,6 +163,7 @@ public class DownloadManager: NSObject/*, ObservableObject */{
             }
             return nil
         }).compactMap({$0}) )
+        allMedia = allMedia.filter({$0.object != nil})
         
         allMedia.append(contentsOf: FilesManager.shared.getAllDownloadedMedia())
         

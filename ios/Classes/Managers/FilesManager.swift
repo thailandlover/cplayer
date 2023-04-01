@@ -136,6 +136,7 @@ public class FilesManager {
             for (_, list) in seasonIndexing {
                 if let item = list.first, let g = item.group {
                     var media = mediaGroupIndexing[g.showId] ?? DownloadedMedia(mediaId: item.mediaId, name: item.name, tempPath: item.tempPath)
+                    media.object = item.object
                     media.mediaType = .series
                     media.group = g
                     media.seasons.append(SeasonGroup(mediaList: list))
