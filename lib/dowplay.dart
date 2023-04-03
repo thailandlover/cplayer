@@ -27,4 +27,16 @@ class Dowplay {
   Future<dynamic> startDownloadEpisode(dynamic item) {
     return DowplayPlatform.instance.startDownloadEpisode(item);
   }
+
+  Future<dynamic> pauseDownload(String mediaId, String mediaType) {
+    return DowplayPlatform.instance.pauseDownload(mediaId, mediaType);
+  }
+
+  Future<dynamic> resumeDownload(String mediaId, String mediaType) {
+    return DowplayPlatform.instance.resumeDownload(mediaId, mediaType);
+  }
+
+  Future<dynamic> cancelDownload(String mediaId, String mediaType) {
+    return DowplayPlatform.instance.cancelDownload(mediaId, mediaType);
+  }
 }

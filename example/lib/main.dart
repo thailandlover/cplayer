@@ -28,6 +28,8 @@ class _MyAppState extends State<MyApp> {
   late Map<String, dynamic> movieObject;
   late MovieMedia movieMedia;
 
+  List _downloadsList = [];
+
   @override
   void initState() {
     super.initState();
@@ -327,8 +329,13 @@ class _MyAppState extends State<MyApp> {
     dynamic result = await invokeGetDownloadsList();
     if (kDebugMode) {
       List<dynamic> downloads = List.from(result as Iterable);
-      printWrapped(
-          "Downloads list [${downloads.length}] : ${jsonEncode(downloads)}");
+      if (mounted) {
+        setState(() {
+          _downloadsList = downloads;
+        });
+      }
+      // printWrapped(
+      //     "Downloads list [${downloads.length}] : ${jsonEncode(downloads[1]['object']['info'])}");
     }
   }
 
@@ -341,8 +348,13 @@ class _MyAppState extends State<MyApp> {
     dynamic result = await invokeStartDownloadMovie(item);
     if (kDebugMode) {
       List<dynamic> downloads = List.from(result as Iterable);
-      printWrapped(
-          "Downloads list [${downloads.length}] : ${jsonEncode(downloads)}");
+      if (mounted) {
+        setState(() {
+          _downloadsList = downloads;
+        });
+      }
+      // printWrapped(
+      //     "Downloads list [${downloads.length}] : ${jsonEncode(downloads)}");
     }
   }
 
@@ -441,8 +453,58 @@ class _MyAppState extends State<MyApp> {
     dynamic result = await invokeStartDownloadEpisode(item);
     if (kDebugMode) {
       List<dynamic> downloads = List.from(result as Iterable);
-      printWrapped(
-          "Downloads list [${downloads.length}] : ${jsonEncode(downloads)}");
+      if (mounted) {
+        setState(() {
+          _downloadsList = downloads;
+        });
+      }
+      // printWrapped(
+      //     "Downloads list [${downloads.length}] : ${jsonEncode(downloads)}");
+    }
+  }
+
+  Future<dynamic> pauseDownload() async {
+    dynamic result =
+        await invokePauseDownload(movieMedia.mediaId, movieMedia.mediaType);
+    if (kDebugMode) {
+      List<dynamic> downloads = List.from(result as Iterable);
+      if (mounted) {
+        setState(() {
+          _downloadsList = downloads;
+        });
+      }
+      // printWrapped(
+      //     "Downloads list [${downloads.length}] : ${jsonEncode(downloads)}");
+    }
+  }
+
+  Future<dynamic> resumeDownload() async {
+    dynamic result =
+        await invokeResumeDownload(movieMedia.mediaId, movieMedia.mediaType);
+    if (kDebugMode) {
+      List<dynamic> downloads = List.from(result as Iterable);
+      if (mounted) {
+        setState(() {
+          _downloadsList = downloads;
+        });
+      }
+      // printWrapped(
+      //     "Downloads list [${downloads.length}] : ${jsonEncode(downloads)}");
+    }
+  }
+
+  Future<dynamic> cancelDownload() async {
+    dynamic result =
+        await invokeCancelDownload(movieMedia.mediaId, movieMedia.mediaType);
+    if (kDebugMode) {
+      List<dynamic> downloads = List.from(result as Iterable);
+      if (mounted) {
+        setState(() {
+          _downloadsList = downloads;
+        });
+      }
+      // printWrapped(
+      //     "Downloads list [${downloads.length}] : ${jsonEncode(downloads)}");
     }
   }
 
@@ -518,6 +580,36 @@ class _MyAppState extends State<MyApp> {
     return result;
   }
 
+  Future<dynamic> invokePauseDownload(String mediaId, String mediaType) async {
+    dynamic result;
+    try {
+      result = await _dowplayPlugin.pauseDownload(mediaId, mediaType);
+    } on PlatformException {
+      result = false;
+    }
+    return result;
+  }
+
+  Future<dynamic> invokeResumeDownload(String mediaId, String mediaType) async {
+    dynamic result;
+    try {
+      result = await _dowplayPlugin.resumeDownload(mediaId, mediaType);
+    } on PlatformException {
+      result = false;
+    }
+    return result;
+  }
+
+  Future<dynamic> invokeCancelDownload(String mediaId, String mediaType) async {
+    dynamic result;
+    try {
+      result = await _dowplayPlugin.cancelDownload(mediaId, mediaType);
+    } on PlatformException {
+      result = false;
+    }
+    return result;
+  }
+
   void printWrapped(String text) {
     final pattern = RegExp('.{1,800}'); // 800 is the size of each chunk
     pattern.allMatches(text).forEach((match) => print(match.group(0)));
@@ -557,6 +649,22 @@ class _MyAppState extends State<MyApp> {
                 onPressed: getDownloadsList,
                 child: const Text("Print Downloads List"),
               ),
+              Visibility(
+                visible: _downloadsList.isNotEmpty,
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: ListView.builder(
+                    shrinkWrap: true,
+                    itemCount: _downloadsList.length,
+                    itemBuilder: (context, index) {
+                      return Text(
+                        ''
+                        "[${index + 1}]-> (${_downloadsList[index]['mediaType']}) : ${_downloadsList[index]['mediaType'] == "movie" ? _downloadsList[index]['object']['title'] : _downloadsList[index]['object']['info']['title']} - ${_downloadsList[index]['status']} - ${_downloadsList[index]['progress']}",
+                      );
+                    },
+                  ),
+                ),
+              ),
               ElevatedButton(
                 onPressed: startDownloadMovie,
                 child: const Text("Start Download Movie"),
@@ -564,6 +672,18 @@ class _MyAppState extends State<MyApp> {
               ElevatedButton(
                 onPressed: startDownloadEpisode,
                 child: const Text("Start Download Episode"),
+              ),
+              ElevatedButton(
+                onPressed: pauseDownload,
+                child: const Text("Pause Download"),
+              ),
+              ElevatedButton(
+                onPressed: resumeDownload,
+                child: const Text("Resume Download Movie"),
+              ),
+              ElevatedButton(
+                onPressed: cancelDownload,
+                child: const Text("Cancel Download Movie"),
               ),
             ],
           ),

@@ -28,6 +28,7 @@ abstract class DowplayPlatform extends PlatformInterface {
   Future<bool?> playEpisode(EpisodeMedia media) {
     throw UnimplementedError('playEpisode() has not been implemented.');
   }
+
   Future<bool?> playMovie(MovieMedia media) {
     throw UnimplementedError('playMovie() has not been implemented.');
   }
@@ -41,10 +42,24 @@ abstract class DowplayPlatform extends PlatformInterface {
   }
 
   Future<dynamic> startDownloadMovie(dynamic item) {
-    throw UnimplementedError('start_download_movie() has not been implemented.');
+    throw UnimplementedError(
+        'start_download_movie() has not been implemented.');
   }
 
   Future<dynamic> startDownloadEpisode(dynamic item) {
-    throw UnimplementedError('start_download_episode() has not been implemented.');
+    throw UnimplementedError(
+        'start_download_episode() has not been implemented.');
+  }
+
+  Future<dynamic> pauseDownload(String mediaId, String mediaType) {
+    throw UnimplementedError('pause_download() has not been implemented.');
+  }
+
+  Future<dynamic> resumeDownload(String mediaId, String mediaType) {
+    throw UnimplementedError('resume_download() has not been implemented.');
+  }
+
+  Future<dynamic> cancelDownload(String mediaId, String mediaType) {
+    throw UnimplementedError('cancel_download() has not been implemented.');
   }
 }

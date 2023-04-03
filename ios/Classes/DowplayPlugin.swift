@@ -29,6 +29,12 @@ public class DowplayPlugin: NSObject, FlutterPlugin {
             startDownloadMovie(call: call, result: result)
         case "start_download_episode":
             startDownloadEpisode(call: call, result: result)
+        case "pause_download":
+            pauseDownload(call: call, result: result)
+        case "resume_download":
+            resumeDownload(call: call, result: result)
+        case "cancel_download":
+            cancelDownload(call: call, result: result)
         default:
             print("method wasn't found : ",call.method);
             result(false)
@@ -170,5 +176,54 @@ public class DowplayPlugin: NSObject, FlutterPlugin {
         }
         
     }
+    
+    func pauseDownload(call: FlutterMethodCall,result: @escaping FlutterResult){
+        guard let args = call.arguments else {
+            return
+        }
+        if let myArgs = args as? [String: Any],
+           let media_type : String = myArgs["mediaType"] as? String,
+           let media_id : String = myArgs["mediaId"] as? String {
+            DownloadManager.shared.pauseDownload(forMediaId: media_id, ofType: media_type == "movie" ? .movie : .series)
+            let downloadsList : [[String : Any]] = DownloadManager.shared.getAllMediaDecoded()
+            result(downloadsList)
+        } else {
+            print("iOS could not extract flutter arguments in method: (pauseDownload)")
+            result(false)
+        }
+    }
+    
+    func resumeDownload(call: FlutterMethodCall,result: @escaping FlutterResult){
+        guard let args = call.arguments else {
+            return
+        }
+        if let myArgs = args as? [String: Any],
+           let media_type : String = myArgs["mediaType"] as? String,
+           let media_id : String = myArgs["mediaId"] as? String {
+            DownloadManager.shared.resumeDownload(forMediaId: media_id, ofType: media_type == "movie" ? .movie : .series)
+            let downloadsList : [[String : Any]] = DownloadManager.shared.getAllMediaDecoded()
+            result(downloadsList)
+        } else {
+            print("iOS could not extract flutter arguments in method: (resumeDownload)")
+            result(false)
+        }
+    }
+    
+    func cancelDownload(call: FlutterMethodCall,result: @escaping FlutterResult){
+        guard let args = call.arguments else {
+            return
+        }
+        if let myArgs = args as? [String: Any],
+           let media_type : String = myArgs["mediaType"] as? String,
+           let media_id : String = myArgs["mediaId"] as? String {
+            DownloadManager.shared.cancelMedia(withMediaId: media_id, forType: media_type == "movie" ? .movie : .series)
+            let downloadsList : [[String : Any]] = DownloadManager.shared.getAllMediaDecoded()
+            result(downloadsList)
+        } else {
+            print("iOS could not extract flutter arguments in method: (cancelDownload)")
+            result(false)
+        }
+    }
+    
     
 }
