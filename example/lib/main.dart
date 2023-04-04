@@ -2,6 +2,8 @@ import 'dart:convert';
 
 import 'package:dowplay/EpisodeMedia.dart';
 import 'package:dowplay/MovieMedia.dart';
+import 'package:dowplay/DownloadMovie.dart';
+import 'package:dowplay/DownloadEpisode.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
@@ -27,6 +29,7 @@ class _MyAppState extends State<MyApp> {
       "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiIxMSIsImp0aSI6ImNjMjFiNzE3MDFlZTMxNzAxYzVmZTc5ZjIzM2I4YzcxNzMzOTM0MGNmZDMwNTZhMWRhYjZlMmVhOGE1ZmZjMDk3MDExMjE5N2QzYmUyYzgxIiwiaWF0IjoxNjgwMjk0MTM3LjQ0NjY2NiwibmJmIjoxNjgwMjk0MTM3LjQ0NjY2OSwiZXhwIjoxNzExOTE2NTM3LjQzOTkwNywic3ViIjoiNzc4MTAiLCJzY29wZXMiOltdfQ.JCuscBuKiI7ZCnrcQhvVDj5heEYMbA3UQe4s322bt8zAwLh6hZBvpRUlvNoEmcmmw2GSRhBYHeC6JzvklHwxz6UO2eFBtJeGHWyAic4DC0T6FEYrYQcuZnExyZDhGco29QPED1_BHy8bVxB-yKZyCrgYoJzwik8IZ1qN8W0TdVmbsGXBRvR0CU9cq0q44tNljxhxcmw2fHzMdUCggfvKGBW8aC9ylXK3UoG4yAHzGp2Ug7K_QCUDG2yRW9aUEDP8YJte3PMZDg1yj99JyN20coiyyrAGqoyF-x76dIGqjnRug3X58gGIhWfy4BlX8VcJoCcnreoZqlXNrd0V7r1vIAL2kNSo14wfQH0lGDXz1hzY9blf8OVXIjoyseMdQTrXFkekvcfEPD1GoH6V4-kOKu7TJMpIf13FjdX4zp8xJqSfjfhCP5pE_qAO4-5TuOZawP-J1Pzz882xfhMCfZQVtG1r7iamLIh14A56SWmilOPs4mdoPpuVVybR7X89gEn77odMV7ivIa-WI6mevbo4P4yQj-1LZD8NY1rgW1-5W5Ak3_Myy8Wpg1QzDWNnd7XYJVzA4bTpoQCcQL-yjMiuvu3H0D3Xrp13-nZWGL1oHazEZvUk9R97nO7WfWxezam3kd5YEf_OxTQ5kBbvcM9RQRuYnmK3LXSlTecOYO0F5FU";
   late Map<String, dynamic> movieObject;
   late MovieMedia movieMedia;
+  late DownloadMovie downloadMovie;
 
   List _downloadsList = [];
 
@@ -131,6 +134,16 @@ class _MyAppState extends State<MyApp> {
         apiBaseUrl: "https://v4.kaayapp.com/api",
         lang: "ar",
         startAt: 3,
+        info: movieObject);
+    downloadMovie = DownloadMovie(
+        title: "The Simpsons in Plusaversary",
+        subTitle: "",
+        url:
+            "https://thekee.gcdn.co/video/m-159n/English/Animation&Family/The.Simpsons.in.Plusaversary.2021.1080.mp4?md5=QA-5PWsq9OIEaa0EM79p9A&expires=1678670074",
+        mediaId: "377530",
+        mediaType: "movie",
+        userId: "77810",
+        profileId: "741029",
         info: movieObject);
 
     // Should be called on the app start
@@ -341,11 +354,8 @@ class _MyAppState extends State<MyApp> {
 
   Future<dynamic> startDownloadMovie() async {
     String type = "movie";
-    Map<String, dynamic> item = {
-      "type": type,
-      "media": movieMedia,
-    };
-    dynamic result = await invokeStartDownloadMovie(item);
+
+    dynamic result = await invokeStartDownloadMovie(type, downloadMovie);
     if (kDebugMode) {
       List<dynamic> downloads = List.from(result as Iterable);
       if (mounted) {
@@ -436,28 +446,19 @@ class _MyAppState extends State<MyApp> {
       "items_ids": itemIds,
     };
 
-    EpisodeMedia media = EpisodeMedia(
+    DownloadEpisode media = DownloadEpisode(
         mediaType: "series",
         userId: "77810",
         profileId: "741029",
-        token: accessToken,
-        apiBaseUrl: "https://v4.kaayapp.com/api",
-        lang: "ar",
         info: episodeToDownload,
         mediaGroup: mediaGroup);
 
-    Map<String, dynamic> item = {
-      "type": type,
-      "media": media,
-    };
-    dynamic result = await invokeStartDownloadEpisode(item);
-    if (kDebugMode) {
-      List<dynamic> downloads = List.from(result as Iterable);
-      if (mounted) {
-        setState(() {
-          _downloadsList = downloads;
-        });
-      }
+    dynamic result = await invokeStartDownloadEpisode(type, media);
+    List<dynamic> downloads = List.from(result as Iterable);
+    if (mounted) {
+      setState(() {
+        _downloadsList = downloads;
+      });
       // printWrapped(
       //     "Downloads list [${downloads.length}] : ${jsonEncode(downloads)}");
     }
@@ -466,16 +467,14 @@ class _MyAppState extends State<MyApp> {
   Future<dynamic> pauseDownload() async {
     dynamic result =
         await invokePauseDownload(movieMedia.mediaId, movieMedia.mediaType);
-    if (kDebugMode) {
-      List<dynamic> downloads = List.from(result as Iterable);
-      if (mounted) {
-        setState(() {
-          _downloadsList = downloads;
-        });
-      }
-      // printWrapped(
-      //     "Downloads list [${downloads.length}] : ${jsonEncode(downloads)}");
+    List<dynamic> downloads = List.from(result as Iterable);
+    if (mounted) {
+      setState(() {
+        _downloadsList = downloads;
+      });
     }
+    // printWrapped(
+    //     "Downloads list [${downloads.length}] : ${jsonEncode(downloads)}");
   }
 
   Future<dynamic> resumeDownload() async {
@@ -544,37 +543,33 @@ class _MyAppState extends State<MyApp> {
     return result;
   }
 
-  Future<dynamic> invokeStartDownloadMovie(dynamic item) async {
+  Future<dynamic> invokeStartDownloadMovie(
+      String type, DownloadMovie media) async {
+    Map<String, dynamic> item = {
+      "type": type,
+      "media": downloadMovie,
+    };
     dynamic result;
-    if (item['type'] == "movie" && item['media'] is MovieMedia) {
-      item['media'] = (item['media'] as MovieMedia).toJson();
-      try {
-        result = await _dowplayPlugin.startDownloadMovie(item);
-      } on PlatformException {
-        result = false;
-      }
-    } else {
-      if (kDebugMode) {
-        print("Invalid item type");
-      }
+    item['media'] = (item['media'] as DownloadMovie).toJson();
+    try {
+      result = await _dowplayPlugin.startDownloadMovie(item);
+    } on PlatformException {
       result = false;
     }
     return result;
   }
 
-  Future<dynamic> invokeStartDownloadEpisode(dynamic item) async {
+  Future<dynamic> invokeStartDownloadEpisode(
+      String type, DownloadEpisode media) async {
+    Map<String, dynamic> item = {
+      "type": type,
+      "media": media,
+    };
     dynamic result;
-    if (item['type'] == "series" && item['media'] is EpisodeMedia) {
-      item['media'] = (item['media'] as EpisodeMedia).toJson();
-      try {
-        result = await _dowplayPlugin.startDownloadEpisode(item);
-      } on PlatformException {
-        result = false;
-      }
-    } else {
-      if (kDebugMode) {
-        print("Invalid item type");
-      }
+    item['media'] = (item['media'] as DownloadEpisode).toJson();
+    try {
+      result = await _dowplayPlugin.startDownloadEpisode(item);
+    } on PlatformException {
       result = false;
     }
     return result;
@@ -637,8 +632,8 @@ class _MyAppState extends State<MyApp> {
                   child: const Text("Play Movie"),
                 ),
                 Padding(
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 24.0, horizontal: 32),
+                  padding: const EdgeInsets.symmetric(
+                      vertical: 24.0, horizontal: 32),
                   child: SizedBox(
                     height: 2,
                     child: Container(
