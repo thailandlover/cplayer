@@ -623,69 +623,71 @@ class _MyAppState extends State<MyApp> {
           title: const Text('Plugin example app'),
         ),
         body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              ElevatedButton(
-                onPressed: playEpisode,
-                child: const Text("Play Episode"),
-              ),
-              ElevatedButton(
-                onPressed: playMovie,
-                child: const Text("Play Movie"),
-              ),
-              Padding(
-                padding:
-                    const EdgeInsets.symmetric(vertical: 24.0, horizontal: 32),
-                child: SizedBox(
-                  height: 2,
-                  child: Container(
-                    color: Colors.black26,
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                ElevatedButton(
+                  onPressed: playEpisode,
+                  child: const Text("Play Episode"),
+                ),
+                ElevatedButton(
+                  onPressed: playMovie,
+                  child: const Text("Play Movie"),
+                ),
+                Padding(
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 24.0, horizontal: 32),
+                  child: SizedBox(
+                    height: 2,
+                    child: Container(
+                      color: Colors.black26,
+                    ),
                   ),
                 ),
-              ),
-              ElevatedButton(
-                onPressed: getDownloadsList,
-                child: const Text("Print Downloads List"),
-              ),
-              Visibility(
-                visible: _downloadsList.isNotEmpty,
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: ListView.builder(
-                    shrinkWrap: true,
-                    itemCount: _downloadsList.length,
-                    itemBuilder: (context, index) {
-                      return Text(
-                        ''
-                        "[${index + 1}]-> (${_downloadsList[index]['mediaType']}) : ${_downloadsList[index]['mediaType'] == "movie" ? _downloadsList[index]['object']['title'] : _downloadsList[index]['object']['info']['title']} - ${_downloadsList[index]['status']} - ${_downloadsList[index]['progress']}",
-                      );
-                    },
+                ElevatedButton(
+                  onPressed: getDownloadsList,
+                  child: const Text("Print Downloads List"),
+                ),
+                Visibility(
+                  visible: _downloadsList.isNotEmpty,
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: ListView.builder(
+                      shrinkWrap: true,
+                      itemCount: _downloadsList.length,
+                      itemBuilder: (context, index) {
+                        return Text(
+                          ''
+                          "[${index + 1}]-> (${_downloadsList[index]['mediaType']}) : ${_downloadsList[index]['mediaType'] == "movie" ? _downloadsList[index]['object']['title'] : _downloadsList[index]['object']['info']['title']} - ${_downloadsList[index]['status']} - ${_downloadsList[index]['progress']}",
+                        );
+                      },
+                    ),
                   ),
                 ),
-              ),
-              ElevatedButton(
-                onPressed: startDownloadMovie,
-                child: const Text("Start Download Movie"),
-              ),
-              ElevatedButton(
-                onPressed: startDownloadEpisode,
-                child: const Text("Start Download Episode"),
-              ),
-              ElevatedButton(
-                onPressed: pauseDownload,
-                child: const Text("Pause Download"),
-              ),
-              ElevatedButton(
-                onPressed: resumeDownload,
-                child: const Text("Resume Download Movie"),
-              ),
-              ElevatedButton(
-                onPressed: cancelDownload,
-                child: const Text("Cancel Download Movie"),
-              ),
-            ],
+                ElevatedButton(
+                  onPressed: startDownloadMovie,
+                  child: const Text("Start Download Movie"),
+                ),
+                ElevatedButton(
+                  onPressed: startDownloadEpisode,
+                  child: const Text("Start Download Episode"),
+                ),
+                ElevatedButton(
+                  onPressed: pauseDownload,
+                  child: const Text("Pause Download"),
+                ),
+                ElevatedButton(
+                  onPressed: resumeDownload,
+                  child: const Text("Resume Download Movie"),
+                ),
+                ElevatedButton(
+                  onPressed: cancelDownload,
+                  child: const Text("Cancel Download Movie"),
+                ),
+              ],
+            ),
           ),
         ),
       ),
