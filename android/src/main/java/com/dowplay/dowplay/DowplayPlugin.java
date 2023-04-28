@@ -32,9 +32,12 @@ public class DowplayPlugin implements FlutterPlugin, MethodCallHandler {
   public void onMethodCall(@NonNull MethodCall call, @NonNull Result result) {
     if (call.method.equals("play_movie")) {
       Log.d(TAG, "onMethodCall: play_movie");
+      Log.d(TAG, "onMethodCall: " + call.arguments.toString());
       Intent intent = new Intent(context, CustomPlayerActivity.class);
       intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
       context.startActivity(intent);
+      result.success(true);
+    } else if(call.method.equals("config_downloader")){
       result.success(true);
     } else {
       result.notImplemented();
