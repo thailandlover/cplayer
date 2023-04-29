@@ -1,0 +1,38 @@
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_checked="true">
+        <layer-list>
+            <!-- Outer circle with white stroke -->
+            <item>
+                <shape android:shape="oval">
+                    <solid android:color="@android:color/transparent" />
+                    <stroke android:color="@android:color/white" android:width="2dp" />
+                </shape>
+            </item>
+            <!-- Inner circle with red fill -->
+            <item android:gravity="center">
+                <shape android:shape="oval">
+                    <solid android:color="@android:color/holo_red_light" />
+                    <size android:width="16dp" android:height="16dp" />
+                </shape>
+            </item>
+        </layer-list>
+    </item>
+    <item>
+        <layer-list>
+            <!-- Outer circle with white stroke -->
+            <item>
+                <shape android:shape="oval">
+                    <solid android:color="@android:color/transparent" />
+                    <stroke android:color="@android:color/white" android:width="2dp" />
+                </shape>
+            </item>
+            <!-- Inner circle with white fill -->
+            <item android:gravity="center">
+                <shape android:shape="oval">
+                    <solid android:color="@android:color/white" />
+                    <size android:width="16dp" android:height="16dp" />
+                </shape>
+            </item>
+        </layer-list>
+    </item>
+</selector>

@@ -1,1 +1,7 @@
-<resources></resources>
+<resources>
+    <string name="app_name">CustomExoPlayer</string>
+    <string name="back_but">back</string>
+    //For menu...
+    <string name="audio">Audio</string>
+    <string name="subtitle">Subtitle</string>
+</resources>

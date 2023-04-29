@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+        <ImageButton
+            android:id="@+id/closeSettingButton"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_gravity="start"
+            android:src="@drawable/close_setting_icon"
+            android:backgroundTint="@android:color/transparent"
+            android:contentDescription="@string/back_but"
+            app:tint="@color/white"/>
+
+
+    <LinearLayout
+        android:layout_width="50mm"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:gravity="center"
+
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/audioTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Audio"
+            android:gravity="start"
+            android:layout_gravity="start"
+            android:textStyle="bold"
+            android:textColor="@color/white"
+            android:textSize="16sp"
+            android:ellipsize="marquee"/>
+            <RadioGroup
+                android:id="@+id/audio_radio_group"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+                <RadioButton
+                    android:id="@+id/englishAudioRadioButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="English"
+                    android:paddingEnd="15dp"/>
+                <RadioButton
+                    android:id="@+id/arabicAudioRadioButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="العربية"
+                    android:paddingEnd="15dp"/>
+            </RadioGroup>
+        <View
+            android:layout_marginTop="5dp"
+            android:layout_marginBottom="5dp"
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:background="#4E4E4E"
+            />
+
+        <TextView
+            android:id="@+id/subtitleTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Subtitle"
+            android:gravity="start"
+            android:layout_gravity="start"
+            android:textStyle="bold"
+            android:textColor="@color/white"
+            android:textSize="16sp"
+            android:ellipsize="marquee"/>
+        <RadioGroup
+            android:id="@+id/subtitle_radio_group"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <RadioButton
+                android:id="@+id/englishSubtitleRadioButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="English"
+                android:paddingEnd="15dp"/>
+            <RadioButton
+                android:id="@+id/arabicSubtitleRadioButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="العربية"
+                android:paddingEnd="15dp"/>
+            <RadioButton
+                android:id="@+id/offSubtitleRadioButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Off"
+                android:paddingEnd="15dp"/>
+        </RadioGroup>
+<View
+    android:layout_width="50dp"
+    android:layout_height="50dp"/>
+
+    </LinearLayout>
+
+
+
+</LinearLayout>
