@@ -17,7 +17,6 @@ import android.view.View
 import android.widget.RadioButton
 import android.widget.Toast
 import androidx.annotation.RequiresApi
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
@@ -34,7 +33,6 @@ import androidx.media3.exoplayer.trackselection.DefaultTrackSelector
 import androidx.media3.exoplayer.trackselection.MappingTrackSelector
 import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.DefaultTrackNameProvider
-import androidx.media3.ui.PlayerControlView
 import androidx.media3.ui.PlayerView
 import com.dowplay.dowplay.databinding.ActivityCustomPlayerBinding
 import com.dowplay.dowplay.databinding.SettingBinding
@@ -43,7 +41,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 @UnstableApi /**
  * A fullscreen activity to play audio or video streams.
  */
-class CustomPlayerActivity : FlutterActivity() {
+class CustomPlayerActivity() : FlutterActivity() {
 
     private val viewBinding by lazy(LazyThreadSafetyMode.NONE) {
         ActivityCustomPlayerBinding.inflate(layoutInflater)
@@ -62,6 +60,7 @@ class CustomPlayerActivity : FlutterActivity() {
     var currentVideoIndex = 0
 
     lateinit var trackSelection: DefaultTrackSelector
+
     ///////////////////////////////////////////////////////////////////////////////////////////////
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
