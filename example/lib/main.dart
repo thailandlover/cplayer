@@ -26,7 +26,7 @@ class _MyAppState extends State<MyApp> {
   final _dowplayPlugin = Dowplay();
 
   final String accessToken =
-      "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiIxMSIsImp0aSI6ImNjMjFiNzE3MDFlZTMxNzAxYzVmZTc5ZjIzM2I4YzcxNzMzOTM0MGNmZDMwNTZhMWRhYjZlMmVhOGE1ZmZjMDk3MDExMjE5N2QzYmUyYzgxIiwiaWF0IjoxNjgwMjk0MTM3LjQ0NjY2NiwibmJmIjoxNjgwMjk0MTM3LjQ0NjY2OSwiZXhwIjoxNzExOTE2NTM3LjQzOTkwNywic3ViIjoiNzc4MTAiLCJzY29wZXMiOltdfQ.JCuscBuKiI7ZCnrcQhvVDj5heEYMbA3UQe4s322bt8zAwLh6hZBvpRUlvNoEmcmmw2GSRhBYHeC6JzvklHwxz6UO2eFBtJeGHWyAic4DC0T6FEYrYQcuZnExyZDhGco29QPED1_BHy8bVxB-yKZyCrgYoJzwik8IZ1qN8W0TdVmbsGXBRvR0CU9cq0q44tNljxhxcmw2fHzMdUCggfvKGBW8aC9ylXK3UoG4yAHzGp2Ug7K_QCUDG2yRW9aUEDP8YJte3PMZDg1yj99JyN20coiyyrAGqoyF-x76dIGqjnRug3X58gGIhWfy4BlX8VcJoCcnreoZqlXNrd0V7r1vIAL2kNSo14wfQH0lGDXz1hzY9blf8OVXIjoyseMdQTrXFkekvcfEPD1GoH6V4-kOKu7TJMpIf13FjdX4zp8xJqSfjfhCP5pE_qAO4-5TuOZawP-J1Pzz882xfhMCfZQVtG1r7iamLIh14A56SWmilOPs4mdoPpuVVybR7X89gEn77odMV7ivIa-WI6mevbo4P4yQj-1LZD8NY1rgW1-5W5Ak3_Myy8Wpg1QzDWNnd7XYJVzA4bTpoQCcQL-yjMiuvu3H0D3Xrp13-nZWGL1oHazEZvUk9R97nO7WfWxezam3kd5YEf_OxTQ5kBbvcM9RQRuYnmK3LXSlTecOYO0F5FU";
+      "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiI5IiwianRpIjoiZTdlNzUwYTE2Njc4N2Q3ZGM3OGMxMTRmZGUzYWE4NDczYTlkOGEzYjQxYTIwYWIzZjhjYzhjYjM0NDU3YmQ4ZTk0NjI0MjU5NWI3MGZhYWYiLCJpYXQiOjE2ODI5NjU4OTAuNzk1MjA2LCJuYmYiOjE2ODI5NjU4OTAuNzk1MjEsImV4cCI6MTcxNDU4ODI5MC43ODgyODksInN1YiI6IjI0NTM5NCIsInNjb3BlcyI6W119.lACpnX8ajL8rPq8GfN1tUnOLGSn8nUBAnIXEY2dZCduZ1eoIlrz_g4iTIfjmgF4Mu7vFqPU8DINhifvNifUDP8MjtLqG_j2iAjq9jOf24XnuGy8DEp-qiV5wQJK1xBJE93fiPe38DPUXGfoZws42YjnJT-nSgGgWb2EZCyYqUh4x3V_yLbNtNotpbBxQA55tw53D-ibij357D-V0-ZBhfDQ6YtN066IUVHhC8U33X-Akvdwdb6i_1eI2IwaxWVzPqAp5-Xz77hNtIx1iu7STrAEoerQFiLKO1kGM3lh35VUIN_UQkMo4URwU0QMWlfDDYgrRlDEngdodHmYNbwQYe6iNQmYXAiK4DCMqnOD2OEud3h0MLT7lg-ZWpOLJS-z1ZrOnfU6APxq-zOeS1__tFGrM8rPe6ROl855ZCosCLhAnxbXkuHzB_8XozEwE64QH3KNTRp5LdbCq3QRIDrJ8sWGz-VnAN4N0DcHuXcfi6aQN_itlY7fqsg2EbZzf8O026kyi7EIUWRAfekRCLbXS5Ot_00bEWYWx5T4DO9CO-e7oKWx0bucJptHhAg80bqdY6cK3uQ9Ai_Upk-3qacDi5y_UU4lU8GglLp7xDGFV0dfEAd3mMK93wHeKiKKA5hb3DaEhdDwP8QBne5VVAKKXJPihkglmE_IgtSFd23J6vNw";
   late Map<String, dynamic> movieObject;
   late MovieMedia movieMedia;
   late DownloadMovie downloadMovie;
@@ -127,10 +127,9 @@ class _MyAppState extends State<MyApp> {
             "https://thekee.gcdn.co/video/m-159n/English/Animation&Family/The.Simpsons.in.Plusaversary.2021.1080.mp4?md5=QA-5PWsq9OIEaa0EM79p9A&expires=1678670074",
         mediaId: "377530",
         mediaType: "movie",
-        userId: "77810",
-        profileId: "741029",
-        token:
-            "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiIxMSIsImp0aSI6Ijk4MGJhODk4NmYyYzU1YWJiNzg1MWEwYzMwM2U1ZGEzMjI3YmQ0YWM5M2VjNGM5YjQ1NzM5NzhhNDUyMTYzMDdiYTAxZWU4M2Y0Y2Q4ZDBiIiwiaWF0IjoxNjc4NzM5NzAyLjQ0NDUzMiwibmJmIjoxNjc4NzM5NzAyLjQ0NDUzNSwiZXhwIjoxNzEwMzYyMTAyLjQzNzA2NCwic3ViIjoiNzc4MTAiLCJzY29wZXMiOltdfQ.mG9mYXSRv9JunSEFRfhk-RwvtI4KRhjB7yD3vuDWOqgW3I9mZuTfl-93Fsh8pFSMcRmYyknm9tK4npQKj436Q1WD-cRFy30qpsywCVB3zK5-B6kU4ljIMSXLHiAXiXD40mlrOdi2W38_EKB8ziC_4uu7xb-SWeqypmlFuUBHiNl5LX3N4L8YN_ujaKmXUlLw49n_iTwyY1OnU9KhEv1HJqe0LTWEhh48OZ1YWHF74G1n3pGDkZqWj0kWs3jNAmTUh6pTsXSbiAvWmYqe4zvBQZCpNjEx6MB4LPbnChtWFdmJ1UhOePo-S_j5K1OQkn_uzzzffUv4dK3VxstQBpGbBvPqZq0dZUzY_8Jj1d8e0kORV5U0McO-ED8lybW6M1rbjL0K3OvKOvOJLQynIKFPMOGvJI2zIdQHeEJxA2omgn3zqFcYJG-jVNlQb0wqy9HPkCDizW38dbL_wMXXTiljk3WDqgFOIa_sm-v3lW474_0zZw3zDjUts1LT3Xw6kn1IOfzFNBt54P0Omx9T3tXFgCmGj2cvfw3BK6j00soPpvD_HTkyo4-1IjbqeP4tsVgX-HgNpvN-1yEraYYNT236fmGAv9X-Or-_KS76PM555JWM2FVs4vgyzyJXvMr_ue8mOMBighPerO6jVucCcmtu7Il6CraPl7vpGdSEDbdohxY",
+        userId: "245394",
+        profileId: "562674",
+        token: accessToken,
         apiBaseUrl: "https://v4.kaayapp.com/api",
         lang: "ar",
         startAt: 3,
@@ -142,8 +141,8 @@ class _MyAppState extends State<MyApp> {
             "https://thekee.gcdn.co/video/m-159n/English/Animation&Family/The.Simpsons.in.Plusaversary.2021.1080.mp4?md5=QA-5PWsq9OIEaa0EM79p9A&expires=1678670074",
         mediaId: "377530",
         mediaType: "movie",
-        userId: "77810",
-        profileId: "741029",
+        userId: "245394",
+        profileId: "562674",
         info: movieObject);
 
     // Should be called on the app start
@@ -197,10 +196,11 @@ class _MyAppState extends State<MyApp> {
             "https://thekee.gcdn.co/video/m-159n/English/Animation&Family/Tom.and.Jerry.1965/01.mp4?md5=eCp0VmIS_doipZ6lGVxwVg&expires=1678550892",
         "trailer_url": null,
         "media_url":
-            "https://thekee.gcdn.co/video/m-159n/English/Animation&Family/Tom.and.Jerry.1965/01.mp4?md5=eCp0VmIS_doipZ6lGVxwVg&expires=1678550892",
+            /*"https://thekee.gcdn.co/video/m-159n/English/Animation&Family/Tom.and.Jerry.1965/01.mp4?md5=eCp0VmIS_doipZ6lGVxwVg&expires=1678550892"*/
+        "https://thekee.gcdn.co/video/m-159n/English/Animation&Family/Klaus.2019.1080pAr.mp4",
         "created_at": "2020-07-01 13:27:14",
         "release_date": "2020-07-01 00:00:00",
-        "watching": {"current_time": "13", "duration": "1380"}
+        "watching": {"current_time": "3000", "duration": "1380"}
       },
       {
         "id": 64864,
@@ -254,7 +254,7 @@ class _MyAppState extends State<MyApp> {
             "https://thekee.gcdn.co/video/m-159n/English/Animation&Family/Tom.and.Jerry.1965/04.mp4?md5=eCp0VmIS_doipZ6lGVxwVg&expires=1678550892",
         "created_at": "2020-07-01 13:27:14",
         "release_date": "2020-07-01 00:00:00",
-        "watching": null
+        "watching": {"current_time": "30", "duration": "60"}
       }
     ];
 
@@ -318,8 +318,8 @@ class _MyAppState extends State<MyApp> {
 
     EpisodeMedia media = EpisodeMedia(
         mediaType: "series",
-        userId: "77810",
-        profileId: "741029",
+        userId: "245394",
+        profileId: "562674",
         token: accessToken,
         apiBaseUrl: "https://v4.kaayapp.com/api",
         lang: "ar",
@@ -448,8 +448,8 @@ class _MyAppState extends State<MyApp> {
 
     DownloadEpisode media = DownloadEpisode(
         mediaType: "series",
-        userId: "77810",
-        profileId: "741029",
+        userId: "245394",
+        profileId: "562674",
         info: episodeToDownload,
         mediaGroup: mediaGroup);
 

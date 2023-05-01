@@ -16,9 +16,7 @@ import android.view.View
 import android.widget.RadioButton
 import android.widget.Toast
 import androidx.annotation.RequiresApi
-import androidx.core.view.WindowCompat
-import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.WindowInsetsControllerCompat
+import androidx.core.view.*
 import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C
 import androidx.media3.common.MediaItem
@@ -65,7 +63,7 @@ class CustomPlayerActivity() : FlutterActivity() {
 
     lateinit var trackSelection: DefaultTrackSelector
 
-    ///////////////////////////////////////////////////////////////////////////////////////////////
+        ///////////////////////////////////////////////////////////////////////////////////////////////
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(viewBinding.root)
@@ -95,13 +93,25 @@ class CustomPlayerActivity() : FlutterActivity() {
                 exoPlayer.prepare()
                 exoPlayer.play()
                 viewBinding.playerView.player = exoPlayer
-
+                player?.playWhenReady = true
             }
-        movieMedia?.info?.watching?.currentTime?.toLong()?.let {
-            player?.seekTo(it*1000)
-            print("A7a creent time :::: "+it*1000)
-        }
+        seekToLastWatching()
         playerEvent()
+    }
+
+    private fun seekToLastWatching(){
+        if (mediaType == "movie") {
+            movieMedia?.info?.watching?.currentTime?.toLong()?.let {
+                player?.seekTo(it*1000)
+                print("B7b creent time :::: "+it*1000)
+            }
+        } else if (mediaType == "series") {
+            episodeMedia?.mediaGroup?.episodes?.get(startVideoPosition)?.watching?.
+            currentTime?.toLong()?.let {
+                player?.seekTo(it*1000)
+                print("B7b creent time :::: "+it*1000)
+            }
+        }
     }
    private fun playerEvent(){
        player?.addListener(object : Player.Listener {
@@ -110,16 +120,22 @@ class CustomPlayerActivity() : FlutterActivity() {
                    Player.STATE_READY -> {
                        // The player is able to immediately play from its current position. The player will be playing if getPlayWhenReady() is true, and paused otherwise.
                        viewBinding.progressBarVideo.visibility = View.GONE
+                       viewBinding.playPauseButton.setImageResource(R.drawable.pause_icon)
                    }
                    Player.STATE_BUFFERING -> {
                        // The player is not able to immediately play the media, but is doing work toward being able to do so. This state typically occurs when the player needs to buffer more data before playback can start.
                        viewBinding.progressBarVideo.visibility = View.VISIBLE
+                       viewBinding.playPauseButton.setImageResource(R.drawable.play_icon)
                    }
                    Player.STATE_IDLE -> {
                        // The player is idle, meaning it holds only limited resources.The player must be prepared before it will play the media.
+                       viewBinding.playPauseButton.setImageResource(R.drawable.play_icon)
+                       player?.prepare()
+                       player?.play()
                    }
                    Player.STATE_ENDED -> {
                        // The player has finished playing the media.
+                       viewBinding.playPauseButton.setImageResource(R.drawable.play_icon)
                    }
                    else -> {
                        // Other things
@@ -134,6 +150,7 @@ class CustomPlayerActivity() : FlutterActivity() {
         /////////////////////////////////////////
         viewBinding.backButton.setOnClickListener{
             vibratePhone()
+            addToWatchingList()
             finish()
         }
         viewBinding.fullScreenScale.setOnClickListener{
@@ -228,22 +245,26 @@ class CustomPlayerActivity() : FlutterActivity() {
 
     private fun previous(){
         if(startVideoPosition > 0) {
+            addToWatchingList()
             startVideoPosition = (startVideoPosition - 1 + videoUris.size) % videoUris.size
             player?.seekToPreviousMediaItem()
             viewBinding.videoSubTitle.text = videoSubTitle[startVideoPosition]
+            seekToLastWatching()
         }else{
-            Toast.makeText(this, "There are no previous videos", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, if(currentLanguage=="en") "There are no previous videos" else "لا يوجد فيديو سابق", Toast.LENGTH_LONG).show()
         }
     }
 
     private fun next(){
         if(videoUris.size-1 > startVideoPosition) {
+            addToWatchingList()
             startVideoPosition = (startVideoPosition + 1) % videoUris.size
             player?.seekToNextMediaItem()
             viewBinding.videoSubTitle.text = videoSubTitle[startVideoPosition]
+            seekToLastWatching()
         }
         else{
-            Toast.makeText(this, "There are no next videos", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, if(currentLanguage=="en") "There are no next videos" else "لا يوجد فيديو تالي", Toast.LENGTH_LONG).show()
         }
     }
 
@@ -260,8 +281,12 @@ class CustomPlayerActivity() : FlutterActivity() {
         bindingMF.englishSubtitleRadioButton.visibility = View.GONE
         bindingMF.arabicSubtitleRadioButton.visibility = View.GONE
         bindingMF.offSubtitleRadioButton.visibility = View.GONE
+        bindingMF.audioTitle.visibility = View.GONE
+        bindingMF.subtitleTitle.visibility = View.GONE
+        bindingMF.noSettingsForVideoTitle.visibility = View.GONE
         (bindingMF.audioRadioGroup.getChildAt(radioButtonAudioSelected) as RadioButton).isChecked = true
         (bindingMF.subtitleRadioGroup.getChildAt(radioButtonSubtitleSelected) as RadioButton).isChecked = true
+        setPlayerLanguage(currentLanguage, bindingMF)
         ////////////////////////////////////////////////////////////////////////////////////////////
         try {
             var mappedTrackInfo: MappingTrackSelector.MappedTrackInfo =
@@ -270,7 +295,7 @@ class CustomPlayerActivity() : FlutterActivity() {
             for (rendererIndex in 0 until mappedTrackInfo.rendererCount) {
                 //var trackType: Int = mappedTrackInfo.getRendererType(rendererIndex)
                 var trackGroupArray = mappedTrackInfo.getTrackGroups(rendererIndex)
-                onTracksChanged(trackGroupArray, trackSelection, bindingMF, rendererIndex)
+                onTracksChanged(trackGroupArray, trackSelection,bindingMF, rendererIndex)
                 /*var isRendererDisabled = parameters.getRendererDisabled(rendererIndex);
                 var selectionOverride =
                 parameters.getSelectionOverride(rendererIndex, trackGroupArray)*/
@@ -339,7 +364,8 @@ class CustomPlayerActivity() : FlutterActivity() {
             }
             //////////////////////////////////////////////
         }catch (e: Exception){
-            Toast.makeText(this, "Video is loading...", Toast.LENGTH_LONG).show()
+
+            Toast.makeText(this, if(currentLanguage=="en") "Please wait..." else "يرجى الانتظار...", Toast.LENGTH_LONG).show()
         }
 
     }
@@ -397,45 +423,56 @@ class CustomPlayerActivity() : FlutterActivity() {
                         Log.d("TAG Test HAS AUDIO", "HAS AUDIO")
                         bindingMF.audioRadioGroup.visibility = View.VISIBLE
                         if(trackName.lowercase().contains("English".lowercase())){
+                            bindingMF.audioTitle.visibility = View.VISIBLE
                             bindingMF.englishAudioRadioButton.visibility = View.VISIBLE
                         }
                         if(trackName.lowercase().contains("Arabic".lowercase())){
                             print("A7a Arabic")
+                            bindingMF.audioTitle.visibility = View.VISIBLE
                             bindingMF.arabicAudioRadioButton.visibility = View.VISIBLE
                         }
-                        bindingMF.offSubtitleRadioButton.visibility = View.VISIBLE
                     }
                     if (sampleMimeType != null && sampleMimeType.contains("x-quicktime-tx3g")) {
                         Log.d("TAG", "HAS Subtitle $sampleMimeType")
                         bindingMF.subtitleRadioGroup.visibility = View.VISIBLE
                         if(trackName.lowercase().contains("English".lowercase())){
+                            bindingMF.subtitleTitle.visibility = View.VISIBLE
+                            bindingMF.offSubtitleRadioButton.visibility = View.VISIBLE
                             bindingMF.englishSubtitleRadioButton.visibility = View.VISIBLE
                         }
                         if(trackName.lowercase().contains("Arabic".lowercase())){
+                            bindingMF.subtitleTitle.visibility = View.VISIBLE
+                            bindingMF.offSubtitleRadioButton.visibility = View.VISIBLE
                             bindingMF.arabicSubtitleRadioButton.visibility = View.VISIBLE
                         }
                     }
                 }
             }
             ///////////////////////////////////////////////////////////////////////////////////////
-            /*for (groupIndex in 0 until trackGroups.length) {
-                for (trackIndex in 0 until trackGroups.get(groupIndex).length) {
-                    var trackName = DefaultTrackNameProvider(resources).getTrackName(
-                        trackGroups.get(groupIndex).getFormat(trackIndex)
-                    )
-                    var isTrackSupported = mappedTrackInfo?.getTrackSupport(
-                        rendererIndex,
-                        groupIndex,
-                        trackIndex
-                    ) == C.FORMAT_HANDLED
-                    Log.d(
-                        "Track Info",
-                        "track item " + groupIndex + ": trackName: " + trackName + ", isTrackSupported: " + isTrackSupported
-                    )
+        }
+        if(!bindingMF.audioTitle.isVisible && !bindingMF.subtitleTitle.isVisible){
+            bindingMF.noSettingsForVideoTitle.visibility = View.VISIBLE
+        }else{
+            bindingMF.noSettingsForVideoTitle.visibility = View.GONE
+        }
+    }
 
-                }
-            }*/
-
+    private fun setPlayerLanguage(lang: String, bindingMF: SettingBinding?){
+        if(lang.contains("ar")){
+            viewBinding.playerSettingText.text = "الإعدادات"
+            if(bindingMF != null) {
+                bindingMF.audioTitle.text = "الصوت"
+                bindingMF.subtitleTitle.text = "الترجمة"
+                bindingMF.offSubtitleRadioButton.text = "ايقاف"
+                bindingMF.noSettingsForVideoTitle.text = "لا يوجد اعدادات لهذا الفيديو"
+            }
+        }else{
+            viewBinding.playerSettingText.text = "Setting"
+            if(bindingMF != null) {
+                bindingMF.subtitleTitle.text = "Subtitle"
+                bindingMF.offSubtitleRadioButton.text = "Off"
+                bindingMF.noSettingsForVideoTitle.text = "No settings for this video"
+            }
         }
     }
 
@@ -466,7 +503,7 @@ class CustomPlayerActivity() : FlutterActivity() {
 
     public override fun onStart() {
         super.onStart()
-        getDataFromIntentAndTypeMedia()
+        initToGetDataFromIntentAndTypeMedia()
         if (Util.SDK_INT > 23) {
             initializePlayer()
         }
@@ -477,45 +514,50 @@ class CustomPlayerActivity() : FlutterActivity() {
     private var episodeMedia: EpisodeMedia? = null
     private var mediaType: String = ""
     private var startVideoPosition:Int = 0
-    private fun getDataFromIntentAndTypeMedia(){
+    private var currentLanguage:String = "en"
+    private fun initToGetDataFromIntentAndTypeMedia(){
         //System.out.println("A7a Gson::: "+json);
         print("A7a 101:::")
         val jsonPlayMovieData = intent.getStringExtra("PlayMovieData")
         val jsonPlayEpisodeData = intent.getStringExtra("PlayEpisodeData")
         if(jsonPlayMovieData != null) {
-            mediaType = "movie"
+
+
             movieMedia = MovieMedia.fromJson(jsonPlayMovieData.toString())
+
+            mediaType = movieMedia?.mediaType ?: "movie"
+            currentLanguage = movieMedia?.lang ?: "en"
+            setPlayerLanguage(currentLanguage,null)
 
             videoUris = arrayOf(movieMedia?.info?.hdURL.toString())!!
             videoTitle = arrayOf(movieMedia?.title.toString())!!
             viewBinding.videoTitle.text = videoTitle[0]
             videoSubTitle += ("")
-            //videoUris.plus(movieMedia?.url)
+
         }else if(jsonPlayEpisodeData != null){
-            mediaType = "series"
             episodeMedia = EpisodeMedia.fromJson(jsonPlayEpisodeData.toString())
+
+            mediaType = episodeMedia?.mediaType ?: "series"
+            currentLanguage = episodeMedia?.lang ?: "en"
+            setPlayerLanguage(currentLanguage,null)
+
             viewBinding.videoTitle.text = episodeMedia?.mediaGroup?.tvShow?.title.toString()
-            //episodeMedia?.mediaGroup?.episodes
-            Log.d("A7A1","A7A1"+episodeMedia?.mediaGroup?.episodes?.size)
+
             for ((index, item) in episodeMedia?.mediaGroup?.episodes?.withIndex()!!) {
                 println("Item $index is $item")
                 videoUris += (item.mediaURL.toString())
                 videoSubTitle += (item.title.toString())
             }
-            /*for (episodes in episodeMedia?.mediaGroup?.episodes!!) {
-                videoUris.plus(episodes.mediaURL.toString())
-                videoSubTitle.plus(episodes.title.toString())
-                Log.d("A7A2","A7A2"+videoSubTitle.size)
-            }*/
+
             startVideoPosition = episodeMedia?.info?.order?.toIntOrNull()?:0
             if(startVideoPosition > 0){
                 startVideoPosition -= 1
             }
             viewBinding.videoTitle.text = episodeMedia?.mediaGroup?.tvShow?.title.toString()
             viewBinding.videoSubTitle.text = videoSubTitle[startVideoPosition]
-            //episodeMedia?.info?.title.toString()
+
         }else{
-            Toast.makeText(this, "No Data Found!!!", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, if(currentLanguage=="en") "There is no content to display" else "لا يوجد محتوى للعرض", Toast.LENGTH_LONG).show()
         }
     }
     public override fun onResume() {
@@ -543,16 +585,53 @@ class CustomPlayerActivity() : FlutterActivity() {
             }
         })
     }
+    private fun addToWatchingList(){
+        if(player != null && (player?.currentPosition?: 0) > 0 && (player?.duration?: 0) > 0) {
+            if (mediaType == "movie") {
+                //movie
+                Log.d("A7a this is time: ", (player?.currentPosition?.div(1000)).toString())
+                RetrofitBuildRequest().createRequestForAddWatching(
+                    movieMedia?.apiBaseURL.toString(),
+                    movieMedia?.profileID.toString(),
+                    "movie",
+                    movieMedia?.mediaID.toString(),
+                    //movieMedia?.info?.watching?.duration.toString(),
+                    player?.duration?.div(1000).toString(),
+                    (player?.currentPosition?.div(1000)).toString(),
+                    movieMedia?.token.toString(),
+                    currentLanguage
+                )
+            } else if (mediaType == "series") {
+                //episode
+                RetrofitBuildRequest().createRequestForAddWatching(
+                    episodeMedia?.apiBaseURL.toString(),
+                    episodeMedia?.profileID.toString(),
+                    "episode",
+                    episodeMedia?.mediaGroup?.episodes?.get(startVideoPosition)?.id.toString(),
+                    player?.duration?.div(1000).toString(),
+                    //episodeMedia?.mediaGroup?.episodes?.get(startVideoPosition)?.watching?.duration.toString(),
+                    (player?.currentPosition?.div(1000)).toString(),
+                    episodeMedia?.token.toString(),
+                    currentLanguage
+                )
+            }
+        }
+    }
     public override fun onPause() {
         super.onPause()
+        //addToWatchingList()
         if (Util.SDK_INT <= 23) {
             releasePlayer()
         }
     }
 
-
+    /*public override fun onDestroy() {
+        super.onDestroy()
+        addToWatchingList()
+    }*/
     public override fun onStop() {
         super.onStop()
+        addToWatchingList()
         if (Util.SDK_INT > 23) {
             releasePlayer()
         }

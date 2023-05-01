@@ -17,6 +17,7 @@
 
 
     <LinearLayout
+        android:id="@+id/settingControlOptions"
         android:layout_width="50mm"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
@@ -96,6 +97,18 @@
                 android:text="Off"
                 android:paddingEnd="15dp"/>
         </RadioGroup>
+        <TextView
+            android:id="@+id/noSettingsForVideoTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="There are no settings for video"
+            android:gravity="center"
+            android:visibility="gone"
+            android:layout_gravity="center"
+            android:textStyle="bold"
+            android:textColor="@color/white"
+            android:textSize="16sp"
+            android:ellipsize="marquee"/>
 <View
     android:layout_width="50dp"
     android:layout_height="50dp"/>
