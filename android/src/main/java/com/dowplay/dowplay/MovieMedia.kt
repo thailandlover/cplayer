@@ -16,7 +16,8 @@ data class MovieMedia (
     @Json(name = "media_id")
     val mediaID: String? = null,
 
-    val media_type: String? = null,
+    @Json(name = "media_type")
+    val mediaType: String? = null,
 
     @Json(name = "user_id")
     val userID: String? = null,
@@ -30,7 +31,8 @@ data class MovieMedia (
     val apiBaseURL: String? = null,
 
     val lang: String? = null,
-    val startAt: Long? = null,
+    @Json(name = "start_at")
+    val startAt: Double? = null,
     val info: Info? = null
 ) {
     public fun toJson() = klaxon.toJsonString(this)

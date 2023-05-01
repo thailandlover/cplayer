@@ -61,7 +61,7 @@ class CustomPlayerActivity() : FlutterActivity() {
     /*listOf(
        "Video 1","Klaus","Video 2"
     )*/
-    var currentVideoIndex = 0
+    //var currentVideoIndex = 0
 
     lateinit var trackSelection: DefaultTrackSelector
 
@@ -91,6 +91,7 @@ class CustomPlayerActivity() : FlutterActivity() {
 
                 /////////////////////
                 exoPlayer.setMediaItems(mediaItem)
+                exoPlayer.seekToDefaultPosition(startVideoPosition)
                 exoPlayer.prepare()
                 exoPlayer.play()
                 viewBinding.playerView.player = exoPlayer
@@ -226,20 +227,20 @@ class CustomPlayerActivity() : FlutterActivity() {
 
 
     private fun previous(){
-        if(currentVideoIndex > 0) {
-            currentVideoIndex = (currentVideoIndex - 1 + videoUris.size) % videoUris.size
+        if(startVideoPosition > 0) {
+            startVideoPosition = (startVideoPosition - 1 + videoUris.size) % videoUris.size
             player?.seekToPreviousMediaItem()
-            viewBinding.videoTitle.text = videoTitle[currentVideoIndex]
+            viewBinding.videoSubTitle.text = videoSubTitle[startVideoPosition]
         }else{
             Toast.makeText(this, "There are no previous videos", Toast.LENGTH_LONG).show()
         }
     }
 
     private fun next(){
-        if(videoUris.size-1 > currentVideoIndex) {
-            currentVideoIndex = (currentVideoIndex + 1) % videoUris.size
+        if(videoUris.size-1 > startVideoPosition) {
+            startVideoPosition = (startVideoPosition + 1) % videoUris.size
             player?.seekToNextMediaItem()
-            viewBinding.videoTitle.text = videoTitle[currentVideoIndex]
+            viewBinding.videoSubTitle.text = videoSubTitle[startVideoPosition]
         }
         else{
             Toast.makeText(this, "There are no next videos", Toast.LENGTH_LONG).show()
@@ -474,24 +475,45 @@ class CustomPlayerActivity() : FlutterActivity() {
 
     private var movieMedia: MovieMedia? = null
     private var episodeMedia: EpisodeMedia? = null
+    private var mediaType: String = ""
+    private var startVideoPosition:Int = 0
     private fun getDataFromIntentAndTypeMedia(){
         //System.out.println("A7a Gson::: "+json);
         print("A7a 101:::")
         val jsonPlayMovieData = intent.getStringExtra("PlayMovieData")
         val jsonPlayEpisodeData = intent.getStringExtra("PlayEpisodeData")
         if(jsonPlayMovieData != null) {
+            mediaType = "movie"
             movieMedia = MovieMedia.fromJson(jsonPlayMovieData.toString())
+
             videoUris = arrayOf(movieMedia?.info?.hdURL.toString())!!
-            //videoName = arrayOf(movieMedia?.title.toString())!!
-            viewBinding.videoTitle.text = movieMedia?.title.toString()
+            videoTitle = arrayOf(movieMedia?.title.toString())!!
+            viewBinding.videoTitle.text = videoTitle[0]
+            videoSubTitle += ("")
             //videoUris.plus(movieMedia?.url)
         }else if(jsonPlayEpisodeData != null){
+            mediaType = "series"
             episodeMedia = EpisodeMedia.fromJson(jsonPlayEpisodeData.toString())
-            videoUris = arrayOf(episodeMedia?.info?.mediaURL.toString())!!
-            //videoName = arrayOf(episodeMedia?.info?.title.toString())!!
             viewBinding.videoTitle.text = episodeMedia?.mediaGroup?.tvShow?.title.toString()
-            viewBinding.videoSubTitle.text = episodeMedia?.info?.title.toString()
-            //videoUris.plus(movieMedia?.url)
+            //episodeMedia?.mediaGroup?.episodes
+            Log.d("A7A1","A7A1"+episodeMedia?.mediaGroup?.episodes?.size)
+            for ((index, item) in episodeMedia?.mediaGroup?.episodes?.withIndex()!!) {
+                println("Item $index is $item")
+                videoUris += (item.mediaURL.toString())
+                videoSubTitle += (item.title.toString())
+            }
+            /*for (episodes in episodeMedia?.mediaGroup?.episodes!!) {
+                videoUris.plus(episodes.mediaURL.toString())
+                videoSubTitle.plus(episodes.title.toString())
+                Log.d("A7A2","A7A2"+videoSubTitle.size)
+            }*/
+            startVideoPosition = episodeMedia?.info?.order?.toIntOrNull()?:0
+            if(startVideoPosition > 0){
+                startVideoPosition -= 1
+            }
+            viewBinding.videoTitle.text = episodeMedia?.mediaGroup?.tvShow?.title.toString()
+            viewBinding.videoSubTitle.text = videoSubTitle[startVideoPosition]
+            //episodeMedia?.info?.title.toString()
         }else{
             Toast.makeText(this, "No Data Found!!!", Toast.LENGTH_LONG).show()
         }
