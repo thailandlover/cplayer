@@ -1,7 +1,11 @@
+// To parse the JSON, install Klaxon and do:
+//
+//   val movieMedia = MovieMedia.fromJson(jsonString)
+
 package com.dowplay.dowplay
 
 import com.beust.klaxon.*
-import java.io.*
+
 private val klaxon = Klaxon()
 
 data class MovieMedia (
@@ -9,20 +13,20 @@ data class MovieMedia (
     val subTitle: String? = null,
     val url: String? = null,
 
-    @Json(name = "mediaId")
+    @Json(name = "media_id")
     val mediaID: String? = null,
 
-    val mediaType: String? = null,
+    val media_type: String? = null,
 
-    @Json(name = "userId")
+    @Json(name = "user_id")
     val userID: String? = null,
 
-    @Json(name = "profileId")
+    @Json(name = "profile_id")
     val profileID: String? = null,
 
     val token: String? = null,
 
-    @Json(name = "apiBaseUrl")
+    @Json(name = "api_base_url")
     val apiBaseURL: String? = null,
 
     val lang: String? = null,
@@ -79,7 +83,15 @@ data class Info (
     @Json(name = "imdb_certificate")
     val imdbCertificate: Any? = null,
 
-    val watching: Watching? = null
+    val watching: Watching? = null,
+///////////////////////////////
+    val order: String? = null,
+
+    @Json(name = "created_at")
+    val createdAt: String? = null,
+
+    @Json(name = "release_date")
+    val releaseDate: String? = null,
 )
 
 data class DirectorInfo (

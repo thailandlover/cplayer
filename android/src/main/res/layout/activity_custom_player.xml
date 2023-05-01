@@ -6,11 +6,17 @@
     android:layout_height="match_parent"
     android:background="@color/black"
     tools:context=".CustomPlayerActivity">
+
+    <!--            android:keepScreenOn="true"-->
+    <!--            app:use_controller="true"-->
+
     <androidx.media3.ui.PlayerView
         android:id="@+id/player_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:controller_layout_id="@layout/custom_control_view">
+        app:controller_layout_id="@layout/custom_control_view"
+        tools:layout_editor_absoluteX="31dp"
+        tools:layout_editor_absoluteY="0dp">
 
         <ProgressBar
             android:id="@+id/progress_bar_video"
@@ -20,11 +26,8 @@
             android:layout_gravity="center"
             android:indeterminate="true"
             android:indeterminateDrawable="@drawable/progress"
-            android:indeterminateDuration="800"
-            />
+            android:indeterminateDuration="800" />
     </androidx.media3.ui.PlayerView>
-    <!--            android:keepScreenOn="true"-->
-    <!--            app:use_controller="true"-->
 
     <LinearLayout
         android:id="@+id/topController"
@@ -42,18 +45,36 @@
             android:backgroundTint="@android:color/transparent"
             android:contentDescription="@string/back_but"
             app:tint="@color/white"/>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:orientation="vertical">
         <TextView
             android:id="@+id/videoTitle"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:text=""
             android:layout_weight="1"
-            android:text="FreeDom"
             android:gravity="center"
             android:layout_gravity="center"
             android:textColor="@color/white"
             android:textSize="16sp"
             android:marqueeRepeatLimit="marquee_forever"
             android:ellipsize="marquee"/>
+        <TextView
+            android:id="@+id/videoSubTitle"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text=""
+            android:layout_weight="1"
+            android:gravity="center"
+            android:layout_gravity="center"
+            android:textColor="@color/white"
+            android:textSize="16sp"
+            android:marqueeRepeatLimit="marquee_forever"
+            android:ellipsize="marquee"/>
+    </LinearLayout>
         <ImageButton
             android:id="@+id/fullScreenScale"
             android:layout_width="50dp"

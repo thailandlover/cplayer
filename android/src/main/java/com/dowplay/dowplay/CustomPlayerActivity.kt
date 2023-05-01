@@ -1,6 +1,5 @@
 package com.dowplay.dowplay
 
-import io.flutter.embedding.android.FlutterActivity
 import android.annotation.SuppressLint
 import android.app.PictureInPictureParams
 import android.content.Context
@@ -34,9 +33,11 @@ import androidx.media3.exoplayer.trackselection.MappingTrackSelector
 import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.DefaultTrackNameProvider
 import androidx.media3.ui.PlayerView
+import com.dowplay.dowplay.MovieMedia.Companion.fromJson
 import com.dowplay.dowplay.databinding.ActivityCustomPlayerBinding
 import com.dowplay.dowplay.databinding.SettingBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import io.flutter.embedding.android.FlutterActivity
 
 @UnstableApi /**
  * A fullscreen activity to play audio or video streams.
@@ -47,16 +48,19 @@ class CustomPlayerActivity() : FlutterActivity() {
         ActivityCustomPlayerBinding.inflate(layoutInflater)
     }
     private var player: ExoPlayer? = null
-
-    val videoUris = listOf(
+   /*
+    var videoUris = listOf(
         Uri.parse("https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4"),
         Uri.parse("https://thekee.gcdn.co/video/m-159n/English/Animation&Family/Klaus.2019.1080pAr.mp4"),
         Uri.parse("https://storage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4")
-    )
+    )*/
+   var videoUris = arrayOf<String>()
 
-    val videoName = listOf(
+    var videoTitle = arrayOf<String>()
+    var videoSubTitle = arrayOf<String>()
+    /*listOf(
        "Video 1","Klaus","Video 2"
-    )
+    )*/
     var currentVideoIndex = 0
 
     lateinit var trackSelection: DefaultTrackSelector
@@ -89,9 +93,13 @@ class CustomPlayerActivity() : FlutterActivity() {
                 exoPlayer.setMediaItems(mediaItem)
                 exoPlayer.prepare()
                 exoPlayer.play()
-
                 viewBinding.playerView.player = exoPlayer
+
             }
+        movieMedia?.info?.watching?.currentTime?.toLong()?.let {
+            player?.seekTo(it*1000)
+            print("A7a creent time :::: "+it*1000)
+        }
         playerEvent()
     }
    private fun playerEvent(){
@@ -221,7 +229,7 @@ class CustomPlayerActivity() : FlutterActivity() {
         if(currentVideoIndex > 0) {
             currentVideoIndex = (currentVideoIndex - 1 + videoUris.size) % videoUris.size
             player?.seekToPreviousMediaItem()
-            viewBinding.videoTitle.text = videoName[currentVideoIndex]
+            viewBinding.videoTitle.text = videoTitle[currentVideoIndex]
         }else{
             Toast.makeText(this, "There are no previous videos", Toast.LENGTH_LONG).show()
         }
@@ -231,7 +239,7 @@ class CustomPlayerActivity() : FlutterActivity() {
         if(videoUris.size-1 > currentVideoIndex) {
             currentVideoIndex = (currentVideoIndex + 1) % videoUris.size
             player?.seekToNextMediaItem()
-            viewBinding.videoTitle.text = videoName[currentVideoIndex]
+            viewBinding.videoTitle.text = videoTitle[currentVideoIndex]
         }
         else{
             Toast.makeText(this, "There are no next videos", Toast.LENGTH_LONG).show()
@@ -457,11 +465,37 @@ class CustomPlayerActivity() : FlutterActivity() {
 
     public override fun onStart() {
         super.onStart()
+        getDataFromIntentAndTypeMedia()
         if (Util.SDK_INT > 23) {
             initializePlayer()
         }
     }
 
+
+    private var movieMedia: MovieMedia? = null
+    private var episodeMedia: EpisodeMedia? = null
+    private fun getDataFromIntentAndTypeMedia(){
+        //System.out.println("A7a Gson::: "+json);
+        print("A7a 101:::")
+        val jsonPlayMovieData = intent.getStringExtra("PlayMovieData")
+        val jsonPlayEpisodeData = intent.getStringExtra("PlayEpisodeData")
+        if(jsonPlayMovieData != null) {
+            movieMedia = MovieMedia.fromJson(jsonPlayMovieData.toString())
+            videoUris = arrayOf(movieMedia?.info?.hdURL.toString())!!
+            //videoName = arrayOf(movieMedia?.title.toString())!!
+            viewBinding.videoTitle.text = movieMedia?.title.toString()
+            //videoUris.plus(movieMedia?.url)
+        }else if(jsonPlayEpisodeData != null){
+            episodeMedia = EpisodeMedia.fromJson(jsonPlayEpisodeData.toString())
+            videoUris = arrayOf(episodeMedia?.info?.mediaURL.toString())!!
+            //videoName = arrayOf(episodeMedia?.info?.title.toString())!!
+            viewBinding.videoTitle.text = episodeMedia?.mediaGroup?.tvShow?.title.toString()
+            viewBinding.videoSubTitle.text = episodeMedia?.info?.title.toString()
+            //videoUris.plus(movieMedia?.url)
+        }else{
+            Toast.makeText(this, "No Data Found!!!", Toast.LENGTH_LONG).show()
+        }
+    }
     public override fun onResume() {
         super.onResume()
         hideSystemUi()

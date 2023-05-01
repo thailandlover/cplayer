@@ -44,10 +44,10 @@ class _MyAppState extends State<MyApp> {
       "download_url":
           "https://s-ed1.cloud.gcore.lu/video/m-159n/English/Animation&Family/Klaus.2019.720p.mp4",
       "hd_url":
-          "https://site.gcdn.co/video/m-159n/English/Animation&Family/Klaus.2019.720p.mp4?md5=ipbkWahE7MGcaEAdHHRS8g&expires=1678668998",
+          "https://thekee.gcdn.co/video/m-159n/English/Animation&Family/Klaus.2019.720p.mp4?md5=ipbkWahE7MGcaEAdHHRS8g&expires=1678668998",
       "trailer_url": null,
       "media_url":
-          "https://site.gcdn.co/video/m-159n/English/Animation&Family/Klaus.2019.1080p.mp4?md5=shMoxWUw5sX8KK6q-QH16w&expires=1678668998",
+          "https://thekee.gcdn.co/video/m-159n/English/Animation&Family/Klaus.2019.1080p.mp4?md5=shMoxWUw5sX8KK6q-QH16w&expires=1678668998",
       "duration": "5m",
       "language": "English",
       "translation": "العربية",

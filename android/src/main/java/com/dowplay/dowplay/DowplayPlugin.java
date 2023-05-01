@@ -5,14 +5,18 @@ import android.content.Intent;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.media3.common.util.UnstableApi;
+
+import com.beust.klaxon.Klaxon;
 
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
 import io.flutter.plugin.common.MethodChannel.Result;
+import com.google.gson.Gson;
 
-/** DowplayPlugin */
+@UnstableApi /** DowplayPlugin */
 public class DowplayPlugin implements FlutterPlugin, MethodCallHandler {
   private static final String TAG = "DowplayPlugin";
   /// The MethodChannel that will the communication between Flutter and native Android
@@ -33,9 +37,24 @@ public class DowplayPlugin implements FlutterPlugin, MethodCallHandler {
     if (call.method.equals("play_movie")) {
       Log.d(TAG, "onMethodCall: play_movie");
       Log.d(TAG, "onMethodCall: " + call.arguments.toString());
-      MovieMedia movieMedia = MovieMedia.Companion.fromJson(call.arguments.toString());
+      Gson gson = new Gson();
+      String json = gson.toJson(call.arguments);
+      //System.out.println("B7b Gson::: "+json);
+      //MovieMedia movieMedia = MovieMedia.Companion.fromJson(json);
+      //Log.d(TAG, "B7b movieMedia?.title is: " + movieMedia);
+      //MovieMedia movieMedia = MovieMedia.Companion.fromJson(call.arguments.toString());
       Intent intent = new Intent(context, CustomPlayerActivity.class);
-      //intent.putExtra("extra", movieMedia);
+      intent.putExtra("PlayMovieData", json);
+      intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+      context.startActivity(intent);
+      result.success(true);
+    } else if(call.method.equals("play_episode")){
+      Log.d(TAG, "onMethodCall: play_episode");
+      Log.d(TAG, "onMethodCall: " + call.arguments.toString());
+      Gson gson = new Gson();
+      String json = gson.toJson(call.arguments);
+      Intent intent = new Intent(context, CustomPlayerActivity.class);
+      intent.putExtra("PlayEpisodeData", json);
       intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
       context.startActivity(intent);
       result.success(true);
