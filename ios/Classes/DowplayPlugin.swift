@@ -64,9 +64,14 @@ public class DowplayPlugin: NSObject, FlutterPlugin {
             var media : [Media] = []
             let _ : [String:Any] = media_group["tv_show"] as! [String:Any]
             let season : [String:Any] = media_group["season"] as! [String:Any]
+            let seasonNumber:Any = season["season_number"]!
+            
+            let tvShow :[String:Any]  = media_group["tv_show"]  as! [String : Any]
+            let tvShowTitle:Any = tvShow["title"]!
+            
             for episode in episodes {
                 let mediaId = String(episode["id"] as! Int);
-                let mediaGroup : MediaGroup = MediaGroup(showId: itemsIds["tv_show_id"] as! String, seasonId: itemsIds["season_id"] as! String, episodeId: mediaId ,data: media_group)
+                let mediaGroup : MediaGroup = MediaGroup(showId: itemsIds["tv_show_id"] as! String, seasonId: itemsIds["season_id"] as! String, episodeId: mediaId,seasonName: "Season \(seasonNumber)",showName: tvShowTitle as! String ,data: media_group)
                 let watching : [String:Any]? = episode["watching"] as? [String : Any]
                 var startAt:Float = 0.0
                 if(watching != nil) {
@@ -162,8 +167,13 @@ public class DowplayPlugin: NSObject, FlutterPlugin {
             
             
             let itemsIds: [String:Any] = media_group["items_ids"] as! [String : Any]
+            let season :[String:Any]  = media_group["season"]  as! [String : Any]
+            let seasonNumber:Any = season["season_number"]!
             
-            let mediaGroup : MediaGroup = MediaGroup(showId: itemsIds["tv_show_id"] as! String, seasonId: itemsIds["season_id"] as! String, episodeId: mediaId ,data: media_group)
+            let tvShow :[String:Any]  = media_group["tv_show"]  as! [String : Any]
+            let tvShowTitle:Any = tvShow["title"]!
+            
+            let mediaGroup : MediaGroup = MediaGroup(showId: itemsIds["tv_show_id"] as! String, seasonId: itemsIds["season_id"] as! String, episodeId: mediaId,seasonName: "Season \(seasonNumber)",showName: tvShowTitle as! String ,data: media_group)
             
             DownloadManager.shared.startDownload(url: url, forMediaId: Int(mediaId )!, type: .series,mediaGroup: mediaGroup, object:media)
             
