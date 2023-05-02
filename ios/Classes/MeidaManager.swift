@@ -105,7 +105,7 @@ public class MediaManager {
     }
     
     public enum MediaType : String, Codable{
-        case movie = "movies"
+        case movie = "movie"
         case series = "series"
         
         var version_4_value : String {

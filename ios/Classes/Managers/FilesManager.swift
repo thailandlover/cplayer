@@ -39,23 +39,23 @@ public class FilesManager {
         }
         //Movies Folder
         let mDir = documentsDirectory.appendingPathComponent("DownloadCache")
-            .appendingPathComponent(MediaManager.MediaType.movie.rawValue, isDirectory: true)
+            .appendingPathComponent(MediaManager.MediaType.movie.version_3_value, isDirectory: true)
             .path
         
         if !checkFolderExistance(dir: mDir){
             try fm.createDirectory(at: documentsDirectory.appendingPathComponent("DownloadCache")
-                .appendingPathComponent(MediaManager.MediaType.movie.rawValue, isDirectory: true),
+                .appendingPathComponent(MediaManager.MediaType.movie.version_3_value, isDirectory: true),
                                        withIntermediateDirectories: true)
         }
         
         //Serise Folder
         let sDir = documentsDirectory.appendingPathComponent("DownloadCache")
-            .appendingPathComponent(MediaManager.MediaType.series.rawValue, isDirectory: true)
+            .appendingPathComponent(MediaManager.MediaType.series.version_3_value, isDirectory: true)
             .path
         
         if !checkFolderExistance(dir: sDir){
             try fm.createDirectory(at: documentsDirectory.appendingPathComponent("DownloadCache")
-                .appendingPathComponent(MediaManager.MediaType.series.rawValue, isDirectory: true),
+                .appendingPathComponent(MediaManager.MediaType.series.version_3_value, isDirectory: true),
                                        withIntermediateDirectories: true)
         }
     }
@@ -132,7 +132,8 @@ public class FilesManager {
             
             let allSerise = (try? self.getSeriseListFile()) ?? []
             for s in allSerise {
-                let group = MediaGroup(showId: s.id, seasonId: "", episodeId: "", seasonName: s.name, showName: "")
+                var group = MediaGroup(showId: s.id, seasonId: "", episodeId: "", seasonName: s.name, showName: "")
+                group.setData(newData: s.data)
                 let dm = DownloadedMedia(mediaId: s.id, name: s.name, group: group, type: .SeriseInfo)
                 result.append(dm)
             }
@@ -219,12 +220,12 @@ extension FilesManager {
                 
                 let list = try getSeasonsListFile(forSerise: id)
                 return list.map({ season in
-                    let group = MediaGroup(showId: info.id,
+                    var group = MediaGroup(showId: info.id,
                                            seasonId: season.id,
                                            episodeId: "",
                                            seasonName: season.name,
                                            showName: info.name)
-                    
+                    group.setData(newData: info.data)
                     return DownloadedMedia(mediaId: season.id, name: season.name, group: group, type: MediaRetrivalType.SeasonInfo)})
             }
             
@@ -336,13 +337,13 @@ extension FilesManager {
     //MARK: - Movies
     private func saveDMListContent(_ content: [String:DownloadedMedia]){
         if let data = try? JSONEncoder().encode(content){
-            let dmListFile = cache.appendingPathComponent(MediaManager.MediaType.movie.rawValue, isDirectory: true).appendingPathComponent("dmList.keeImportant")
+            let dmListFile = cache.appendingPathComponent(MediaManager.MediaType.movie.version_3_value, isDirectory: true).appendingPathComponent("dmList.keeImportant")
             try? data.write(to: dmListFile)
         }
     }
     
     private func getDMList() throws ->[String:DownloadedMedia]{
-        let dmListFile = cache.appendingPathComponent(MediaManager.MediaType.movie.rawValue, isDirectory: true).appendingPathComponent("dmList.keeImportant")
+        let dmListFile = cache.appendingPathComponent(MediaManager.MediaType.movie.version_3_value, isDirectory: true).appendingPathComponent("dmList.keeImportant")
         
         if checkFileExistance(filePath: dmListFile.path){
             let data = try Data(contentsOf: dmListFile)

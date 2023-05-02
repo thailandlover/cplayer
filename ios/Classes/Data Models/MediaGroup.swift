@@ -18,6 +18,9 @@ public struct MediaGroup : Codable{
     public var showName : String
     
     private var data : Data?
+    mutating func setData(newData: Data?){
+        self.data = newData
+    }
     
     
     var downloadPath : String {
@@ -51,13 +54,13 @@ public struct MediaGroup : Codable{
     
     public func register(){
         if let data = try? JSONEncoder().encode(self){
-            UserDefaults.standard.set(data, forKey: "\(episodeId)_\(MediaManager.MediaType.series.rawValue)_group")
+            UserDefaults.standard.set(data, forKey: "\(episodeId)_\(MediaManager.MediaType.series.version_3_value)_group")
         }
         
     }
     
     public static func get(usingEpisodeID eid: String)->MediaGroup?{
-        if let v = UserDefaults.standard.object(forKey: "\(eid)_\(MediaManager.MediaType.series.rawValue)_group") as? Data {
+        if let v = UserDefaults.standard.object(forKey: "\(eid)_\(MediaManager.MediaType.series.version_3_value)_group") as? Data {
             if let obj = try? JSONDecoder().decode(MediaGroup.self, from: v){
                 return obj
             }

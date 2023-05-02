@@ -7,7 +7,7 @@
 
 import Foundation
 
-enum MediaRetrivalType {
+enum MediaRetrivalType : Codable{
     case SeriseInfo
     case SeasonInfo
     case EpisodeInfo
@@ -76,6 +76,7 @@ public struct DownloadedMedia : Codable{
         case group
         case data
         case progress
+        case mediaRetrivalType
     }
     
     init(mediaId: String, mediaURL: URL? = nil, mediaType: MediaManager.MediaType = .movie, name: String, tempPath: URL?) {

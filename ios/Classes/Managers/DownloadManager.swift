@@ -314,7 +314,7 @@ extension DownloadManager: URLSessionDelegate, URLSessionDownloadDelegate {
             UserDefaults.standard.removeObject(forKey: "\(d.mediaId ?? "")")            
         }
         if let  pureID = pureID {
-            var group = MediaGroup.get(usingEpisodeID: pureID)
+            let group = MediaGroup.get(usingEpisodeID: pureID)
             obj.group = group
             UserDefaults.standard.removeObject(forKey: "\(d.mediaId ?? "")_group")
         }
