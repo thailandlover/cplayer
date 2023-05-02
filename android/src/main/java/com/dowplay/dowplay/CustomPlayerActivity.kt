@@ -1,10 +1,13 @@
 package com.dowplay.dowplay
 
 import android.annotation.SuppressLint
+import android.app.DownloadManager
+import android.app.NotificationManager
 import android.app.PictureInPictureParams
+import android.content.BroadcastReceiver
 import android.content.Context
+import android.content.Intent
 import android.graphics.drawable.ColorDrawable
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.VibrationEffect
@@ -16,6 +19,7 @@ import android.view.View
 import android.widget.RadioButton
 import android.widget.Toast
 import androidx.annotation.RequiresApi
+import androidx.core.app.NotificationCompat
 import androidx.core.view.*
 import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C
@@ -31,7 +35,6 @@ import androidx.media3.exoplayer.trackselection.MappingTrackSelector
 import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.DefaultTrackNameProvider
 import androidx.media3.ui.PlayerView
-import com.dowplay.dowplay.MovieMedia.Companion.fromJson
 import com.dowplay.dowplay.databinding.ActivityCustomPlayerBinding
 import com.dowplay.dowplay.databinding.SettingBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -649,5 +652,54 @@ class CustomPlayerActivity() : FlutterActivity() {
             exoPlayer.release()
         }
         player = null
+    }
+
+    private val downloadReceiver = object : BroadcastReceiver() {
+        @SuppressLint("Range")
+        override fun onReceive(context: Context?, intent: Intent?) {
+            val action = intent?.action
+
+            if (DownloadManager.ACTION_DOWNLOAD_COMPLETE == action) {
+                val downloadId = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, 0)
+
+                val query = DownloadManager.Query()
+                    .setFilterById(downloadId)
+
+                val downloadManager = getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
+                val cursor = downloadManager.query(query)
+
+                if (cursor.moveToFirst()) {
+                    val status = cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_STATUS))
+
+                    when (status) {
+                        DownloadManager.STATUS_SUCCESSFUL -> {
+                            // Download completed successfully, update notification
+                            val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                            notificationManager.cancel(downloadId.toInt())
+                            val notificationBuilder = NotificationCompat.Builder(this@CustomPlayerActivity, "1")
+                                .setContentTitle("Download complete")
+                                .setContentText("Downloaded Test")
+                                .setSmallIcon(R.drawable.play_icon)
+                            notificationManager.notify(downloadId.toInt(), notificationBuilder.build())
+                        }
+                        DownloadManager.STATUS_FAILED -> {
+                            // Download failed, update notification
+                            val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                            notificationManager.cancel(downloadId.toInt())
+                            val notificationBuilder = NotificationCompat.Builder(this@CustomPlayerActivity, "1")
+                                .setContentTitle("Download failed")
+                                .setContentText("Failed to download Test")
+                                .setSmallIcon(R.drawable.play_icon)
+                            notificationManager.notify(downloadId.toInt(), notificationBuilder.build())
+                        }
+                    }
+                }
+            } else if (DownloadManager.ACTION_NOTIFICATION_CLICKED == action) {
+                // User clicked on the notification, open Downloads app
+                val downloadManager = getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
+                val intent = Intent(DownloadManager.ACTION_VIEW_DOWNLOADS)
+                startActivity(intent)
+            }
+        }
     }
 }

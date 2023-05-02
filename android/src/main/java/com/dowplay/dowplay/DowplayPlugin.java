@@ -60,7 +60,19 @@ public class DowplayPlugin implements FlutterPlugin, MethodCallHandler {
       result.success(true);
     } else if(call.method.equals("config_downloader")){
       result.success(true);
-    } else {
+    } else if(call.method.equals("get_downloads_list")){
+      result.success(true);
+    }else if(call.method.equals("start_download_movie")){
+      result.success(true);
+    }else if(call.method.equals("start_download_episode")){
+      result.success(true);
+    }else if(call.method.equals("pause_download")){
+      result.success(true);
+    }else if(call.method.equals("resume_download")){
+      result.success(true);
+    }else if(call.method.equals("cancel_download")){
+      result.success(true);
+    }else {
       result.notImplemented();
     }
   }
