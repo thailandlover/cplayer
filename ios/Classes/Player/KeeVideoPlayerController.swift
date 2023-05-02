@@ -194,10 +194,20 @@ public class KeeVideoPlayerController: UIViewController {
     func validateDownloadButton() throws{
         lb_downloadPercentage.isHidden = true
         if let id = media?.keeId, let type = media?.type{
-            if  let _ = try DownloadedMedia.getByID(id: id, ofType: type) {
+            var isDownloaded = false
+            if type == .movie {
+                isDownloaded = try DownloadedMedia.getMovieByID(id: id) != nil
+                localPath = try? FilesManager.shared.getFileForMovie(mediaID: id)
+            }else{
+                if let g = self.media?.mediaGroup {
+                    isDownloaded = (DownloadedMedia.getEpisodeByID(id: g.episodeId, season: g.seasonId, series: g.showId) != nil)
+                    localPath = try? FilesManager.shared.getFileForEpisode(id: g.episodeId, season: g.seasonId, series: g.showId)
+                }
+            }
+                        
+            if  isDownloaded {
                 btn_download.tintColor = .systemGreen
                 btn_download.tag = 2
-                localPath = try? FilesManager.shared.getFileForMedia(mediaID: id, type: type)                
             }else if DownloadManager.shared.isDownloadingMediaWithID(id, ofType: type) {
                 btn_download.tintColor = .systemOrange
                 if DownloadManager.shared.isDownloadingMediaWithIDSuspended(id, ofType: type){

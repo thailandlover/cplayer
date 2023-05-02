@@ -148,8 +148,12 @@ public class DownloadManager: NSObject/*, ObservableObject */{
     }
     
  
-    public func mediaIsDownloaded(_ id : String, ofType: MediaManager.MediaType)->Bool {
-        return (try? FilesManager.shared.getDownloadeMediaById(id, type: ofType) != nil) ?? false
+    public func movieIsDownloaded(_ id : String)->Bool {
+        return (try? FilesManager.shared.getDownloadeMovieById(id) != nil) ?? false
+    }
+    
+    public func episodeIsDownloaded(_ id : String, season: String, serise: String)->Bool {
+        return (FilesManager.shared.getDownloadedEpisode(id: id, season: season, series: serise) != nil)
     }
     //MARK: - Hybrid Functions
     ///Get all media (downloading, suspended, and downloaded)
@@ -157,22 +161,108 @@ public class DownloadManager: NSObject/*, ObservableObject */{
         guard configed else {throw DonwloadManagerError.managerIsNotConfiged}
         var allMedia : [DownloadedMedia] = []
         
-        allMedia.append(contentsOf: tasks.map({ task in
+        var allTasks =  tasks.map({ task in
             if let t = task as? URLSessionDownloadTask {
                 return extractMedia(usingTask: t)
             }
             return nil
-        }).compactMap({$0}) )
-        allMedia = allMedia.filter({$0.object != nil})
+        }).compactMap({$0})
+        allTasks = allTasks.filter({$0.object != nil || $0.status != .completed})
+        let movieTasks = allTasks.filter({$0.mediaType == .movie})
+        let seriseTasks = allTasks.filter({$0.mediaType == .series})
+        let convrtedSeriseTasks = groupDownloadinTasksForSerise(tasksList: seriseTasks)
         
+        allMedia.append(contentsOf: movieTasks)
+        allMedia.append(contentsOf: convrtedSeriseTasks)
         allMedia.append(contentsOf: FilesManager.shared.getAllDownloadedMedia())
         
         return allMedia
     }
+    public func getAllMedia(ForSerise seriesID: String) throws -> [DownloadedMedia]{
+        guard configed else {throw DonwloadManagerError.managerIsNotConfiged}
+        var allMedia : [DownloadedMedia] = []
+        allMedia.append(contentsOf: getDownloadingSeasons(forSerise: seriesID))
+        allMedia.append(contentsOf:FilesManager.shared.getSeasons(forSeriseID: seriesID))
+        return allMedia
+    }
+    public func getAllEpisodes(forSeason sID: String, atSeriesID id: String)throws -> [DownloadedMedia] {
+        guard configed else {throw DonwloadManagerError.managerIsNotConfiged}
+        var allMedia : [DownloadedMedia] = []
+        allMedia.append(contentsOf: getDownloadingEpisodes(inSeason: sID, forSerise: id))
+        allMedia.append(contentsOf:FilesManager.shared.getEpisodes(seasonID: sID, atSeriseId: id))
+        return allMedia
+    }
+    
     
     public func getAllMediaDecoded()-> [[String:Any]] {
         return (try? self.getAllMedia().getEncodedDictionary()) ?? []
     }
+    
+    public func getAllSeasonsDecoded(forSeries id: String)-> [[String:Any]] {
+        return (try? self.getAllMedia(ForSerise: id).getEncodedDictionary()) ?? []
+    }
+    
+    public func getAllEpisodesDecoded(forSeason sID: String, atSeriesID id: String)-> [[String:Any]] {
+        return (try? self.getAllEpisodes(forSeason: sID, atSeriesID: id).getEncodedDictionary()) ?? []
+    }
+    
+    
+    func getDownloadingEpisodes(inSeason id: String, forSerise sid: String)->[DownloadedMedia] {
+        var serise = tasks.filter({task in
+            let pureType = task.mediaId?.components(separatedBy: "_").last ?? ""
+            return pureType != "movies"
+        }).map({task in
+            if let t = task as? URLSessionDownloadTask {
+                return extractMedia(usingTask: t)
+            }
+            return nil
+        }).compactMap({$0})
+        serise = serise.filter({$0.object != nil || $0.status != .completed})
+        let episodes = serise.filter({ item in
+            return item.group?.seasonId == id && item.group?.showId == sid
+        })
+        
+        return episodes
+    }
+    
+    func getDownloadingSeasons(forSerise id: String)->[DownloadedMedia]{
+        var serise = tasks.filter({task in
+            let pureType = task.mediaId?.components(separatedBy: "_").last ?? ""
+            return pureType != "movies"
+        }).map({task in
+            if let t = task as? URLSessionDownloadTask {
+                return extractMedia(usingTask: t)
+            }
+            return nil
+        }).compactMap({$0})
+        serise = serise.filter({$0.object != nil || $0.status != .completed})
+        
+        var seasons : [String: DownloadedMedia] = [:]
+        for e in serise { // the content here is eposiods
+            if let g = e.group{
+                let dm = DownloadedMedia(mediaId: g.seasonId, name: g.seasonName, group: g, type: .SeasonInfo)
+                if seasons[g.seasonId] == nil {
+                    seasons[g.seasonId] = dm
+                }
+            }
+        }
+        
+        return Array(seasons.values)
+    }
+    
+    func groupDownloadinTasksForSerise(tasksList : [DownloadedMedia])->[DownloadedMedia]{
+        var serises : [String: DownloadedMedia] = [:]
+        for t in tasksList {
+            if let g = t.group{
+                let dm = DownloadedMedia(mediaId: g.showId, name: g.showName, group: g, type: .SeriseInfo)
+                if serises[g.showId] == nil {
+                    serises[g.showId] = dm
+                }
+            }
+        }
+        return Array(serises.values)
+    }
+   
     
     
     func extractMedia(usingTask task : URLSessionDownloadTask)->DownloadedMedia{
@@ -183,6 +273,7 @@ public class DownloadManager: NSObject/*, ObservableObject */{
         
         if pureType != "movies"{
             obj.mediaType = .series
+            obj.mediaRetrivalType = .EpisodeInfo
         }
         
         if let data = UserDefaults.standard.object(forKey: "\(task.mediaId ?? "")") as? Data,
@@ -214,6 +305,7 @@ extension DownloadManager: URLSessionDelegate, URLSessionDownloadDelegate {
         
         if pureType != "movies"{
             obj.mediaType = .series
+            obj.mediaRetrivalType = .EpisodeInfo
         }
         
         if let data = UserDefaults.standard.object(forKey: "\(d.mediaId ?? "")") as? Data,

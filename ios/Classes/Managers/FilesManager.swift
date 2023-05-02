@@ -65,115 +65,84 @@ public class FilesManager {
     /// Should be called after the download is finished
     /// This function is called by the DownloadedMedia Object
     func registerDownloadedMedia(_ downloadedMedia: DownloadedMedia) throws{
-        
-        var downloadPath = downloadedMedia.mediaDownloadName
-        if let g = downloadedMedia.group {
-            let tvShowFolder = String(format: "%@/%@",downloadedMedia.mediaType.version_3_value, g.showId)
-            if !checkFolderExistance(dir: tvShowFolder) {
-                try fm.createDirectory(at: documentsDirectory.appendingPathComponent("DownloadCache")
-                    .appendingPathComponent(tvShowFolder, isDirectory: true),
-                                           withIntermediateDirectories: true)
+        if downloadedMedia.mediaType == .movie {
+            self.saveMovieInfo(downloadedMedia)
+        }else{
+            if let group = downloadedMedia.group {
+                var serise = Info(name: group.showName,
+                                        id: group.showId)
+                serise.info = group.info
+                self.addSeries(serise)
+                self.checkFolders(forSerise: serise, andSeasonID: group.seasonId)
+                var season = Info(name: group.seasonName, id: group.seasonId)
+                season.info = group.info
+                self.saveSeasonInfo(season, forSerise: serise.id)
+                self.moveEpisodeFile(downloadedMedia)
             }
-            
-            let seasonFolder = String(format: "%@/%@",tvShowFolder, g.seasonId)
-            
-            if !checkFolderExistance(dir: seasonFolder) {
-                try fm.createDirectory(at: documentsDirectory.appendingPathComponent("DownloadCache")
-                    .appendingPathComponent(seasonFolder, isDirectory: true),
-                                           withIntermediateDirectories: true)
-            }
-            
-            downloadPath = String(format: "%@/%@", seasonFolder, downloadedMedia.mediaId)
         }
-        
-        
-        try self.moveDownloadedFile(atPath: downloadedMedia.tempPath,
-                                toCacheUsingName: downloadPath,
-                                        Extension: "mp4")
-        var dmListContent = try getDMList(forType: downloadedMedia.mediaType)
-            dmListContent[downloadedMedia.mediaId] = downloadedMedia
-        saveDMListContent(dmListContent, forType: downloadedMedia.mediaType)
     }
     
-    public func getDownloadeMediaById(_ id : String, type: MediaManager.MediaType)throws -> DownloadedMedia? {
-        return try Array(self.getDMList(forType: type).values).first(where: {$0.mediaId == id})
+    public func getDownloadeMovieById(_ id : String)throws -> DownloadedMedia? {
+        return try Array(self.getDMList().values).first(where: {$0.mediaId == id})
     }
     
-    public func deleteMediaBy(id : String, type: MediaManager.MediaType)throws{
-        var dmListContent = try self.getDMList(forType: type)
+    public func deleteMovieBy(id : String)throws{
+        var dmListContent = try self.getDMList()
         if let deletedItem = dmListContent.removeValue(forKey: id){
-            try? fm.removeItem(at: deletedItem.tempPath)
+            try? fm.removeItem(at: deletedItem.tempPath!)
             try? fm.removeItem(at: deletedItem.path)
-            saveDMListContent(dmListContent, forType: type)
+            saveDMListContent(dmListContent)
+        }
+        
+    }
+    
+    public func deleteEpisodeById(_ id: String, season: String, series: String){
+        if let ep = getDownloadedEpisode(id: id, season: season, series: series) {
+            deleteEpisode(ep)
         }
     }
     
-    public func getFileForMedia(mediaID: String,  type: MediaManager.MediaType)throws->URL?{
-        return try DownloadedMedia.getByID(id: mediaID, ofType: type)?.path
+    public func deleteEpisode(_ e: DownloadedMedia) {
+        // remove the episode file, and info file
+        try? fm.removeItem(at: e.tempPath!)
+        try? fm.removeItem(at: e.path)
+        if let info = e.episodeInfoPathURL{
+            try? fm.removeItem(at: info)
+        }
     }
     
-    public func getDownloadList(type: MediaManager.MediaType)throws ->[DownloadedMedia]{
-        return try Array(self.getDMList(forType: type).values)
+    
+    public func getDownloadedEpisode(id: String, season: String, series: String)->DownloadedMedia?{
+        return getEpisodes(seasonID: season, atSeriseId: series).first(where: {$0.group?.episodeId == id})
+    }
+                
+    public func getFileForMovie(mediaID: String)throws->URL?{
+        return try DownloadedMedia.getMovieByID(id: mediaID)?.path
     }
     
-    typealias SeasonIndex = [String: [DownloadedMedia]]
+    public func getFileForEpisode(id: String, season: String, series: String)throws->URL?{
+        return  DownloadedMedia.getEpisodeByID(id: id, season: season, series: series)?.path
+    }
+    
     public func getAllDownloadedMedia()->[DownloadedMedia]{
         do{
-            let movies : [DownloadedMedia] = try Array(self.getDMList(forType: .movie).values)
-            let series : [DownloadedMedia] = try Array(self.getDMList(forType: .series).values)
-            var seasonIndexing : SeasonIndex = [:]
-            
-            for item in series {
-                if let g = item.group {
-                    var sList : [DownloadedMedia] = seasonIndexing[g.seasonId] ?? []
-                    sList.append(item)
-                    seasonIndexing[g.seasonId] = sList
-                }
-            }
-            
-            var mediaGroupIndexing : [String: DownloadedMedia] = [:]
-            
-            for (_, list) in seasonIndexing {
-                if let item = list.first, let g = item.group {
-                    var media = mediaGroupIndexing[g.showId] ?? DownloadedMedia(mediaId: item.mediaId, name: item.name, tempPath: item.tempPath)
-                    media.object = item.object
-                    media.mediaType = .series
-                    media.group = g
-                    media.seasons.append(SeasonGroup(mediaList: list))
-                    mediaGroupIndexing[g.showId] = media
-                }
-            }
+            let movies : [DownloadedMedia] = try Array(self.getDMList().values)
             var result : [DownloadedMedia] = []
             result.append(contentsOf: movies)
-            result.append(contentsOf: mediaGroupIndexing.values)
+            
+            let allSerise = (try? self.getSeriseListFile()) ?? []
+            for s in allSerise {
+                let group = MediaGroup(showId: s.id, seasonId: "", episodeId: "", seasonName: s.name, showName: "")
+                let dm = DownloadedMedia(mediaId: s.id, name: s.name, group: group, type: .SeriseInfo)
+                result.append(dm)
+            }
+
             return result
-            
-            
+                        
         }catch{
             
         }
-        
-        
         return []
-    }
-    
-    private func saveDMListContent(_ content: [String:DownloadedMedia], forType: MediaManager.MediaType){
-        if let data = try? JSONEncoder().encode(content){
-            let dmListFile = cache.appendingPathComponent(forType.rawValue, isDirectory: true).appendingPathComponent("dmList.keeImportant")
-            try? data.write(to: dmListFile)
-        }
-    }
-    
-    private func getDMList(forType: MediaManager.MediaType) throws ->[String:DownloadedMedia]{
-        let dmListFile = cache.appendingPathComponent(forType.rawValue, isDirectory: true).appendingPathComponent("dmList.keeImportant")
-        
-        if checkFileExistance(filePath: dmListFile.path){
-            let data = try Data(contentsOf: dmListFile)
-                let dmListContent = try JSONDecoder().decode([String:DownloadedMedia].self, from: data)
-                    return dmListContent
-        }
-        
-        return [:]
     }
     
     @discardableResult
@@ -204,4 +173,240 @@ public class FilesManager {
     }
     
     
+}
+
+//MARK: - Movie Save/Load Functions
+extension FilesManager {
+    private func saveMovieInfo(_ media : DownloadedMedia){
+        do{
+        var downloadPath = media.mediaDownloadName
+        try self.moveDownloadedFile(atPath: media.tempPath!,
+                                toCacheUsingName: downloadPath,
+                                        Extension: "mp4")
+        
+        var dmListContent = try getDMList()
+        dmListContent[media.mediaId] = media
+        saveDMListContent(dmListContent)
+        
+            try self.moveDownloadedFile(atPath: media.tempPath!,
+                                        toCacheUsingName: downloadPath,
+                                        Extension: "mp4")
+        }catch{
+            print(error)
+        }
+    }
+}
+
+//MARK: - Serise Save/Load Functions
+extension FilesManager {
+    // GET Serise Info
+    func getSeriseInfo(usingID id: String)->Info? {
+        do{
+            let list = try getSeriseListFile().filter({$0.id == id})
+            if list.count > 0 {
+                return list.first
+            }
+        }catch{
+            print(error)
+        }
+        return nil
+    }
+    
+    // GET Seasons for Serise
+    public func getSeasons(forSeriseID id: String)->[DownloadedMedia] {
+        do{
+            if let info = getSeriseInfo(usingID: id){
+                
+                let list = try getSeasonsListFile(forSerise: id)
+                return list.map({ season in
+                    let group = MediaGroup(showId: info.id,
+                                           seasonId: season.id,
+                                           episodeId: "",
+                                           seasonName: season.name,
+                                           showName: info.name)
+                    
+                    return DownloadedMedia(mediaId: season.id, name: season.name, group: group, type: MediaRetrivalType.SeasonInfo)})
+            }
+            
+            return []
+        }catch{
+            return []
+        }
+    }
+        
+    // GET Episodes for Season
+    public func getEpisodes(seasonID id: String, atSeriseId: String)->[DownloadedMedia] {
+        do{
+            let path = "\(MediaManager.MediaType.series.version_3_value)/\(atSeriseId)/\(id)/"
+            let fullPath = cache.appendingPathComponent(path)
+            let items = try fm.contentsOfDirectory(atPath: fullPath.path)
+            let filtteredItmes = items.filter({$0.contains(".keeinfo")})
+            var result : [DownloadedMedia] = []
+            for file in filtteredItmes {
+                let filePath = fullPath.appendingPathComponent("\(file)")
+                if let data = try? Data(contentsOf: filePath) {
+                    if let decodingMedia = try? JSONDecoder().decode(DownloadedMedia.self, from: data) {
+                        result.append(decodingMedia)
+                    }
+                }
+            }
+            return result
+        }catch{
+            print(error)
+        }
+        
+        return []
+    }
+    
+    //MARK: - Saving an episode
+    //STEP ONE <Add the series info to series.keeinfo file>
+    private func addSeries(_ info : Info){
+        var list = (try? getSeriseListFile()) ?? []
+        list.append(info)
+        saveSeriseListFile(list)
+    }
+    
+    //STEP TWO <Create the required folders>
+    private func checkFolders(forSerise: Info, andSeasonID: String){
+        do{
+//        if let g = downloadedMedia.group {
+            let tvShowFolder = String(format: "%@/%@",MediaManager.MediaType.series.version_3_value, forSerise.id)
+            if !checkFolderExistance(dir: tvShowFolder) {
+                try fm.createDirectory(at: documentsDirectory.appendingPathComponent("DownloadCache")
+                    .appendingPathComponent(tvShowFolder, isDirectory: true),
+                                           withIntermediateDirectories: true)
+            }
+            
+            let seasonFolder = String(format: "%@/%@",tvShowFolder, andSeasonID)
+            
+            if !checkFolderExistance(dir: seasonFolder) {
+                try fm.createDirectory(at: documentsDirectory.appendingPathComponent("DownloadCache")
+                    .appendingPathComponent(seasonFolder, isDirectory: true),
+                                           withIntermediateDirectories: true)
+            }
+            
+        } catch {
+            
+        }
+        
+    }
+    
+    //STEP THREE <Save the season info in the {seriseID}/seasons.keeinfo file>
+    private func saveSeasonInfo(_ season: Info, forSerise s: String){
+        var list = (try? getSeasonsListFile(forSerise: s)) ?? []
+        list.append(season)
+        saveSeasonsListFile(list, atSerise: s)
+    }
+    
+    //STEP FOUR <Move the downloaded file to the {seriseID}/{seasonID}/{episodeID}.mp4 file>
+    private func moveEpisodeFile(_ media: DownloadedMedia){
+        guard let g = media.group else {return}
+        let downloadPath = "\(MediaManager.MediaType.series.version_3_value)/\(g.showId)/\(g.seasonId)/\(g.episodeId)"
+        
+        do{
+            try self.moveDownloadedFile(atPath: media.tempPath!,
+                                        toCacheUsingName: downloadPath,
+                                        Extension: "mp4")
+            self.saveEpisodeInfo(media)
+        }catch{
+            print(error)
+        }
+        
+        
+    }
+    
+    //STEP FIVE <Save the episode info in {seriseID}/{seasonID}/{episodeID}.keeinfo file>
+    private func saveEpisodeInfo(_ media: DownloadedMedia){
+        guard let g = media.group else {return}
+        let downloadPath = cache.appendingPathComponent(MediaManager.MediaType.series.version_3_value, isDirectory: true)
+            .appendingPathComponent(g.showId)
+            .appendingPathComponent(g.seasonId)
+            .appendingPathComponent(g.episodeId)
+            .appendingPathExtension("keeinfo")
+        
+        if let data = try? JSONEncoder().encode(media){
+            try? data.write(to: downloadPath)
+        }
+    }
+}
+
+
+//MARK: - Lists Store/Read Functions
+extension FilesManager {
+    //MARK: - Movies
+    private func saveDMListContent(_ content: [String:DownloadedMedia]){
+        if let data = try? JSONEncoder().encode(content){
+            let dmListFile = cache.appendingPathComponent(MediaManager.MediaType.movie.rawValue, isDirectory: true).appendingPathComponent("dmList.keeImportant")
+            try? data.write(to: dmListFile)
+        }
+    }
+    
+    private func getDMList() throws ->[String:DownloadedMedia]{
+        let dmListFile = cache.appendingPathComponent(MediaManager.MediaType.movie.rawValue, isDirectory: true).appendingPathComponent("dmList.keeImportant")
+        
+        if checkFileExistance(filePath: dmListFile.path){
+            let data = try Data(contentsOf: dmListFile)
+                let dmListContent = try JSONDecoder().decode([String:DownloadedMedia].self, from: data)
+                    return dmListContent
+        }
+        
+        return [:]
+    }
+    
+    //MARK: - Serise
+    private func getSeriseListFile()throws->[Info]{
+        let dmListFile = cache.appendingPathComponent(MediaManager.MediaType.series.version_3_value, isDirectory: true).appendingPathComponent("serise.keeinfo")
+        if checkFileExistance(filePath: dmListFile.path){
+            let data = try Data(contentsOf: dmListFile)
+                let dmListContent = try JSONDecoder().decode([Info].self, from: data)
+                    return dmListContent
+        }
+        return []
+    }
+    private func saveSeriseListFile(_ list: [Info]){
+        if let data = try? JSONEncoder().encode(list){
+            let dmListFile = cache.appendingPathComponent(MediaManager.MediaType.series.version_3_value, isDirectory: true).appendingPathComponent("serise.keeinfo")
+            try? data.write(to: dmListFile)
+        }
+    }
+    
+    private func getSeasonsListFile(forSerise s: String)throws->[Info]{
+        let dmListFile = cache.appendingPathComponent(MediaManager.MediaType.series.version_3_value, isDirectory: true).appendingPathComponent(s).appendingPathComponent("seasons.keeinfo")
+        if checkFileExistance(filePath: dmListFile.path){
+            let data = try Data(contentsOf: dmListFile)
+                let dmListContent = try JSONDecoder().decode([Info].self, from: data)
+                    return dmListContent
+        }
+        return []
+        
+    }
+    
+    private func saveSeasonsListFile(_ list: [Info], atSerise s: String){
+        if let data = try? JSONEncoder().encode(list){
+            let dmListFile = cache.appendingPathComponent(MediaManager.MediaType.series.version_3_value, isDirectory: true).appendingPathComponent(s).appendingPathComponent("seasons.keeinfo")
+            try? data.write(to: dmListFile)
+        }
+    }
+}
+
+
+struct Info : Codable {
+    var name : String
+    var id : String
+    var data: Data?
+    
+    var info : [String:Any]? {
+        set{
+            if newValue != nil{
+                self.data = try? JSONSerialization.data(withJSONObject: newValue!, options: .prettyPrinted)
+            }
+        }
+        
+        get{
+            if let data = self.data{
+                return try? JSONSerialization.jsonObject(with: data, options: .fragmentsAllowed) as? [String:Any]
+            }
+            return nil
+        }
+    }
 }

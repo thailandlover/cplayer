@@ -13,12 +13,23 @@ public struct MediaGroup : Codable{
     public var showId : String
     public var seasonId : String
     public var episodeId : String
+    
+    public var seasonName : String
+    public var showName : String
+    
     private var data : Data?
     
-    init(showId: String, seasonId: String, episodeId: String, data: [String:Any]? = nil) {
+    
+    var downloadPath : String {
+        return "\(MediaManager.MediaType.series.version_3_value)/\(showId)/\(seasonId)/"
+    }
+    
+    init(showId: String, seasonId: String, episodeId: String,seasonName: String, showName: String,  data: [String:Any]? = nil) {
         self.showId = showId
         self.seasonId = seasonId
         self.episodeId = episodeId
+        self.seasonName = seasonName
+        self.showName = showName
         self.info = data
     }
     
@@ -54,10 +65,6 @@ public struct MediaGroup : Codable{
         
         return nil
     }
-    
-//    var collectionID : String
-//    var groupID : String
-//    var itemID : String
     
     func getObjectAsJSONDictionary() -> [String : Any]? {
            if let data = try? JSONEncoder().encode(self) {

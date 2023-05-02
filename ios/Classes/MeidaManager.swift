@@ -59,26 +59,24 @@ public class MediaManager {
     
     //MARK: -Downloaded Media Functions. (Fetching)
         
-    public func getDownloaded(ForMediaIdentifier identifier: String, type: MediaType)->DownloadedMedia?{
-        return try? FilesManager.shared.getDownloadeMediaById(identifier,type: type)
-    }
+//    public func getDownloaded(ForMediaIdentifier identifier: String, type: MediaType)->DownloadedMedia?{
+//        return try? FilesManager.shared.getDownloadeMediaById(identifier,type: type)
+//    }
+//    
+//    public func getMetaData(ForMediaIdentifier identifier: String, type: MediaType)->[String:Any]?{
+//        if let media = getDownloaded(ForMediaIdentifier: identifier, type: type) {
+//            return media.object
+//        }
+//        
+//        if let data = UserDefaults.standard.object(forKey: "\(identifier)_\(type.rawValue)") as? Data {
+//            return try? JSONSerialization.jsonObject(with: data, options: .fragmentsAllowed) as? [String:Any]
+//        }
+//        
+//        return nil
+//    }
     
-    public func getMetaData(ForMediaIdentifier identifier: String, type: MediaType)->[String:Any]?{
-        if let media = getDownloaded(ForMediaIdentifier: identifier, type: type) {
-            return media.object
-        }
-        
-        if let data = UserDefaults.standard.object(forKey: "\(identifier)_\(type.rawValue)") as? Data {
-            return try? JSONSerialization.jsonObject(with: data, options: .fragmentsAllowed) as? [String:Any]
-        }
-        
-        return nil
-    }
     
-    
-    public func getDownloadedList(type: MediaType)->[DownloadedMedia]{
-        return (try? FilesManager.shared.getDownloadList(type: type)) ?? []
-    }
+   
     
     public func getDownloadingList(type: MediaType)->[[String:Any]]{
         let results = DownloadManager.shared.getAllDownloadingTasks(forType: type).map({ object in
