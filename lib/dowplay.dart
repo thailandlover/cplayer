@@ -12,12 +12,19 @@ class Dowplay {
     return DowplayPlatform.instance.playMovie(media);
   }
 
-  Future<bool?> config() {
-    return DowplayPlatform.instance.config();
+  Future<bool?> config(Map<String,dynamic> data) {
+    return DowplayPlatform.instance.config(data);
   }
 
   Future<dynamic> getDownloadsList() {
     return DowplayPlatform.instance.getDownloadsList();
+  }
+
+  Future<dynamic> getTvShowSeasonsDownloadList(Map<String,dynamic> data) {
+    return DowplayPlatform.instance.getTvShowSeasonsDownloadList(data);
+  }
+  Future<dynamic> getSeasonEpisodesDownloadList(Map<String,dynamic> data) {
+    return DowplayPlatform.instance.getSeasonEpisodesDownloadList(data);
   }
 
   Future<dynamic> startDownloadMovie(dynamic item) {

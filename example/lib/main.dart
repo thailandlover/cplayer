@@ -152,7 +152,9 @@ class _MyAppState extends State<MyApp> {
   config() async {
     bool result;
     try {
-      result = await _dowplayPlugin.config() ?? false;
+      result = await _dowplayPlugin.config(
+              {"user_id": "245394", "profile_id": "562674", "lang": "ar"}) ??
+          false;
       if (kDebugMode) {
         print("result : $result");
       }
@@ -197,7 +199,7 @@ class _MyAppState extends State<MyApp> {
         "trailer_url": null,
         "media_url":
             /*"https://thekee.gcdn.co/video/m-159n/English/Animation&Family/Tom.and.Jerry.1965/01.mp4?md5=eCp0VmIS_doipZ6lGVxwVg&expires=1678550892"*/
-        "https://thekee.gcdn.co/video/m-159n/English/Animation&Family/Klaus.2019.1080pAr.mp4",
+            "https://thekee.gcdn.co/video/m-159n/English/Animation&Family/Klaus.2019.1080pAr.mp4",
         "created_at": "2020-07-01 13:27:14",
         "release_date": "2020-07-01 00:00:00",
         "watching": {"current_time": "3000", "duration": "1380"}
@@ -347,8 +349,36 @@ class _MyAppState extends State<MyApp> {
           _downloadsList = downloads;
         });
       }
-      // printWrapped(
-      //     "Downloads list [${downloads.length}] : ${jsonEncode(downloads[1]['object']['info'])}");
+      printWrapped(
+          "Downloads list [${downloads.length}] : ${jsonEncode(downloads)}");
+    }
+  }
+
+  Future<dynamic> getTvShowSeasonsDownloadList() async {
+    dynamic result = await invokeGetTvShowSeasonsDownloadList();
+    if (kDebugMode) {
+      List<dynamic> downloads = List.from(result as Iterable);
+      if (mounted) {
+        setState(() {
+          _downloadsList = downloads;
+        });
+      }
+      printWrapped(
+          "TvShow Seasons Downloads list [${downloads.length}] : ${jsonEncode(downloads)}");
+    }
+  }
+
+  Future<dynamic> getSeasonEpisodesDownloadList() async {
+    dynamic result = await invokeGetSeasonEpisodesDownloadList();
+    if (kDebugMode) {
+      List<dynamic> downloads = List.from(result as Iterable);
+      if (mounted) {
+        setState(() {
+          _downloadsList = downloads;
+        });
+      }
+      printWrapped(
+          "TvShow Seasons Downloads list [${downloads.length}] : ${jsonEncode(downloads)}");
     }
   }
 
@@ -356,6 +386,7 @@ class _MyAppState extends State<MyApp> {
     String type = "movie";
 
     dynamic result = await invokeStartDownloadMovie(type, downloadMovie);
+    print("result is $result");
     if (kDebugMode) {
       List<dynamic> downloads = List.from(result as Iterable);
       if (mounted) {
@@ -459,8 +490,8 @@ class _MyAppState extends State<MyApp> {
       setState(() {
         _downloadsList = downloads;
       });
-      // printWrapped(
-      //     "Downloads list [${downloads.length}] : ${jsonEncode(downloads)}");
+      printWrapped(
+          "Downloads list [${downloads.length}] : ${jsonEncode(downloads)}");
     }
   }
 
@@ -537,6 +568,31 @@ class _MyAppState extends State<MyApp> {
     dynamic result;
     try {
       result = await _dowplayPlugin.getDownloadsList();
+    } on PlatformException {
+      result = false;
+    }
+    return result;
+  }
+
+  Future<dynamic> invokeGetTvShowSeasonsDownloadList() async {
+    dynamic result;
+    try {
+      result = await _dowplayPlugin.getTvShowSeasonsDownloadList({
+        "tvshow_id": "1532" // should be string
+      });
+    } on PlatformException {
+      result = false;
+    }
+    return result;
+  }
+
+  Future<dynamic> invokeGetSeasonEpisodesDownloadList() async {
+    dynamic result;
+    try {
+      result = await _dowplayPlugin.getSeasonEpisodesDownloadList({
+        "tvshow_id": "1532", // should be string,
+        "season_id": "3236"
+      });
     } on PlatformException {
       result = false;
     }
@@ -653,13 +709,21 @@ class _MyAppState extends State<MyApp> {
                       shrinkWrap: true,
                       itemCount: _downloadsList.length,
                       itemBuilder: (context, index) {
-                        return Text(
-                          ''
-                          "[${index + 1}]-> (${_downloadsList[index]['mediaType']}) : ${_downloadsList[index]['mediaType'] == "movie" ? _downloadsList[index]['object']['title'] : _downloadsList[index]['object']['info']['title']} - ${_downloadsList[index]['status']} - ${_downloadsList[index]['progress']}",
-                        );
+                        return Text(''
+                            // "[${index + 1}]-> (${_downloadsList[index]['mediaType']}) : ${_downloadsList[index]['mediaType'] == "movie" ? _downloadsList[index]['object']['title'] : _downloadsList[index]['object']['info']['title']} - ${_downloadsList[index]['status']} - ${_downloadsList[index]['progress']}",
+                            );
                       },
                     ),
                   ),
+                ),
+                ElevatedButton(
+                  onPressed: getTvShowSeasonsDownloadList,
+                  child: const Text("Print TvShow Seasons Downloads List"),
+                ),
+
+                ElevatedButton(
+                  onPressed: getSeasonEpisodesDownloadList,
+                  child: const Text("Print Season Episodes Downloads List"),
                 ),
                 ElevatedButton(
                   onPressed: startDownloadMovie,

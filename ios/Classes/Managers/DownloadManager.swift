@@ -52,12 +52,12 @@ public class DownloadManager: NSObject/*, ObservableObject */{
         let task = urlSession.downloadTask(with: url)
 
         task.taskDescription = mediaName
-        task.mediaId = "\(id)_\(type.rawValue)_\(userSignature)" //mediaID format (3255_movie) or (36970_series)
+        task.mediaId = "\(id)_\(type.version_3_value)_\(userSignature)" //mediaID format (3255_movie) or (36970_series)
         task.resume()
         tasks.append(task)
         
         if let object = object, let data = try? JSONSerialization.data(withJSONObject: object, options: .prettyPrinted){
-            UserDefaults.standard.set(data, forKey: "\(id)_\(type.rawValue)")
+            UserDefaults.standard.set(data, forKey: "\(id)_\(type.version_3_value)_\(userSignature)")
         }
         mediaGroup?.register()
         
@@ -282,7 +282,7 @@ public class DownloadManager: NSObject/*, ObservableObject */{
         // 1 : type
         // 2 : user signature
         let  pureID = task.mediaId?.components(separatedBy: "_").first
-        let pureType = task.mediaId?.components(separatedBy: "_")[2]
+        let pureType = task.mediaId?.components(separatedBy: "_")[1]
         
         var obj = DownloadedMedia(mediaId: pureID ?? "", name: task.taskDescription ?? "Untitled Media", status: task.state, progress: task.progress.fractionCompleted)
         

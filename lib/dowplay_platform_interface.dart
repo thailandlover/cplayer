@@ -33,12 +33,20 @@ abstract class DowplayPlatform extends PlatformInterface {
     throw UnimplementedError('playMovie() has not been implemented.');
   }
 
-  Future<bool?> config() {
+  Future<bool?> config(Map<String,dynamic> data) {
     throw UnimplementedError('config() has not been implemented.');
   }
 
   Future<dynamic> getDownloadsList() {
     throw UnimplementedError('get_downloads_list() has not been implemented.');
+  }
+
+  Future<dynamic> getTvShowSeasonsDownloadList(Map<String,dynamic> data) {
+    throw UnimplementedError('tvshow_seasons_downloads_list() has not been implemented.');
+  }
+
+  Future<dynamic> getSeasonEpisodesDownloadList(Map<String,dynamic> data) {
+    throw UnimplementedError('season_episodes_downloads_list() has not been implemented.');
   }
 
   Future<dynamic> startDownloadMovie(dynamic item) {

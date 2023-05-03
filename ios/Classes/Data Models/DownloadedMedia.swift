@@ -7,11 +7,11 @@
 
 import Foundation
 
-enum MediaRetrivalType : Codable{
-    case SeriseInfo
-    case SeasonInfo
-    case EpisodeInfo
-    case MovieInfo
+enum MediaRetrivalType : String, Codable{
+    case SeriseInfo = "SeriseInfo"
+    case SeasonInfo = "SeasonInfo"
+    case EpisodeInfo = "EpisodeInfo"
+    case MovieInfo = "MovieInfo"
 }
 
 public struct DownloadedMedia : Codable{

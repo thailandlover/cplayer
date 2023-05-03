@@ -25,9 +25,9 @@ class MethodChannelDowplay extends DowplayPlatform {
   }
 
   @override
-  Future<bool?> config() async {
+  Future<bool?> config(Map<String,dynamic> data) async {
     final bool? result =
-        await methodChannel.invokeMethod<bool>('config_downloader');
+        await methodChannel.invokeMethod<bool>('config_downloader',data);
     return result;
   }
 
@@ -35,6 +35,20 @@ class MethodChannelDowplay extends DowplayPlatform {
   Future<dynamic> getDownloadsList() async {
     final dynamic result =
         await methodChannel.invokeMethod<dynamic>('get_downloads_list');
+    return result;
+  }
+
+  @override
+  Future<dynamic> getTvShowSeasonsDownloadList(Map<String,dynamic> data) async {
+    final dynamic result =
+        await methodChannel.invokeMethod<dynamic>('tvshow_seasons_downloads_list',data);
+    return result;
+  }
+
+  @override
+  Future<dynamic> getSeasonEpisodesDownloadList(Map<String,dynamic> data) async {
+    final dynamic result =
+        await methodChannel.invokeMethod<dynamic>('season_episodes_downloads_list',data);
     return result;
   }
 
