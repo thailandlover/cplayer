@@ -76,15 +76,20 @@ public class DowplayPlugin implements FlutterPlugin, MethodCallHandler {
       String json = gson.toJson(call.arguments);
       MovieMedia movieMedia = MovieMedia.Companion.fromJson(json);
       System.out.println("B7b Gson::: "+movieMedia);
-      new DownloaderDowPlay(context).startDownload(movieMedia.getUrl(),movieMedia.getTitle());
+      new DownloaderDowPlay(context).startDownloadOLD(movieMedia.getUrl(),movieMedia.getTitle());
       List returnData = new ArrayList();
       result.success(returnData);
     }else if(call.method.equals("start_download_episode")){
       result.success(true);
     }else if(call.method.equals("pause_download")){
-      result.success(true);
+      new DownloaderDowPlay(context).pauseDownload(4094);
+      List returnData = new ArrayList();
+      result.success(returnData);
     }else if(call.method.equals("resume_download")){
-      result.success(true);
+      System.out.println("A7a resume_download");
+      new DownloaderDowPlay(context).resumeDownload(4094);
+      List returnData = new ArrayList();
+      result.success(returnData);
     }else if(call.method.equals("cancel_download")){
       result.success(true);
     }else {

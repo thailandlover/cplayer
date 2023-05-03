@@ -35,7 +35,7 @@ android {
     }
 
     defaultConfig {
-        minSdkVersion 16
+        minSdkVersion 24
     }
 }
 def mediaVersion = "1.0.1"
@@ -53,4 +53,10 @@ dependencies {
     //For API send post data
     implementation 'com.squareup.retrofit2:retrofit:2.9.0'
     implementation "com.squareup.retrofit2:converter-gson:2.9.0"
+    //FOR Downloader lib
+    //implementation "com.tonyodev.fetch2:fetch2:3.0.12"
+    //implementation "androidx.tonyodev.fetch2:xfetch2:3.1.6"
+    implementation 'com.tonyodev.fetch2:core:2.0.1'
+    implementation 'com.tonyodev.fetch2okhttp:2.0.1'
+    implementation 'com.tonyodev.fetch2rx:2.0.1'
 }
