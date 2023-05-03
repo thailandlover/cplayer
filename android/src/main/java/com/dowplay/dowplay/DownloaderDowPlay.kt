@@ -9,19 +9,7 @@ import android.os.Environment
 import android.util.Log
 import androidx.media3.common.C.NetworkType
 import java.util.*
-/////
-/*
-import com.tonyodev.fetch2.Download;
-import com.tonyodev.fetch2.Error;
-import com.tonyodev.fetch2.Fetch;
-import com.tonyodev.fetch2.Request;
-import com.tonyodev.fetch2.Status;
-import com.tonyodev.fetch2core.Extras;
-import com.tonyodev.fetch2core.FetchObserver;
-import com.tonyodev.fetch2core.Func;
-import com.tonyodev.fetch2core.MutableExtras;
-import com.tonyodev.fetch2core.Reason;*/
-/////
+
 class DownloaderDowPlay(innerContext: Context) {
 
     //private var fetch: Fetch? = null
@@ -30,23 +18,7 @@ class DownloaderDowPlay(innerContext: Context) {
         context = innerContext
     }
 
-
-    /*
     fun startDownload(url: String, fileName: String) {
-        val fetchConfiguration: FetchConfiguration = Builder(this)
-            .setDownloadConcurrentLimit(3)
-            .build()
-        fetch = Fetch.Impl.getInstance(fetchConfiguration)
-        val url = "http:www.example.com/test.txt"
-        val file = "/downloads/test.txt"
-        val request = Request(url, file)
-        request.setPriority(Priority.HIGH)
-        request.setNetworkType(NetworkType.ALL)
-        request.addHeader("clientKey", "SD78DF93_3947&MVNGHE1WONG")
-        fetch.enqueue(request, { updatedRequest -> }) { error -> }
-    }*/
-
-    fun startDownloadOLD(url: String, fileName: String) {
         Log.d("Test Download:", "Download is Start...")
 
         val downloadManager = context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
