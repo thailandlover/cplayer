@@ -1,8 +1,10 @@
 package com.dowplay.dowplay;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.media3.common.util.UnstableApi;
@@ -10,11 +12,16 @@ import androidx.media3.common.util.UnstableApi;
 import com.beust.klaxon.Klaxon;
 
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
+import io.flutter.embedding.engine.plugins.activity.ActivityAware;
+import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
 import io.flutter.plugin.common.MethodChannel.Result;
 import com.google.gson.Gson;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @UnstableApi /** DowplayPlugin */
 public class DowplayPlugin implements FlutterPlugin, MethodCallHandler {
@@ -63,7 +70,15 @@ public class DowplayPlugin implements FlutterPlugin, MethodCallHandler {
     } else if(call.method.equals("get_downloads_list")){
       result.success(true);
     }else if(call.method.equals("start_download_movie")){
-      result.success(true);
+      Log.d(TAG, "onMethodCall: start_download_movie");
+      Log.d(TAG, "onMethodCall: " + call.arguments.toString());
+      Gson gson = new Gson();
+      String json = gson.toJson(call.arguments);
+      MovieMedia movieMedia = MovieMedia.Companion.fromJson(json);
+      System.out.println("B7b Gson::: "+movieMedia);
+      new DownloaderDowPlay(context).startDownload(movieMedia.getUrl(),movieMedia.getTitle());
+      List returnData = new ArrayList();
+      result.success(returnData);
     }else if(call.method.equals("start_download_episode")){
       result.success(true);
     }else if(call.method.equals("pause_download")){
@@ -76,7 +91,8 @@ public class DowplayPlugin implements FlutterPlugin, MethodCallHandler {
       result.notImplemented();
     }
   }
-
+/////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
   @Override
   public void onDetachedFromEngine(@NonNull FlutterPluginBinding binding) {
     channel.setMethodCallHandler(null);

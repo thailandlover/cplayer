@@ -17,7 +17,7 @@ class MethodChannelDowplay extends DowplayPlatform {
         await methodChannel.invokeMethod<bool>('play_episode', media.toJson());
     return result;
   }
-
+  @override
   Future<bool?> playMovie(MovieMedia media) async {
     final bool? result =
         await methodChannel.invokeMethod<bool>('play_movie', media.toJson());
