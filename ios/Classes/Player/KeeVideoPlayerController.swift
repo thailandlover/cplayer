@@ -196,11 +196,11 @@ public class KeeVideoPlayerController: UIViewController {
         if let id = media?.keeId, let type = media?.type{
             var isDownloaded = false
             if type == .movie {
-                isDownloaded = try DownloadedMedia.getMovieByID(id: id) != nil
+                isDownloaded = try DownloadedMedia.getMovieByID(id: id,signature: settings.userSignature) != nil
                 localPath = try? FilesManager.shared.getFileForMovie(mediaID: id)
             }else{
                 if let g = self.media?.mediaGroup {
-                    isDownloaded = (DownloadedMedia.getEpisodeByID(id: g.episodeId, season: g.seasonId, series: g.showId) != nil)
+                    isDownloaded = (DownloadedMedia.getEpisodeByID(id: g.episodeId, season: g.seasonId, series: g.showId, signature: settings.userSignature) != nil)
                     localPath = try? FilesManager.shared.getFileForEpisode(id: g.episodeId, season: g.seasonId, series: g.showId)
                 }
             }
@@ -218,7 +218,7 @@ public class KeeVideoPlayerController: UIViewController {
                     btn_download.tag = 1
                 }
                 lb_downloadPercentage.isHidden = false
-                NotificationCenter.default.addObserver(self, selector: #selector(downloadProgressReceiver(notification:)), name: NSNotification.Name(rawValue: "downloadTask_media_\(id)_\(type.rawValue)"), object: nil)
+                NotificationCenter.default.addObserver(self, selector: #selector(downloadProgressReceiver(notification:)), name: NSNotification.Name(rawValue: "downloadTask_media_\(id)_\(type.rawValue)_\(settings.userSignature)"), object: nil)
             }else{
                 btn_download.tag = 0
                 btn_download.tintColor = .white
@@ -234,7 +234,7 @@ public class KeeVideoPlayerController: UIViewController {
             if let id = media?.keeId, let type = media?.type {
                 if let taskID = downloadTask.mediaId{
                     let ID = "\(taskID)"
-                    if ID == "\(id)_\(type.rawValue)" {
+                    if ID == "\(id)_\(type.rawValue)_\(settings.userSignature)" {
                         DispatchQueue.main.async {
                             self.lb_downloadPercentage.text = String(format: "%02.2f%%", downloadTask.progress.fractionCompleted * 100)
                         }

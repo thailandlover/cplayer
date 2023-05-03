@@ -114,29 +114,29 @@ public struct DownloadedMedia : Codable{
     }
    
     
-    var mediaDownloadName : String {
-        return mediaType.rawValue + "/" + "\(mediaId)"
+//    var mediaDownloadName : String {
+//        return mediaType.rawValue + "/" + "\(mediaId)"
+//    }
+    
+    func store(signature: String) throws{
+        try FilesManager.shared.forUser(signature).registerDownloadedMedia(self)
     }
     
-    func store() throws{
-        try FilesManager.shared.registerDownloadedMedia(self)
-    }
-    
-    func remove() throws{
+    func remove(signature: String) throws{
         if mediaType == .movie{
-            try FilesManager.shared.deleteMovieBy(id: mediaId)
+            try FilesManager.shared.forUser(signature).deleteMovieBy(id: mediaId)
         }else{
-            FilesManager.shared.deleteEpisode(self)
+            FilesManager.shared.forUser(signature).deleteEpisode(self)
         }
         
     }
     
-    static func getMovieByID(id : String)throws->DownloadedMedia?{
-            return try FilesManager.shared.getDownloadeMovieById(id)
+    static func getMovieByID(id : String, signature: String)throws->DownloadedMedia?{
+        return try FilesManager.shared.forUser(signature).getDownloadeMovieById(id)
     }
     
-    static func getEpisodeByID(id : String, season: String, series: String)->DownloadedMedia?{
-        return FilesManager.shared.getDownloadedEpisode(id: id, season: season, series: series)
+    static func getEpisodeByID(id : String, season: String, series: String, signature: String)->DownloadedMedia?{
+        return FilesManager.shared.forUser(signature).getDownloadedEpisode(id: id, season: season, series: series)
     }
     
         
@@ -163,26 +163,3 @@ public struct Season {
     var mediaList : [DownloadedMedia] = []
 }
 
-//public struct SeasonInfo : Codable{
-//    var seasonID : String
-//    var seriseName : String
-//    var seriseName : String
-//    var data : Data!
-//    
-//    var info : [String:Any]? {
-//        set{
-//            if newValue != nil{
-//                if let d = try? JSONSerialization.data(withJSONObject: newValue!, options: .fragmentsAllowed) {
-//                    self.data = d
-//                }
-//            }else{
-//                self.data = nil
-//            }
-//        }
-//        
-//        get{
-//            let f = try? JSONSerialization.jsonObject(with: data, options: .fragmentsAllowed) as? [String:Any]
-//            return f
-//        }
-//    }
-//}

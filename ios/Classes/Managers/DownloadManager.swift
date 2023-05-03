@@ -18,8 +18,11 @@ public class DownloadManager: NSObject/*, ObservableObject */{
     var tasks: [URLSessionTask] = []
     
     private var configed : Bool = false
-    
+    private var settings : HostAppSettings!
     var didLoadPreListedTasks : (()->Void)?
+    var userSignature : String {
+        return settings.userSignature
+    }
     
     override private init() {
         super.init()
@@ -30,7 +33,10 @@ public class DownloadManager: NSObject/*, ObservableObject */{
         updateTasks()
     }
     
-    public func config(){ configed = true }
+    public func config(useSettings : HostAppSettings){
+        self.settings = useSettings
+        configed = true
+    }
 
     public func startDownload(url: URL,
                               forMediaId id :Int,
@@ -46,7 +52,7 @@ public class DownloadManager: NSObject/*, ObservableObject */{
         let task = urlSession.downloadTask(with: url)
 
         task.taskDescription = mediaName
-        task.mediaId = "\(id)_\(type.rawValue)" //mediaID format (3255_movie) or (36970_series)
+        task.mediaId = "\(id)_\(type.rawValue)_\(userSignature)" //mediaID format (3255_movie) or (36970_series)
         task.resume()
         tasks.append(task)
         
@@ -75,7 +81,7 @@ public class DownloadManager: NSObject/*, ObservableObject */{
     
     func getDownloadTask(withMediaId id: String, forType type: MediaManager.MediaType)->URLSessionTask?{
         if !configed {return nil}
-        let taskId = "\(id)_\(type.rawValue)"
+        let taskId = "\(id)_\(type.rawValue)_\(userSignature)"
         return tasks.first(where: {$0.mediaId == taskId})
     }
     
@@ -93,7 +99,7 @@ public class DownloadManager: NSObject/*, ObservableObject */{
     
     public func cancelMedia(withMediaId id: String, forType type: MediaManager.MediaType){
         if !configed {return}
-        let taskId = "\(id)_\(type.rawValue)"
+        let taskId = "\(id)_\(type.rawValue)_\(userSignature)"
         cancelTask(withID: taskId)
     }
     
@@ -112,7 +118,7 @@ public class DownloadManager: NSObject/*, ObservableObject */{
     
     public func pauseDownload(forMediaId id: String, ofType type: MediaManager.MediaType){
         if !configed {return}
-        let taskId = "\(id)_\(type.rawValue)"
+        let taskId = "\(id)_\(type.rawValue)_\(userSignature)"
         pauseDownload(forTaskID: taskId)
     }
     
@@ -124,7 +130,7 @@ public class DownloadManager: NSObject/*, ObservableObject */{
     //MARK: - Resume Download Functions
     public func resumeDownload(forMediaId id: String, ofType type: MediaManager.MediaType){
         if !configed {return}
-        let taskId = "\(id)_\(type.rawValue)"
+        let taskId = "\(id)_\(type.rawValue)_\(userSignature)"
         resumeDownload(forTaskID: taskId)
     }
     
@@ -137,13 +143,13 @@ public class DownloadManager: NSObject/*, ObservableObject */{
     //MARK: - Check Download Status Functions
     ///is downloading regardless the status
     public func isDownloadingMediaWithID(_ id : String, ofType type: MediaManager.MediaType)->Bool{
-        let taskId = "\(id)_\(type.rawValue)"
+        let taskId = "\(id)_\(type.rawValue)_\(userSignature)"
         return tasks.contains(where: {taskId == "\($0.mediaId ?? "")"})
     }
     
     ///is downloading and is suspended
     public func isDownloadingMediaWithIDSuspended(_ id : String, ofType type: MediaManager.MediaType)->Bool{
-        let taskId = "\(id)_\(type.rawValue)"
+        let taskId = "\(id)_\(type.rawValue)_\(userSignature)"
         return tasks.first(where: {taskId == "\($0.mediaId ?? "")"})?.state == .suspended
     }
     
@@ -209,7 +215,10 @@ public class DownloadManager: NSObject/*, ObservableObject */{
     
     func getDownloadingEpisodes(inSeason id: String, forSerise sid: String)->[DownloadedMedia] {
         var serise = tasks.filter({task in
-            let pureType = task.mediaId?.components(separatedBy: "_").last ?? ""
+            // 0 : id
+            // 1 : type
+            // 2 : user signature
+            let pureType = task.mediaId?.components(separatedBy: "_")[1] ?? ""
             return pureType != "movies"
         }).map({task in
             if let t = task as? URLSessionDownloadTask {
@@ -226,8 +235,11 @@ public class DownloadManager: NSObject/*, ObservableObject */{
     }
     
     func getDownloadingSeasons(forSerise id: String)->[DownloadedMedia]{
+        // 0 : id
+        // 1 : type
+        // 2 : user signature
         var serise = tasks.filter({task in
-            let pureType = task.mediaId?.components(separatedBy: "_").last ?? ""
+            let pureType = task.mediaId?.components(separatedBy: "_")[1] ?? ""
             return pureType != "movies"
         }).map({task in
             if let t = task as? URLSessionDownloadTask {
@@ -266,8 +278,11 @@ public class DownloadManager: NSObject/*, ObservableObject */{
     
     
     func extractMedia(usingTask task : URLSessionDownloadTask)->DownloadedMedia{
+        // 0 : id
+        // 1 : type
+        // 2 : user signature
         let  pureID = task.mediaId?.components(separatedBy: "_").first
-        let pureType = task.mediaId?.components(separatedBy: "_").last
+        let pureType = task.mediaId?.components(separatedBy: "_")[2]
         
         var obj = DownloadedMedia(mediaId: pureID ?? "", name: task.taskDescription ?? "Untitled Media", status: task.state, progress: task.progress.fractionCompleted)
         
@@ -297,9 +312,11 @@ extension DownloadManager: URLSessionDelegate, URLSessionDownloadDelegate {
     }
 
     public func urlSession(_: URLSession, downloadTask d: URLSessionDownloadTask, didFinishDownloadingTo location: URL) {
-        
+        // 0 : id
+        // 1 : type
+        // 2 : user signature
         let  pureID = d.mediaId?.components(separatedBy: "_").first
-        let pureType = d.mediaId?.components(separatedBy: "_").last
+        let pureType = d.mediaId?.components(separatedBy: "_")[1]
         
         var obj = DownloadedMedia(mediaId: pureID ?? "", name: d.taskDescription ?? "Untitled Media", tempPath: location)
         
@@ -320,7 +337,7 @@ extension DownloadManager: URLSessionDelegate, URLSessionDownloadDelegate {
         }
         
         do{
-            try obj.store()
+            try obj.store(signature: userSignature)
         }catch{
             print("Error:\(error)")
         }

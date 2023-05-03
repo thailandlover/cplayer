@@ -22,4 +22,9 @@ public struct HostAppSettings {
         
     static var `default` = HostAppSettings(lang: "en")
     static var default_4 = HostAppSettings(lang: "en", apiVersion: 4)
+    
+    
+    var userSignature : String {
+        return "\(KeeUser.userID)_\(KeeUser.profileID)"
+    }
 }
