@@ -552,7 +552,7 @@ class _MyAppState extends State<MyApp> {
     dynamic result;
     item['media'] = (item['media'] as DownloadMovie).toJson();
     try {
-      result = await _dowplayPlugin.startDownloadMovie(item);
+      result = await _dowplayPlugin.startDownloadMovie(item['media']);
     } on PlatformException {
       result = false;
     }
@@ -568,7 +568,7 @@ class _MyAppState extends State<MyApp> {
     dynamic result;
     item['media'] = (item['media'] as DownloadEpisode).toJson();
     try {
-      result = await _dowplayPlugin.startDownloadEpisode(item);
+      result = await _dowplayPlugin.startDownloadEpisode(item['media']);
     } on PlatformException {
       result = false;
     }
