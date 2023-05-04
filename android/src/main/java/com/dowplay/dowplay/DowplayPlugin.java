@@ -82,12 +82,12 @@ public class DowplayPlugin implements FlutterPlugin, MethodCallHandler {
     }else if(call.method.equals("start_download_episode")){
       result.success(true);
     }else if(call.method.equals("pause_download")){
-      new DownloaderDowPlay(context).pauseDownload(4094);
+      new DownloaderDowPlay(context).pauseDownload(-1490791117);
       List returnData = new ArrayList();
       result.success(returnData);
     }else if(call.method.equals("resume_download")){
       System.out.println("A7a resume_download");
-      new DownloaderDowPlay(context).resumeDownload(4094);
+      new DownloaderDowPlay(context).resumeDownload(-1490791117);
       List returnData = new ArrayList();
       result.success(returnData);
     }else if(call.method.equals("cancel_download")){

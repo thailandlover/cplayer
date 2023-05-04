@@ -3,21 +3,90 @@ package com.dowplay.dowplay
 import android.annotation.SuppressLint
 import android.app.DownloadManager
 import android.content.Context
+import android.content.Intent
 import android.net.Uri
-import android.os.Bundle
 import android.os.Environment
 import android.util.Log
-import androidx.media3.common.C.NetworkType
+import com.downloader.PRDownloader
 import java.util.*
+
 
 class DownloaderDowPlay(innerContext: Context) {
 
-    //private var fetch: Fetch? = null
     private var context: Context
     init {
         context = innerContext
     }
 
+    fun cancelDownload(downloadId: Long) {
+        val downloadManager = context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
+        downloadManager.remove(downloadId)
+    }
+
+    fun pauseDownload(downloadId: Int) {
+        PRDownloader.pause(downloadId)
+    }
+
+    fun resumeDownload(downloadId: Int) {
+        PRDownloader.resume(downloadId)
+    }
+    fun getAllDownloadMedia() {}
+    fun getAllSeasons(seriesId:Int) {}
+    fun getAllEpisodes(seriesId:Int, seasons:Int) {}
+
+    fun startDownload(url: String, fileName: String) {
+        //PRDownloader.initialize(context);
+        // Enabling database for resume support even after the application is killed:
+        var url1 = "https://thekee.gcdn.co/video/m-159n/English/Animation&Family/The.Simpsons.in.Plusaversary.2021.1080.mp4"
+        //var url1 = "https://thekee-m.gcdn.co/images06012022/uploads/directors/2022-10-16/z16camhTHPAt1JMh.png"
+        var file1 = "${context.getExternalFilesDir(null)}"
+
+        val intent = Intent(context, DownloadService::class.java).apply {
+            putExtra("url", url1)
+            putExtra("dirPath", file1)
+            putExtra("fileName", "fileA7a.mp4")
+        }
+        /*if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            println("A7a1")
+            context.startForegroundService(intent)
+        } else {
+            println("A7a2")*/
+            context.startService(intent)
+        //}
+        //context.startService(intent)
+/*
+        val config = PRDownloaderConfig.newBuilder()
+            .setDatabaseEnabled(true)
+            .setReadTimeout(30000)
+            .setConnectTimeout(30000)
+            .build()
+        PRDownloader.initialize(context, config)
+        val downloadId = PRDownloader.download(url1, file1, "filexxx.mp4")
+            .build()
+            .setOnStartOrResumeListener {
+
+            }
+    .setOnPauseListener {
+
+    }
+    .setOnCancelListener {
+
+    }
+    .setOnProgressListener { progress ->
+        val progressPercent = progress.currentBytes * 100 / progress.totalBytes
+        println("Download progress: $progressPercent%")
+    }
+    .start(object : OnDownloadListener {
+        override fun onDownloadComplete() {
+
+        }
+
+        override fun onError(error: com.downloader.Error?) {
+        }
+    })*/
+}
+
+    /*
     fun startDownload(url: String, fileName: String) {
         Log.d("Test Download:", "Download is Start...")
 
@@ -107,13 +176,6 @@ class DownloaderDowPlay(innerContext: Context) {
         cursor.close()
     }
 
-    fun cancelDownload(downloadId: Long) {
-        val downloadManager = context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
-        downloadManager.remove(downloadId)
-    }
-    fun getAllDownloadMedia() {}
-    fun getAllSeasons(seriesId:Int) {}
-    fun getAllEpisodes(seriesId:Int, seasons:Int) {}
 
     @SuppressLint("Range")
     fun downloadManagerStatus(context: Context, downloadId: Long): Int {
@@ -194,6 +256,7 @@ class DownloaderDowPlay(innerContext: Context) {
         cursor.close()
         return DownloadManagerSTATUS.STATUS_UNKNOWN
     }
+     */
 }
 
 class DownloadManagerSTATUS{
@@ -206,70 +269,3 @@ class DownloadManagerSTATUS{
         const val STATUS_UNKNOWN = 5
     }
 }
-
-
-/*
-// Register the BroadcastReceiver
-        val filter = IntentFilter().apply {
-            addAction(DownloadManager.ACTION_DOWNLOAD_COMPLETE)
-            addAction(DownloadManager.ACTION_NOTIFICATION_CLICKED)
-            addAction(DownloadManager.ACTION_VIEW_DOWNLOADS)
-            /*addAction(DownloadManager.ACTION_DOWNLOAD_CANCELLED)
-            addAction(DownloadManager.ACTION_DOWNLOAD_PAUSED)
-            addAction(DownloadManager.ACTION_DOWNLOAD_RESUMED)*/
-        }
-        val receiver = DownloadReceiver()
-        context.registerReceiver(receiver, filter)
-     ///////////////////////////////////////////////////////////
-class DownloadReceiver : BroadcastReceiver() {
-    @SuppressLint("Range")
-    override fun onReceive(context: Context?, intent: Intent?) {
-        when (intent?.action) {
-            DownloadManager.ACTION_DOWNLOAD_COMPLETE -> {
-                val downloadId = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1)
-                // Handle download completion
-                Log.d("Test Download:","A7a Download is ACTION_DOWNLOAD_COMPLETE...")
-
-            }
-            DownloadManager.ACTION_NOTIFICATION_CLICKED -> {
-                // Handle notification click
-                Log.d("Test Download:","A7a Download is ACTION_NOTIFICATION_CLICKED...")
-
-            }
-            DownloadManager.ACTION_VIEW_DOWNLOADS -> {
-                // Handle view downloads action
-                Log.d("Test Download:","A7a Download is ACTION_VIEW_DOWNLOADS...")
-
-            }
-
-            else -> {
-                // Check if the download is paused or resumed
-                val downloadId = intent?.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1)
-                val downloadManager = context?.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
-                val query = DownloadManager.Query().setFilterById(downloadId!!)
-                val cursor = downloadManager.query(query)
-                if (cursor.moveToFirst()) {
-                    val status = cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_STATUS))
-                    if (status == DownloadManager.STATUS_PAUSED) {
-                        // Handle download pause
-                        Log.d("Test Download:","A7a Download is STATUS_PAUSED...")
-
-                    } else if (status == DownloadManager.STATUS_RUNNING) {
-                        // Handle download resume
-                        Log.d("Test Download:","A7a Download is STATUS_RUNNING...")
-                    }
-                    else if (status == DownloadManager.STATUS_FAILED) {
-                        // The download has failed
-                        Log.d("Test Download:","A7a Download is STATUS_FAILED...")
-
-                    }else if (status == DownloadManager.STATUS_SUCCESSFUL) {
-                        // The download has completed successfully
-                        Log.d("Test Download:","A7a Download is STATUS_SUCCESSFUL...")
-                    }
-                }
-                cursor.close()
-            }
-        }
-    }
-}
-*/
