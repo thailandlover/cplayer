@@ -409,8 +409,7 @@ class _MyAppState extends State<MyApp> {
       "poster_photo":
           "https://thekee-m.gcdn.co/images06012022/uploads/media/series/seasons/posters/2020-07-01/ZMx47Bf3sO03FprZ.jpg",
       "duration": "10 min",
-      "download_url":
-          "https://thekee.gcdn.co/video/m-159n/English/Animation&Family/Tom.and.Jerry.1965/02.mp4?md5=eCp0VmIS_doipZ6lGVxwVg&expires=1678550892",
+      "download_url": "https://thekee.gcdn.co/video/m-159n/English/Animation&Family/Tom.and.Jerry.1965/02.mp4?md5=eCp0VmIS_doipZ6lGVxwVg&expires=1678550892",
       "hd_url":
           "https://thekee.gcdn.co/video/m-159n/English/Animation&Family/Tom.and.Jerry.1965/02.mp4?md5=eCp0VmIS_doipZ6lGVxwVg&expires=1678550892",
       "trailer_url": null,
@@ -709,7 +708,7 @@ class _MyAppState extends State<MyApp> {
                       shrinkWrap: true,
                       itemCount: _downloadsList.length,
                       itemBuilder: (context, index) {
-                        return Text(''
+                        return Text("Count::: ${_downloadsList.length}+ ${_downloadsList[index]}"
                             // "[${index + 1}]-> (${_downloadsList[index]['mediaType']}) : ${_downloadsList[index]['mediaType'] == "movie" ? _downloadsList[index]['object']['title'] : _downloadsList[index]['object']['info']['title']} - ${_downloadsList[index]['status']} - ${_downloadsList[index]['progress']}",
                             );
                       },

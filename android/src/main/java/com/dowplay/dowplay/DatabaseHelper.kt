@@ -19,7 +19,9 @@ class DatabaseHelper(innerContext: Context) : SQLiteOpenHelper(innerContext, DAT
         private const val DATABASE_NAME = "downloader_db"
         private const val DATABASE_VERSION = 1
         //
-        const val my_table = "downloader_table"
+        const val main_table = "downloader_table"
+        const val seasons_table = "seasons_table"
+        const val episodes_table = "episodes_table"
         //
         const val COL_download_id: String = "download_id"
         const val COL_status: String = "status"
@@ -31,15 +33,30 @@ class DatabaseHelper(innerContext: Context) : SQLiteOpenHelper(innerContext, DAT
         const val COL_media_data: String = "media_data"
         const val COL_user_id: String = "user_id"
         const val COL_profile_id: String = "profile_id"
+        /////////////////////////////////
+        //Col for seasons
+        //id, tv_show_id, season_id, name, order
+        //Col for episodes
+        //id, tv_show_id, season_id, episode_id, name, order
+        //const val COL_tv_show_id: String = "tv_show_id"
+        const val COL_season_id: String = "season_id"
+        const val COL_episode_id: String = "episode_id"
+        const val COL_order: String = "col_order"
+
     }
 
 
     override fun onCreate(db: SQLiteDatabase) {
-        db.execSQL("CREATE TABLE $my_table ($COL_download_id NUMBER PRIMARY KEY, $COL_status NUMBER,  $COL_progress NUMBER,$COL_video_path TEXT, $COL_name TEXT, $COL_media_type TEXT, $COL_media_id TEXT, $COL_media_data TEXT, $COL_user_id TEXT, $COL_profile_id TEXT)")
+        db.execSQL("CREATE TABLE $main_table ($COL_download_id NUMBER PRIMARY KEY ON CONFLICT REPLACE, $COL_status NUMBER,  $COL_progress NUMBER,$COL_video_path TEXT, $COL_name TEXT, $COL_media_type TEXT, $COL_media_id TEXT UNIQUE ON CONFLICT REPLACE, $COL_media_data TEXT, $COL_user_id TEXT, $COL_profile_id TEXT )")
+        db.execSQL("CREATE TABLE $seasons_table (id INTEGER PRIMARY KEY AUTOINCREMENT, $COL_media_id TEXT,  $COL_season_id TEXT , $COL_name TEXT, $COL_order TEXT, UNIQUE($COL_media_id, $COL_season_id) ON CONFLICT REPLACE)")
+        db.execSQL("CREATE TABLE $episodes_table ($COL_download_id NUMBER PRIMARY KEY, $COL_status NUMBER,  $COL_progress NUMBER,$COL_video_path TEXT, $COL_media_id TEXT,  $COL_season_id TEXT,$COL_episode_id TEXT , $COL_name TEXT, $COL_order TEXT, UNIQUE($COL_media_id, $COL_season_id, $COL_episode_id) ON CONFLICT REPLACE)")
+
     }
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
-        db.execSQL("DROP TABLE IF EXISTS $my_table")
+        db.execSQL("DROP TABLE IF EXISTS $main_table")
+        db.execSQL("DROP TABLE IF EXISTS $seasons_table")
+        db.execSQL("DROP TABLE IF EXISTS $episodes_table")
         onCreate(db)
     }
 
@@ -71,7 +88,58 @@ class DatabaseHelper(innerContext: Context) : SQLiteOpenHelper(innerContext, DAT
             put(COL_user_id, user_id)
             put(COL_profile_id, profile_id)
         }
-        val insertCount = db.insert(my_table, null, values)
+        val insertCount = db.insert(main_table, null, values)
+        db.close()
+        dbHelper.close()
+        return insertCount
+    }
+    fun saveSeasonDataInDB(
+        media_id: String,
+        season_id: String,
+        name: String,
+        order:String,
+        ): Long {
+        val dbHelper = DatabaseHelper(context)
+        val db = dbHelper.writableDatabase
+
+        val values = ContentValues().apply {
+            put(COL_media_id, media_id)
+            put(COL_season_id, season_id)
+            put(COL_name, name)
+            put(COL_order, order)
+        }
+        val insertCount = db.insert(seasons_table, null, values)
+        db.close()
+        dbHelper.close()
+        return insertCount
+    }
+
+    fun saveEpisodeDataInDB(
+        download_id: Int,
+        status: Int,
+        progress: Int,
+        video_path: String,
+        media_id: String,
+        season_id: String,
+        episode_id:String,
+        name: String,
+        order:String,
+        ): Long {
+        val dbHelper = DatabaseHelper(context)
+        val db = dbHelper.writableDatabase
+
+        val values = ContentValues().apply {
+            put(COL_download_id, download_id)
+            put(COL_status, status)
+            put(COL_progress, progress)
+            put(COL_video_path, video_path)
+            put(COL_media_id, media_id)
+            put(COL_season_id, season_id)
+            put(COL_episode_id, episode_id)
+            put(COL_name, name)
+            put(COL_order, order)
+        }
+        val insertCount = db.insert(episodes_table, null, values)
         db.close()
         dbHelper.close()
         return insertCount
@@ -98,12 +166,12 @@ class DatabaseHelper(innerContext: Context) : SQLiteOpenHelper(innerContext, DAT
             //put(COL_media_id, media_id)
             //put(COL_media_data, media_data)
         }
-        print("A7a::: $progress - $values")
+        print("Bom::: $progress - $values")
         val selection = "download_id = ?"
         val selectionArgs = arrayOf("$download_id")
 
         val updateCount = db.update(
-            my_table,
+            main_table,
             values,
             selection,
             selectionArgs
@@ -112,8 +180,37 @@ class DatabaseHelper(innerContext: Context) : SQLiteOpenHelper(innerContext, DAT
         dbHelper.close()
         return updateCount
     }
+    ///////////////////////////////////////////////
+    fun updateSeriesDownloadDataInDB(
+        download_id: Int,
+        status: Int,
+        progress: Int,
+    ): Int {
+        val dbHelper = DatabaseHelper(context)
+        val db = dbHelper.writableDatabase
+
+        val values = ContentValues().apply {
+            put(COL_download_id, download_id)
+            put(COL_status, status)
+            put(COL_progress, progress)
+        }
+        print("Bom::: $progress - $values")
+        val selection = "download_id = ?"
+        val selectionArgs = arrayOf("$download_id")
+
+        val updateCount = db.update(
+            episodes_table,
+            values,
+            selection,
+            selectionArgs
+        )
+        db.close()
+        dbHelper.close()
+        return updateCount
+    }
+
     @SuppressLint("Range")
-    fun getDownloadDataFromDbByDownloadId(download_id: Int): HashMap<String,Any>{
+    fun getDownloadDataFromDbByDownloadId(media_id: String, media_type:String): ArrayList<HashMap<String, Any>> {
         val dbHelper = DatabaseHelper(context)
         val db = dbHelper.readableDatabase
 
@@ -121,11 +218,12 @@ class DatabaseHelper(innerContext: Context) : SQLiteOpenHelper(innerContext, DAT
                 "${COL_status}, ${COL_progress}, ${COL_video_path}," +
                 "${COL_name},${COL_media_type}," +
                 "${COL_media_id},${COL_media_data}," +
-                "${COL_user_id},${COL_profile_id} FROM ${my_table} WHERE download_id = ?"
-        val selectionArgs = arrayOf(""+download_id)
+                "${COL_user_id},${COL_profile_id} FROM $main_table WHERE $COL_media_id = ? AND $COL_media_type = ?"
+        val selectionArgs = arrayOf(media_id, media_type)
 
         val cursor = db.rawQuery(query, selectionArgs)
 
+        val allDownloadData = ArrayList<HashMap<String,Any>>()
         val mapData = HashMap<String,Any>()
         if (cursor.moveToFirst()) {
             val downloadId = cursor.getInt(cursor.getColumnIndex(COL_download_id))
@@ -148,16 +246,18 @@ class DatabaseHelper(innerContext: Context) : SQLiteOpenHelper(innerContext, DAT
             mapData["media_data"] = mediaData
             mapData["user_id"] = userId
             mapData["profile_id"] = profileId
+            allDownloadData += mapData
         }
 
-        Log.d("Sqlite Data:","${mapData.toString()}")
+        Log.d("Sqlite Data:","$mapData")
 
         cursor.close()
         db.close()
-        return mapData
+        return allDownloadData
     }
     @SuppressLint("Range")
-    fun getAllDownloadDataFromDB(): HashMap<String,Any>{
+    fun getAllDownloadDataFromDB(): List<HashMap<String,Any>>{
+
         val dbHelper = DatabaseHelper(context)
         val db = dbHelper.readableDatabase
 
@@ -165,12 +265,13 @@ class DatabaseHelper(innerContext: Context) : SQLiteOpenHelper(innerContext, DAT
                 "${COL_status}, ${COL_progress}, ${COL_video_path}," +
                 "${COL_name},${COL_media_type}," +
                 "${COL_media_id},${COL_media_data}, " +
-                "${COL_user_id},${COL_profile_id} FROM $my_table"
+                "${COL_user_id},${COL_profile_id} FROM $main_table"
 
         val cursor = db.rawQuery(query,null)
 
+        val allDownloadData = ArrayList<HashMap<String,Any>>()
         val mapData = HashMap<String,Any>()
-        if (cursor.moveToFirst()) {
+        while (cursor.moveToNext()) {
             val downloadId = cursor.getInt(cursor.getColumnIndex(COL_download_id))
             val status = cursor.getInt(cursor.getColumnIndex(COL_status))
             val progress = cursor.getInt(cursor.getColumnIndex(COL_progress))
@@ -191,12 +292,96 @@ class DatabaseHelper(innerContext: Context) : SQLiteOpenHelper(innerContext, DAT
             mapData["media_data"] = mediaData
             mapData["user_id"] = userId
             mapData["profile_id"] = profileId
+            allDownloadData += mapData
         }
 
-        Log.d("Sqlite Data:","$mapData")
+        Log.d("Sqlite Data:","$allDownloadData")
 
         cursor.close()
         db.close()
-        return mapData
+        return allDownloadData
+    }
+
+    @SuppressLint("Range")
+    fun getAllSeasonsDownloadDataFromDB(series_id: String): List<HashMap<String,Any>>{
+
+        val dbHelper = DatabaseHelper(context)
+        val db = dbHelper.readableDatabase
+
+        val query = "SELECT ${COL_media_id},${COL_season_id}," +
+                "${COL_name},${COL_order} FROM $seasons_table WHERE $COL_media_id = ? Order by $COL_order ASC"
+
+        val selectionArgs = arrayOf(series_id)
+
+        val cursor = db.rawQuery(query, selectionArgs)
+
+        val allDownloadData = ArrayList<HashMap<String,Any>>()
+        val mapData = HashMap<String,Any>()
+        while (cursor.moveToNext()) {
+            val mediaId = cursor.getString(cursor.getColumnIndex(COL_media_id))
+            val seasonId = cursor.getString(cursor.getColumnIndex(COL_season_id))
+            val name = cursor.getString(cursor.getColumnIndex(COL_name))
+            val order = cursor.getString(cursor.getColumnIndex(COL_order))
+
+            mapData["media_id"] = mediaId
+            mapData["season_id"] = seasonId
+            mapData["name"] = name
+            mapData["order"] = order
+
+            allDownloadData += mapData
+        }
+
+        Log.d("Sqlite Data:","$allDownloadData")
+
+        cursor.close()
+        db.close()
+        return allDownloadData
+    }
+    @SuppressLint("Range")
+    fun getAllEpisodesDownloadDataFromDB(season_id: String,tvshow_id:String): List<HashMap<String,Any>>{
+
+        val dbHelper = DatabaseHelper(context)
+        val db = dbHelper.readableDatabase
+
+        val query = "SELECT ${COL_download_id},${COL_status}," +
+                "${COL_progress},${COL_video_path}," +
+                "${COL_media_id}, ${COL_season_id},${COL_episode_id}," +
+                "${COL_name},${COL_order} FROM $episodes_table WHERE $COL_season_id = ? AND $COL_media_id = ? Order by $COL_order ASC"
+
+        val selectionArgs = arrayOf(season_id, tvshow_id)
+
+        val cursor = db.rawQuery(query, selectionArgs)
+
+        val allDownloadData = ArrayList<HashMap<String,Any>>()
+        val mapData = HashMap<String,Any>()
+        while (cursor.moveToNext()) {
+            val downloadId = cursor.getInt(cursor.getColumnIndex(COL_download_id))
+            val status = cursor.getInt(cursor.getColumnIndex(COL_status))
+            val progress = cursor.getInt(cursor.getColumnIndex(COL_progress))
+            val videoPath = cursor.getString(cursor.getColumnIndex(COL_video_path))
+            val mediaId = cursor.getString(cursor.getColumnIndex(COL_media_id))
+            val seasonId = cursor.getString(cursor.getColumnIndex(COL_season_id))
+            val episodeId = cursor.getString(cursor.getColumnIndex(COL_episode_id))
+            val name = cursor.getString(cursor.getColumnIndex(COL_name))
+            val order = cursor.getString(cursor.getColumnIndex(COL_order))
+
+            mapData["download_id"] = downloadId
+            mapData["status"] = status
+            mapData["progress"] = progress
+            mapData["video_path"] = videoPath
+            mapData["media_id"] = mediaId
+            mapData["season_id"] = seasonId
+            mapData["episode_id"] = episodeId
+            mapData["name"] = name
+            mapData["order"] = order
+
+            allDownloadData += mapData
+        }
+
+        Log.d("Sqlite Data:","$allDownloadData")
+
+        cursor.close()
+        db.close()
+        return allDownloadData
     }
 }

@@ -19,7 +19,8 @@ class DownloaderDowPlay(innerContext: Context) {
         return token.take(length)
     }
 
-    fun startDownload(url: String,name:String, mediaType: String, mediaId:String, mediaData: String,userId:String, profileId:String) {
+    fun startDownload(url: String,name:String, mediaType: String, mediaId:String, mediaData: String,userId:String, profileId:String
+    ,seasonId:String, episodeId:String, seasonOrder:String,episodeOrder:String, seasonName:String,episodeName:String) {
         //PRDownloader.initialize(context);
         // Enabling database for resume support even after the application is killed:
         //val url1 = "https://thekee.gcdn.co/video/m-159n/English/Animation&Family/The.Simpsons.in.Plusaversary.2021.1080.mp4"
@@ -29,8 +30,8 @@ class DownloaderDowPlay(innerContext: Context) {
         //for save in private pkg app
         val dirPath = context.filesDir.path+"/downplay"
         val videoName = generateRandomToken(50)+".mp4"
-        println("A7a Dir: $dirPath")
-        println("A7a Dir: ${"$dirPath/$videoName"}")
+        println("Bom Dir: $dirPath")
+        println("Bom Dir: ${"$dirPath/$videoName"}")
         val intent = Intent(context, DownloadService::class.java).apply {
             putExtra("url", url)
             putExtra("dir_path", dirPath)
@@ -42,6 +43,12 @@ class DownloaderDowPlay(innerContext: Context) {
             putExtra("media_data", mediaData)
             putExtra("user_id", userId)
             putExtra("profile_id", profileId)
+            putExtra("season_id", seasonId)
+            putExtra("episode_id", episodeId)
+            putExtra("season_order", seasonOrder)
+            putExtra("episode_order", episodeOrder)
+            putExtra("season_name", seasonName)
+            putExtra("episode_name", episodeName)
         }
         context.startService(intent)
     }
@@ -55,14 +62,18 @@ class DownloaderDowPlay(innerContext: Context) {
     fun cancelDownload(downloadId: Int) {
         PRDownloader.cancel(downloadId)
     }
-    fun getDownloadMediaByDownloadID(downloadId: Int) {
-        var dataDB =  DatabaseHelper(context).getDownloadDataFromDbByDownloadId(downloadId)
+    fun getDownloadMediaByDownloadID(media_id: String, media_type:String): ArrayList<HashMap<String, Any>> {
+        return DatabaseHelper(context).getDownloadDataFromDbByDownloadId(media_id,media_type)
     }
-    fun getAllDownloadMedia() {
-        var dataDB =  DatabaseHelper(context).getAllDownloadDataFromDB()
+    fun getAllDownloadMedia(): List<HashMap<String, Any>> {
+        return DatabaseHelper(context).getAllDownloadDataFromDB()
     }
-    fun getAllSeasons(seriesId:Int) {}
-    fun getAllEpisodes(seriesId:Int, seasons:Int) {}
+    fun getAllSeasons(series_id:String): List<HashMap<String, Any>> {
+        return DatabaseHelper(context).getAllSeasonsDownloadDataFromDB(series_id)
+    }
+    fun getAllEpisodes(seasons_id:String, tvshow_id:String): List<HashMap<String, Any>> {
+        return DatabaseHelper(context).getAllEpisodesDownloadDataFromDB(seasons_id,tvshow_id)
+    }
 
 
   /*
@@ -77,13 +88,13 @@ class DownloaderDowPlay(innerContext: Context) {
         val intent = Intent(context, DownloadService::class.java).apply {
             putExtra("url", url1)
             putExtra("dirPath", file1)
-            putExtra("fileName", "fileA7a.mp4")
+            putExtra("fileName", "fileBom.mp4")
         }
         /*if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            println("A7a1")
+            println("Bom1")
             context.startForegroundService(intent)
         } else {
-            println("A7a2")*/
+            println("Bom2")*/
             context.startService(intent)
         //}
         //context.startService(intent)
@@ -224,7 +235,7 @@ class DownloaderDowPlay(innerContext: Context) {
             when (status) {
                 DownloadManager.STATUS_SUCCESSFUL -> {
                     // The download has completed successfully
-                    Log.d("Test Download:", "A7a Download is STATUS_SUCCESSFUL...")
+                    Log.d("Test Download:", "Bom Download is STATUS_SUCCESSFUL...")
                     DatabaseHelper(context).updateDownloadDataInDB(
                         downloadId,
                         DownloadManagerSTATUS.STATUS_SUCCESSFUL,
@@ -238,7 +249,7 @@ class DownloaderDowPlay(innerContext: Context) {
                 }
                 DownloadManager.STATUS_FAILED -> {
                     // The download has failed
-                    Log.d("Test Download:", "A7a Download is STATUS_FAILED...")
+                    Log.d("Test Download:", "Bom Download is STATUS_FAILED...")
                     DatabaseHelper(context).updateDownloadDataInDB(
                         downloadId,
                         DownloadManagerSTATUS.STATUS_FAILED,
@@ -252,7 +263,7 @@ class DownloaderDowPlay(innerContext: Context) {
                 }
                 DownloadManager.STATUS_RUNNING -> {
                     // The download is still in progress
-                    Log.d("Test Download:", "A7a Download is STATUS_RUNNING...")
+                    Log.d("Test Download:", "Bom Download is STATUS_RUNNING...")
                     val totalBytes =
                         cursor.getLong(cursor.getColumnIndex(DownloadManager.COLUMN_TOTAL_SIZE_BYTES))
                     val downloadedBytes =
@@ -272,7 +283,7 @@ class DownloaderDowPlay(innerContext: Context) {
                 }
                 DownloadManager.STATUS_PAUSED -> {
                     // The download has been paused
-                    Log.d("Test Download:", "A7a Download is STATUS_PAUSED...")
+                    Log.d("Test Download:", "Bom Download is STATUS_PAUSED...")
                     DatabaseHelper(context).updateDownloadDataInDB(
                         downloadId,
                         DownloadManagerSTATUS.STATUS_PAUSED,
