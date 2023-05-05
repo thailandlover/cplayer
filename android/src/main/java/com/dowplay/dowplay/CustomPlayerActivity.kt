@@ -86,10 +86,10 @@ class CustomPlayerActivity() : FlutterActivity() {
             .build()
             .also { exoPlayer ->
                 //val mediaItem = MediaItem.fromUri("https://thekee.gcdn.co/video/m-159n/English/Animation&Family/Klaus.2019.1080pAr.mp4")
+                //val mediaItem = MediaItem.fromUri("/data/user/0/com.dowplay.dowplay_example/files/downplay/qvapqtuqtd0fgokeenfelnqli.mp4")
                 //////////////////////
 
                 val mediaItem = videoUris.map { MediaItem.fromUri(it) }
-
                 /////////////////////
                 exoPlayer.setMediaItems(mediaItem)
                 exoPlayer.seekToDefaultPosition(startVideoPosition)

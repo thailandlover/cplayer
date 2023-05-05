@@ -1,14 +1,10 @@
 package com.dowplay.dowplay
 
-import android.annotation.SuppressLint
-import android.app.DownloadManager
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
-import android.os.Environment
-import android.util.Log
 import com.downloader.PRDownloader
-import java.util.*
+import java.security.SecureRandom
+import java.math.BigInteger
 
 
 class DownloaderDowPlay(innerContext: Context) {
@@ -17,12 +13,38 @@ class DownloaderDowPlay(innerContext: Context) {
     init {
         context = innerContext
     }
-
-    fun cancelDownload(downloadId: Long) {
-        val downloadManager = context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
-        downloadManager.remove(downloadId)
+    fun generateRandomToken(length: Int): String {
+        val secureRandom = SecureRandom()
+        val token = BigInteger(130, secureRandom).toString(32)
+        return token.take(length)
     }
 
+    fun startDownload(url: String,name:String, mediaType: String, mediaId:String, mediaData: String,userId:String, profileId:String) {
+        //PRDownloader.initialize(context);
+        // Enabling database for resume support even after the application is killed:
+        //val url1 = "https://thekee.gcdn.co/video/m-159n/English/Animation&Family/The.Simpsons.in.Plusaversary.2021.1080.mp4"
+        //var url1 = "https://thekee.gcdn.co/video/m-159n/English/Drama/Deathwatch.2002.1080p.V1.mp4"
+        //for save in public pkg app
+        //var dirPath = "${context.getExternalFilesDir(null)}"
+        //for save in private pkg app
+        val dirPath = context.filesDir.path+"/downplay"
+        val videoName = generateRandomToken(50)+".mp4"
+        println("A7a Dir: $dirPath")
+        println("A7a Dir: ${"$dirPath/$videoName"}")
+        val intent = Intent(context, DownloadService::class.java).apply {
+            putExtra("url", url)
+            putExtra("dir_path", dirPath)
+            putExtra("video_name", videoName)
+            putExtra("full_path", "$dirPath/$videoName")
+            putExtra("media_type", mediaType)
+            putExtra("media_id", mediaId)
+            putExtra("media_name", name)
+            putExtra("media_data", mediaData)
+            putExtra("user_id", userId)
+            putExtra("profile_id", profileId)
+        }
+        context.startService(intent)
+    }
     fun pauseDownload(downloadId: Int) {
         PRDownloader.pause(downloadId)
     }
@@ -30,14 +52,25 @@ class DownloaderDowPlay(innerContext: Context) {
     fun resumeDownload(downloadId: Int) {
         PRDownloader.resume(downloadId)
     }
-    fun getAllDownloadMedia() {}
+    fun cancelDownload(downloadId: Int) {
+        PRDownloader.cancel(downloadId)
+    }
+    fun getDownloadMediaByDownloadID(downloadId: Int) {
+        var dataDB =  DatabaseHelper(context).getDownloadDataFromDbByDownloadId(downloadId)
+    }
+    fun getAllDownloadMedia() {
+        var dataDB =  DatabaseHelper(context).getAllDownloadDataFromDB()
+    }
     fun getAllSeasons(seriesId:Int) {}
     fun getAllEpisodes(seriesId:Int, seasons:Int) {}
 
+
+  /*
     fun startDownload(url: String, fileName: String) {
         //PRDownloader.initialize(context);
         // Enabling database for resume support even after the application is killed:
         var url1 = "https://thekee.gcdn.co/video/m-159n/English/Animation&Family/The.Simpsons.in.Plusaversary.2021.1080.mp4"
+        //var url1 = "https://thekee.gcdn.co/video/m-159n/English/Drama/Deathwatch.2002.1080p.V1.mp4"
         //var url1 = "https://thekee-m.gcdn.co/images06012022/uploads/directors/2022-10-16/z16camhTHPAt1JMh.png"
         var file1 = "${context.getExternalFilesDir(null)}"
 
@@ -85,7 +118,7 @@ class DownloaderDowPlay(innerContext: Context) {
         }
     })*/
 }
-
+*/
     /*
     fun startDownload(url: String, fileName: String) {
         Log.d("Test Download:", "Download is Start...")
@@ -257,15 +290,4 @@ class DownloaderDowPlay(innerContext: Context) {
         return DownloadManagerSTATUS.STATUS_UNKNOWN
     }
      */
-}
-
-class DownloadManagerSTATUS{
-    //println("${STATUS.ordinal} = ${STATUS.name}")
-    companion object {
-        const val STATUS_RUNNING = 0
-        const val STATUS_FAILED = 1
-        const val STATUS_SUCCESSFUL = 3
-        const val STATUS_PAUSED = 4
-        const val STATUS_UNKNOWN = 5
-    }
 }

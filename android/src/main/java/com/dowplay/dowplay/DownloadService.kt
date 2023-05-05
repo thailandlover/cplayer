@@ -20,7 +20,8 @@ class DownloadService : Service() {
         override fun onBind(intent: Intent): IBinder? {
             return null
         }
-    var isrun : Boolean = true
+
+    var currentProgressPercent:Int = 0
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
             Log.d("A7a::: ", "Download Started")
@@ -43,8 +44,20 @@ class DownloadService : Service() {
             ///////////////
             if (intent != null) {
                 val url = intent.getStringExtra("url")
-                val dirPath = intent.getStringExtra("dirPath")
-                val fileName = intent.getStringExtra("fileName")
+                val dirPath = intent.getStringExtra("dir_path")
+                val fileName = intent.getStringExtra("video_name")
+                val fullPath = intent.getStringExtra("full_path")
+                val mediaType = intent.getStringExtra("media_type")
+                val mediaId = intent.getStringExtra("media_id")
+                val mediaName = intent.getStringExtra("media_name")
+                val mediaData = intent.getStringExtra("media_data")
+                val userId = intent.getStringExtra("user_id")
+                val profileId = intent.getStringExtra("profile_id")
+                Log.d("A7a Info", url.toString())
+                Log.d("A7a Info", dirPath.toString())
+                Log.d("A7a Info", fileName.toString())
+                Log.d("A7a Info", fullPath.toString())
+
                 val config = PRDownloaderConfig.newBuilder()
                     .setDatabaseEnabled(true)
                     .setReadTimeout(30000)
@@ -56,21 +69,53 @@ class DownloadService : Service() {
                     .setOnStartOrResumeListener {
                         // Download started or resumed
                         Log.d("A7a::: ", "Download resumed")
+                        DatabaseHelper(this).saveDownloadDataInDB(
+                            downloadId,
+                            DownloadManagerSTATUS.STATUS_RUNNING,
+                            0,
+                            fullPath.toString(),
+                            mediaName.toString(),
+                            mediaType.toString(),
+                            mediaId.toString(),
+                            mediaData.toString(),
+                            userId.toString(),
+                            profileId.toString()
+                        )
                         Log.d("A7a::: ", "Download ID $downloadId")
-
+                        //Log.d("A7a::: ", "Is Insert ID $isInsert")
                     }
                     .setOnPauseListener {
                         // Download paused
+                        DatabaseHelper(this).updateDownloadDataInDB(
+                            downloadId,
+                            DownloadManagerSTATUS.STATUS_PAUSED,
+                            currentProgressPercent,
+                        )
                         Log.d("A7a::: ", "Download paused")
                     }
                     .setOnCancelListener {
                         // Download cancelled
+                        DatabaseHelper(this).updateDownloadDataInDB(
+                            downloadId,
+                            DownloadManagerSTATUS.STATUS_FAILED,
+                            currentProgressPercent,
+                        )
                         Log.d("A7a::: ", "Download cancelled")
                     }
                     .setOnProgressListener { progress ->
                         // Download progress updated
+
                         val progressPercent = progress.currentBytes * 100 / progress.totalBytes
-                        Log.d("A7a::: ", "Download progress: $progressPercent%")
+
+                        if(progressPercent.toInt() != currentProgressPercent) {
+                            Log.d("A7a::: ", "Download progress: ${progressPercent.toInt()}%")
+                            currentProgressPercent = progressPercent.toInt()
+                            DatabaseHelper(this).updateDownloadDataInDB(
+                                downloadId,
+                                DownloadManagerSTATUS.STATUS_RUNNING,
+                                currentProgressPercent,
+                            )
+                        }
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                             val notificationManager =
                                 getSystemService(NotificationManager::class.java)
@@ -88,28 +133,24 @@ class DownloadService : Service() {
                         override fun onDownloadComplete() {
                             // Download completed
                             Log.d("A7a::: ", "Download completed")
+                            DatabaseHelper(applicationContext).updateDownloadDataInDB(
+                                downloadId,
+                                DownloadManagerSTATUS.STATUS_SUCCESSFUL,
+                                100,
+                            )
                             stopSelf()
                         }
 
                         override fun onError(error: com.downloader.Error?) {
-                            Log.d("A7a::: ", "Download error")
+                            Log.d("A7a::: ", "Download error $error")
+                            DatabaseHelper(applicationContext).updateDownloadDataInDB(
+                                downloadId,
+                                DownloadManagerSTATUS.STATUS_FAILED,
+                                currentProgressPercent,
+                            )
+                            stopSelf()
                         }
                     })
-
-                /*val timer = Timer()
-                timer.scheduleAtFixedRate(object : TimerTask() {
-                    override fun run() {
-                        // Code to be executed every 5 seconds
-                        if(isrun) {
-                            PRDownloader.pause(downloadId)
-                            isrun = false
-                        }else{
-                            PRDownloader.resume(downloadId)
-                            isrun = true
-                        }
-                    }
-                }, 0, 10000)*/
-
             }
             return START_NOT_STICKY
         }
