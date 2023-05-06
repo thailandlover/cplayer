@@ -652,7 +652,9 @@ class CustomPlayerActivity() : FlutterActivity() {
         //////////
         //Log.d("1122334455","${downloadInfo["status"]}")*/
         if (downloadInfo["status"] == DownloadManagerSTATUS.STATUS_SUCCESSFUL && downloadInfo["status"] != null) {
-            videoUris[startVideoPosition] = downloadInfo["video_path"].toString()
+            if(downloadInfo["video_path"].toString() != "" && downloadInfo["video_path"] != null) {
+                videoUris[startVideoPosition] = downloadInfo["video_path"].toString()
+            }
             viewBinding.downloadButton.setColorFilter( ContextCompat.getColor(context, R.color.green_download));
         }else if (downloadInfo["status"] == DownloadManagerSTATUS.STATUS_RUNNING && downloadInfo["status"] != null) {
             viewBinding.downloadButton.setColorFilter( ContextCompat.getColor(context, R.color.blue_download));
