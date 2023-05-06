@@ -7,7 +7,9 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
-    <color name="green">#00FF0A</color>
+    <color name="green_download">#00FF0A</color>
+    <color name="blue_download">#1538F8</color>
+    <color name="red_download">#F44336</color>
     <color name="forground_timebar">#F44B4B</color>
     <color name="backgound_timebar">#707070</color>
     <color name="buffered_timebar">#FFA1A1</color>

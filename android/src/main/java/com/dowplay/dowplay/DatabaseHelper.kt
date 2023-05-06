@@ -50,7 +50,8 @@ class DatabaseHelper(innerContext: Context) : SQLiteOpenHelper(innerContext, DAT
 
 
     override fun onCreate(db: SQLiteDatabase) {
-        db.execSQL("CREATE TABLE $main_table ($COL_download_id NUMBER PRIMARY KEY ON CONFLICT REPLACE, $COL_status NUMBER,  $COL_progress NUMBER,$COL_video_path TEXT, $COL_name TEXT, $COL_media_type TEXT, $COL_media_id TEXT UNIQUE ON CONFLICT REPLACE, $COL_media_data TEXT, $COL_user_id TEXT, $COL_profile_id TEXT )")
+        // ON CONFLICT REPLACE
+        db.execSQL("CREATE TABLE $main_table ($COL_download_id NUMBER PRIMARY KEY, $COL_status NUMBER,  $COL_progress NUMBER,$COL_video_path TEXT, $COL_name TEXT, $COL_media_type TEXT, $COL_media_id TEXT UNIQUE, $COL_media_data TEXT, $COL_user_id TEXT, $COL_profile_id TEXT)")
         db.execSQL("CREATE TABLE $seasons_table (id INTEGER PRIMARY KEY AUTOINCREMENT, $COL_media_id TEXT,  $COL_season_id TEXT , $COL_name TEXT, $COL_order TEXT, UNIQUE($COL_media_id, $COL_season_id) ON CONFLICT REPLACE)")
         db.execSQL("CREATE TABLE $episodes_table ($COL_download_id NUMBER PRIMARY KEY, $COL_status NUMBER,  $COL_progress NUMBER,$COL_video_path TEXT, $COL_media_id TEXT,  $COL_season_id TEXT,$COL_episode_id TEXT , $COL_name TEXT, $COL_order TEXT, UNIQUE($COL_media_id, $COL_season_id, $COL_episode_id) ON CONFLICT REPLACE)")
 
@@ -255,7 +256,7 @@ class DatabaseHelper(innerContext: Context) : SQLiteOpenHelper(innerContext, DAT
             mapData["media_data"] = mediaData
             mapData["user_id"] = userId
             mapData["profile_id"] = profileId
-            allDownloadData += mapData
+            allDownloadData.add(mapData)
         }
 
         Log.d("Sqlite Data:", "$mapData")
@@ -280,8 +281,9 @@ class DatabaseHelper(innerContext: Context) : SQLiteOpenHelper(innerContext, DAT
         val cursor = db.rawQuery(query, null)
 
         val allDownloadData = ArrayList<HashMap<String, Any>>()
-        val mapData = HashMap<String, Any>()
+
         while (cursor.moveToNext()) {
+            val mapData = HashMap<String, Any>()
             val downloadId = cursor.getInt(cursor.getColumnIndex(COL_download_id))
             val status = cursor.getInt(cursor.getColumnIndex(COL_status))
             val progress = cursor.getInt(cursor.getColumnIndex(COL_progress))
@@ -302,10 +304,12 @@ class DatabaseHelper(innerContext: Context) : SQLiteOpenHelper(innerContext, DAT
             mapData["media_data"] = mediaData
             mapData["user_id"] = userId
             mapData["profile_id"] = profileId
+            //Log.d("Hello:::",mediaType)
             allDownloadData += mapData
         }
 
-        Log.d("Sqlite Data:", "$allDownloadData")
+        Log.d("Sqlite Data:", "${allDownloadData[0]["media_type"]}")
+        Log.d("Sqlite Data:", "${allDownloadData[1]["media_type"]}")
 
         cursor.close()
         db.close()
@@ -326,8 +330,9 @@ class DatabaseHelper(innerContext: Context) : SQLiteOpenHelper(innerContext, DAT
         val cursor = db.rawQuery(query, selectionArgs)
 
         val allDownloadData = ArrayList<HashMap<String, Any>>()
-        val mapData = HashMap<String, Any>()
+
         while (cursor.moveToNext()) {
+            val mapData = HashMap<String, Any>()
             val mediaId = cursor.getString(cursor.getColumnIndex(COL_media_id))
             val seasonId = cursor.getString(cursor.getColumnIndex(COL_season_id))
             val name = cursor.getString(cursor.getColumnIndex(COL_name))
@@ -367,8 +372,9 @@ class DatabaseHelper(innerContext: Context) : SQLiteOpenHelper(innerContext, DAT
         val cursor = db.rawQuery(query, selectionArgs)
 
         val allDownloadData = ArrayList<HashMap<String, Any>>()
-        val mapData = HashMap<String, Any>()
+
         while (cursor.moveToNext()) {
+            val mapData = HashMap<String, Any>()
             val downloadId = cursor.getInt(cursor.getColumnIndex(COL_download_id))
             val status = cursor.getInt(cursor.getColumnIndex(COL_status))
             val progress = cursor.getInt(cursor.getColumnIndex(COL_progress))
@@ -389,7 +395,7 @@ class DatabaseHelper(innerContext: Context) : SQLiteOpenHelper(innerContext, DAT
             mapData["name"] = name
             mapData["order"] = order
 
-            allDownloadData += mapData
+            allDownloadData.add(mapData)
         }
 
         Log.d("Sqlite Data:", "$allDownloadData")

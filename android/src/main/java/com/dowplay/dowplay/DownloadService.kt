@@ -23,7 +23,8 @@ class DownloadService : Service() {
     }
 
     var currentProgressPercent: Int = 0
-
+    var isDone:Boolean = false
+    var mediaType:String? = null
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
 
         ///////////////
@@ -32,7 +33,7 @@ class DownloadService : Service() {
             val dirPath = intent.getStringExtra("dir_path")
             val fileName = intent.getStringExtra("video_name")
             val fullPath = intent.getStringExtra("full_path")
-            val mediaType = intent.getStringExtra("media_type")
+            mediaType = intent.getStringExtra("media_type")
             val mediaId = intent.getStringExtra("media_id")
             val mediaName = intent.getStringExtra("media_name")
             val mediaData = intent.getStringExtra("media_data")
@@ -153,6 +154,7 @@ class DownloadService : Service() {
                             DownloadManagerSTATUS.STATUS_SUCCESSFUL,
                             100
                         )
+                        isDone = true
                         stopSelf()
                     }
 
@@ -209,7 +211,16 @@ class DownloadService : Service() {
     }
 
     override fun onDestroy() {
+        if(!isDone) {
+            updateStatusDownloadInDB(
+                mediaType.toString(),
+                DownloadManagerSTATUS.STATUS_FAILED,
+                currentProgressPercent
+            )
+            stopSelf()
+        }
         PRDownloader.cancel(downloadId)
+
         super.onDestroy()
     }
 }

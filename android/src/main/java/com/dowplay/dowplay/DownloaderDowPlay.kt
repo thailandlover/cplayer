@@ -22,7 +22,7 @@ class DownloaderDowPlay(innerContext: Context) {
     }
 
     fun startDownload(url: String,name:String, mediaType: String, mediaId:String, mediaData: String,userId:String, profileId:String
-    ,seasonId:String, episodeId:String, seasonOrder:String,episodeOrder:String, seasonName:String,episodeName:String) {
+    ,seasonId:String, episodeId:String, seasonOrder:String,episodeOrder:String, seasonName:String,episodeName:String): Int {
         //PRDownloader.initialize(context);
         // Enabling database for resume support even after the application is killed:
         //val url1 = "https://thekee.gcdn.co/video/m-159n/English/Animation&Family/The.Simpsons.in.Plusaversary.2021.1080.mp4"
@@ -31,8 +31,10 @@ class DownloaderDowPlay(innerContext: Context) {
         //var dirPath = "${context.getExternalFilesDir(null)}"
         //for save in private pkg app
         val downloadInfo = DatabaseHelper(context).getDownloadInfoFromDB(mediaId, mediaType)
-        if(downloadInfo["status"] == DownloadManagerSTATUS.STATUS_SUCCESSFUL){
+        Log.d("startDownload Method","this video is downloaded..."+mediaId+" > "+mediaType+" > "+downloadInfo["status"])
+        if(downloadInfo["status"] == DownloadManagerSTATUS.STATUS_SUCCESSFUL || downloadInfo["status"] == DownloadManagerSTATUS.STATUS_RUNNING){
             Log.d("startDownload Method","this video is downloaded...")
+            return 0
         }else {
             val dirPath = context.filesDir.path + "/downplay"
             val videoName = generateRandomToken(50) + ".mp4"
@@ -57,6 +59,7 @@ class DownloaderDowPlay(innerContext: Context) {
                 putExtra("episode_name", episodeName)
             }
             context.startService(intent)
+            return 1
         }
     }
     fun pauseDownload(media_id: String,media_type: String) {

@@ -672,6 +672,7 @@ class _MyAppState extends State<MyApp> {
         ),
         body: Center(
           child: SingleChildScrollView(
+            scrollDirection: Axis.vertical,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
@@ -701,7 +702,7 @@ class _MyAppState extends State<MyApp> {
                 Visibility(
                   visible: _downloadsList.isNotEmpty,
                   child: Padding(
-                    padding: const EdgeInsets.all(8.0),
+                    padding: const EdgeInsets.all(20.0),
                     child: ListView.builder(
                       shrinkWrap: true,
                       itemCount: _downloadsList.length,

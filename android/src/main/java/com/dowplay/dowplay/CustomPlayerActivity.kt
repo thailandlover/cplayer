@@ -21,6 +21,7 @@ import android.widget.RadioButton
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
+import androidx.core.content.ContextCompat
 import androidx.core.view.*
 import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C
@@ -40,7 +41,6 @@ import com.dowplay.dowplay.databinding.ActivityCustomPlayerBinding
 import com.dowplay.dowplay.databinding.SettingBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import io.flutter.embedding.android.FlutterActivity
-import java.util.HashMap
 
 @UnstableApi
 /**
@@ -60,9 +60,11 @@ class CustomPlayerActivity() : FlutterActivity() {
          Uri.parse("https://storage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4")
      )*/
     var videoUris = arrayOf<String>()
-
     var videoTitle = arrayOf<String>()
     var videoSubTitle = arrayOf<String>()
+
+    val movie:String = "movie"
+    val series:String = "series"
     /*listOf(
        "Video 1","Klaus","Video 2"
     )*/
@@ -107,12 +109,12 @@ class CustomPlayerActivity() : FlutterActivity() {
     }
 
     private fun seekToLastWatching() {
-        if (mediaType == "movie") {
+        if (mediaType == movie) {
             movieMedia?.info?.watching?.currentTime?.toLong()?.let {
                 player?.seekTo(it * 1000)
                 print("B7b creent time :::: " + it * 1000)
             }
-        } else if (mediaType == "series") {
+        } else if (mediaType == series) {
             episodeMedia?.mediaGroup?.episodes?.get(startVideoPosition)?.watching?.currentTime?.toLong()
                 ?.let {
                     player?.seekTo(it * 1000)
@@ -258,10 +260,10 @@ class CustomPlayerActivity() : FlutterActivity() {
         if (startVideoPosition > 0) {
             addToWatchingList()
             startVideoPosition = (startVideoPosition - 1 + videoUris.size) % videoUris.size
+            setGreenColorForDownloadButtonIfIsDownloaded(mediaType)
             player?.seekToPreviousMediaItem()
             viewBinding.videoSubTitle.text = videoSubTitle[startVideoPosition]
             seekToLastWatching()
-            setGreenColorForDownloadButtonIfIsDownloaded(mediaType)
         } else {
             Toast.makeText(
                 this,
@@ -275,10 +277,10 @@ class CustomPlayerActivity() : FlutterActivity() {
         if (videoUris.size - 1 > startVideoPosition) {
             addToWatchingList()
             startVideoPosition = (startVideoPosition + 1) % videoUris.size
+            setGreenColorForDownloadButtonIfIsDownloaded(mediaType)
             player?.seekToNextMediaItem()
             viewBinding.videoSubTitle.text = videoSubTitle[startVideoPosition]
             seekToLastWatching()
-            setGreenColorForDownloadButtonIfIsDownloaded(mediaType)
         } else {
             Toast.makeText(
                 this,
@@ -510,7 +512,38 @@ class CustomPlayerActivity() : FlutterActivity() {
     }
 
     private fun download() {
-
+        var result = 0
+        if(mediaType == movie){
+            result = DownloaderDowPlay(context).startDownload(
+                movieMedia?.info?.downloadURL.toString(),
+                movieMedia?.title.toString(),
+                movieMedia?.mediaType.toString(),
+                movieMedia?.mediaID.toString(), jsonPlayMovieData?:"",
+                movieMedia?.userID.toString(), movieMedia?.profileID.toString(), "", "", "", "", "", ""
+            )
+        }else{
+            //episodeMedia?.mediaGroup?.episodes?.get(startVideoPosition)?.id.toString()
+            result = DownloaderDowPlay(context).startDownload(
+                episodeMedia?.mediaGroup?.episodes?.get(startVideoPosition)?.downloadURL.toString(),
+                episodeMedia?.mediaGroup!!.tvShow!!.title!!,
+                episodeMedia!!.mediaType!!,
+                episodeMedia!!.mediaGroup!!.itemsIDS!!.tvShowID!!,
+                jsonPlayEpisodeData?:"",
+                episodeMedia!!.userID!!,
+                episodeMedia!!.profileID!!,
+                episodeMedia!!.mediaGroup!!.itemsIDS!!.seasonID!!,
+                episodeMedia?.mediaGroup?.episodes?.get(startVideoPosition)?.id.toString(),
+                episodeMedia!!.mediaGroup!!.season!!.seasonNumber!!,
+                episodeMedia?.mediaGroup?.episodes?.get(startVideoPosition)?.order.toString(),
+                episodeMedia!!.mediaGroup!!.season!!.title!!,
+                episodeMedia?.mediaGroup?.episodes?.get(startVideoPosition)?.title.toString()
+            )
+        }
+        if (result == 1) {
+            viewBinding.downloadButton.setColorFilter( ContextCompat.getColor(context, R.color.blue_download));
+        } else {
+            //viewBinding.downloadButton.setColorFilter(Color.parseColor("#ffffff"));
+        }
     }
 
     @RequiresApi(Build.VERSION_CODES.N)
@@ -549,16 +582,18 @@ class CustomPlayerActivity() : FlutterActivity() {
     private var mediaType: String = ""
     private var startVideoPosition: Int = 0
     private var currentLanguage: String = "en"
+    private var jsonPlayMovieData:String? = null
+    private var jsonPlayEpisodeData:String? = null
     private fun initToGetDataFromIntentAndTypeMedia() {
         //System.out.println("Bom Gson::: "+json);
         print("Bom 101:::")
-        val jsonPlayMovieData = intent.getStringExtra("PlayMovieData")
-        val jsonPlayEpisodeData = intent.getStringExtra("PlayEpisodeData")
+        jsonPlayMovieData = intent.getStringExtra("PlayMovieData")
+        jsonPlayEpisodeData = intent.getStringExtra("PlayEpisodeData")
         if (jsonPlayMovieData != null) {
 
             movieMedia = MovieMedia.fromJson(jsonPlayMovieData.toString())
 
-            mediaType = movieMedia?.mediaType ?: "movie"
+            mediaType = movieMedia?.mediaType ?: movie
             currentLanguage = movieMedia?.lang ?: "en"
             setPlayerLanguage(currentLanguage, null)
 
@@ -572,7 +607,7 @@ class CustomPlayerActivity() : FlutterActivity() {
         } else if (jsonPlayEpisodeData != null) {
             episodeMedia = EpisodeMedia.fromJson(jsonPlayEpisodeData.toString())
 
-            mediaType = episodeMedia?.mediaType ?: "series"
+            mediaType = episodeMedia?.mediaType ?: series
             currentLanguage = episodeMedia?.lang ?: "en"
             setPlayerLanguage(currentLanguage, null)
 
@@ -582,6 +617,7 @@ class CustomPlayerActivity() : FlutterActivity() {
                 println("Item $index is $item")
                 videoUris += (item.mediaURL.toString())
                 videoSubTitle += (item.title.toString())
+                //Log.d("Path URL MEDIA:",item.mediaURL.toString())
             }
             ///////
             val index = episodeMedia?.mediaGroup?.episodes?.indexOfFirst { info -> info.id == episodeMedia?.info?.id }
@@ -606,15 +642,22 @@ class CustomPlayerActivity() : FlutterActivity() {
     }
 
     private fun setGreenColorForDownloadButtonIfIsDownloaded(mediaType:String){
-        var downloadInfo = HashMap<String, Any>()
-        if(mediaType == "series") {
+        var downloadInfo= HashMap<String, Any>()
+        if(mediaType == series) {
             downloadInfo = DatabaseHelper(context).getDownloadInfoFromDB(episodeMedia?.mediaGroup?.episodes?.get(startVideoPosition)?.id.toString(), mediaType)
+            //videoUris[startVideoPosition] = downloadInfo["video_path"].toString()
         }else{
             downloadInfo = DatabaseHelper(context).getDownloadInfoFromDB(movieMedia?.mediaID.toString(), mediaType)
         }
         //////////
+        //Log.d("1122334455","${downloadInfo["status"]}")*/
         if (downloadInfo["status"] == DownloadManagerSTATUS.STATUS_SUCCESSFUL && downloadInfo["status"] != null) {
-            viewBinding.downloadButton.setColorFilter(Color.parseColor("#00FF0A"));
+            videoUris[startVideoPosition] = downloadInfo["video_path"].toString()
+            viewBinding.downloadButton.setColorFilter( ContextCompat.getColor(context, R.color.green_download));
+        }else if (downloadInfo["status"] == DownloadManagerSTATUS.STATUS_RUNNING && downloadInfo["status"] != null) {
+            viewBinding.downloadButton.setColorFilter( ContextCompat.getColor(context, R.color.blue_download));
+        }else if (downloadInfo["status"] == DownloadManagerSTATUS.STATUS_FAILED && downloadInfo["status"] != null) {
+            viewBinding.downloadButton.setColorFilter( ContextCompat.getColor(context, R.color.red_download));
         } else {
             viewBinding.downloadButton.setColorFilter(Color.parseColor("#ffffff"));
         }
@@ -649,13 +692,13 @@ class CustomPlayerActivity() : FlutterActivity() {
 
     private fun addToWatchingList() {
         if (player != null && (player?.currentPosition ?: 0) > 0 && (player?.duration ?: 0) > 0) {
-            if (mediaType == "movie") {
+            if (mediaType == movie) {
                 //movie
                 Log.d("Bom this is time: ", (player?.currentPosition?.div(1000)).toString())
                 RetrofitBuildRequest().createRequestForAddWatching(
                     movieMedia?.apiBaseURL.toString(),
                     movieMedia?.profileID.toString(),
-                    "movie",
+                    movie,
                     movieMedia?.mediaID.toString(),
                     //movieMedia?.info?.watching?.duration.toString(),
                     player?.duration?.div(1000).toString(),
@@ -663,7 +706,7 @@ class CustomPlayerActivity() : FlutterActivity() {
                     movieMedia?.token.toString(),
                     currentLanguage
                 )
-            } else if (mediaType == "series") {
+            } else if (mediaType == series) {
                 //episode
                 RetrofitBuildRequest().createRequestForAddWatching(
                     episodeMedia?.apiBaseURL.toString(),

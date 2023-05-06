@@ -103,7 +103,7 @@ public class DowplayPlugin implements FlutterPlugin, MethodCallHandler {
             String json = gson.toJson(call.arguments);
             MovieMedia movieMedia = MovieMedia.Companion.fromJson(json);
             System.out.println("B7b Gson::: " + movieMedia);
-            new DownloaderDowPlay(context).startDownload(movieMedia.getUrl(), movieMedia.getTitle(), movieMedia.getMediaType(),
+            new DownloaderDowPlay(context).startDownload(movieMedia.getInfo().getDownloadURL(), movieMedia.getTitle(), movieMedia.getMediaType(),
                     movieMedia.getMediaID(), call.arguments.toString(), movieMedia.getUserID(), movieMedia.getProfileID(), "", "", "", "", "", "");
             List returnData = new ArrayList();
             result.success(returnData);
