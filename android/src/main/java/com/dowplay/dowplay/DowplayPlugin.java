@@ -123,18 +123,32 @@ public class DowplayPlugin implements FlutterPlugin, MethodCallHandler {
             result.success(returnData);
 //////////////////////////////////////////////////////////////////////////////////////////////////
         } else if (call.method.equals("pause_download")) {
-            new DownloaderDowPlay(context).pauseDownload(-1490791117);
+            Log.d(TAG, "onMethodCall: pause_download");
+            Log.d(TAG, "onMethodCall: " + call.arguments.toString());
+            //{mediaType=movie, mediaId=377530}
+            String mediaType = call.arguments.toString().replaceAll(".*mediaType=(\\d+).*", "$1");
+            String mediaId = call.arguments.toString().replaceAll(".*mediaId=(\\d+).*", "$1");
+            new DownloaderDowPlay(context).pauseDownload(mediaId,mediaType);
             List returnData = new ArrayList();
             result.success(returnData);
 //////////////////////////////////////////////////////////////////////////////////////////////////
         } else if (call.method.equals("resume_download")) {
-            System.out.println("Bom resume_download");
-            new DownloaderDowPlay(context).resumeDownload(-1490791117);
+            Log.d(TAG, "onMethodCall: resume_download");
+            Log.d(TAG, "onMethodCall: " + call.arguments.toString());
+            //{mediaType=movie, mediaId=377530}
+            String mediaType = call.arguments.toString().replaceAll(".*mediaType=(\\d+).*", "$1");
+            String mediaId = call.arguments.toString().replaceAll(".*mediaId=(\\d+).*", "$1");
+            new DownloaderDowPlay(context).resumeDownload(mediaId,mediaType);
             List returnData = new ArrayList();
             result.success(returnData);
 //////////////////////////////////////////////////////////////////////////////////////////////////
         } else if (call.method.equals("cancel_download")) {
-            new DownloaderDowPlay(context).cancelDownload(-1490791117);
+            Log.d(TAG, "onMethodCall: cancel_download");
+            Log.d(TAG, "onMethodCall: " + call.arguments.toString());
+            //{mediaType=movie, mediaId=377530}
+            String mediaType = call.arguments.toString().replaceAll(".*mediaType=(\\d+).*", "$1");
+            String mediaId = call.arguments.toString().replaceAll(".*mediaId=(\\d+).*", "$1");
+            new DownloaderDowPlay(context).cancelDownload(mediaId,mediaType);
             List returnData = new ArrayList();
             result.success(returnData);
 //////////////////////////////////////////////////////////////////////////////////////////////////

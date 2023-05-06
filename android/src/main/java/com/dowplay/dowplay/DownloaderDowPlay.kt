@@ -2,7 +2,9 @@ package com.dowplay.dowplay
 
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import com.downloader.PRDownloader
+import java.io.File
 import java.security.SecureRandom
 import java.math.BigInteger
 
@@ -52,15 +54,33 @@ class DownloaderDowPlay(innerContext: Context) {
         }
         context.startService(intent)
     }
-    fun pauseDownload(downloadId: Int) {
-        PRDownloader.pause(downloadId)
+    fun pauseDownload(media_id: String,media_type: String) {
+        val downloadData = DatabaseHelper(context).getDownloadIdAndVideoPathFromDB(media_id,media_type)
+        val downloadId = downloadData["download_id"]
+        if(downloadId.toString().trim().isNotEmpty() && downloadId != null) {
+            PRDownloader.pause(downloadId.toString().toInt())
+        }
     }
 
-    fun resumeDownload(downloadId: Int) {
-        PRDownloader.resume(downloadId)
+    fun resumeDownload(media_id: String,media_type: String) {
+        val downloadData = DatabaseHelper(context).getDownloadIdAndVideoPathFromDB(media_id,media_type)
+        val downloadId = downloadData["download_id"]
+        if(downloadId.toString().trim().isNotEmpty() && downloadId != null) {
+            PRDownloader.resume(downloadId.toString().toInt())
+        }
     }
-    fun cancelDownload(downloadId: Int) {
-        PRDownloader.cancel(downloadId)
+    fun cancelDownload(media_id: String,media_type: String) {
+        val downloadData = DatabaseHelper(context).getDownloadIdAndVideoPathFromDB(media_id,media_type)
+        val downloadId = downloadData["download_id"]
+        val videoPath = downloadData["video_path"]
+        if(downloadId.toString().trim().isNotEmpty() && downloadId != null) {
+            PRDownloader.cancel(downloadId.toString().toInt())
+            val file = File(videoPath.toString())
+            if (file.exists()) {
+                file.delete()
+            }
+            DatabaseHelper(context).deleteMediaFromDB(media_id, media_type)
+        }
     }
     fun getDownloadMediaByDownloadID(media_id: String, media_type:String): ArrayList<HashMap<String, Any>> {
         return DatabaseHelper(context).getDownloadDataFromDbByDownloadId(media_id,media_type)
