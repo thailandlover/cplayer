@@ -578,11 +578,15 @@ class CustomPlayerActivity() : FlutterActivity() {
                 videoUris += (item.mediaURL.toString())
                 videoSubTitle += (item.title.toString())
             }
-
-            startVideoPosition = episodeMedia?.info?.order?.toIntOrNull() ?: 0
+            ///////
+            val index = episodeMedia?.mediaGroup?.episodes?.indexOfFirst { info -> info.id == episodeMedia?.info?.id }
+            startVideoPosition = index?:0
+            print("what the hell ? "+startVideoPosition)
+            /*startVideoPosition = episodeMedia?.info?.order?.toIntOrNull() ?: 0
             if (startVideoPosition > 0) {
                 startVideoPosition -= 1
-            }
+            }*/
+            //////
             viewBinding.videoTitle.text = episodeMedia?.mediaGroup?.tvShow?.title.toString()
             viewBinding.videoSubTitle.text = videoSubTitle[startVideoPosition]
 
