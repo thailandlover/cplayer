@@ -7,6 +7,7 @@ import android.app.PictureInPictureParams
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Build
 import android.os.Bundle
@@ -39,6 +40,7 @@ import com.dowplay.dowplay.databinding.ActivityCustomPlayerBinding
 import com.dowplay.dowplay.databinding.SettingBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import io.flutter.embedding.android.FlutterActivity
+import java.util.HashMap
 
 @UnstableApi
 /**
@@ -259,6 +261,7 @@ class CustomPlayerActivity() : FlutterActivity() {
             player?.seekToPreviousMediaItem()
             viewBinding.videoSubTitle.text = videoSubTitle[startVideoPosition]
             seekToLastWatching()
+            setGreenColorForDownloadButtonIfIsDownloaded(mediaType)
         } else {
             Toast.makeText(
                 this,
@@ -275,6 +278,7 @@ class CustomPlayerActivity() : FlutterActivity() {
             player?.seekToNextMediaItem()
             viewBinding.videoSubTitle.text = videoSubTitle[startVideoPosition]
             seekToLastWatching()
+            setGreenColorForDownloadButtonIfIsDownloaded(mediaType)
         } else {
             Toast.makeText(
                 this,
@@ -552,17 +556,18 @@ class CustomPlayerActivity() : FlutterActivity() {
         val jsonPlayEpisodeData = intent.getStringExtra("PlayEpisodeData")
         if (jsonPlayMovieData != null) {
 
-
             movieMedia = MovieMedia.fromJson(jsonPlayMovieData.toString())
 
             mediaType = movieMedia?.mediaType ?: "movie"
             currentLanguage = movieMedia?.lang ?: "en"
             setPlayerLanguage(currentLanguage, null)
 
-            videoUris = arrayOf(movieMedia?.info?.hdURL.toString())!!
+            videoUris = arrayOf(movieMedia?.url.toString())!!
             videoTitle = arrayOf(movieMedia?.title.toString())!!
             viewBinding.videoTitle.text = videoTitle[0]
             videoSubTitle += ("")
+            ////////////////////////
+            setGreenColorForDownloadButtonIfIsDownloaded(mediaType)
 
         } else if (jsonPlayEpisodeData != null) {
             episodeMedia = EpisodeMedia.fromJson(jsonPlayEpisodeData.toString())
@@ -589,7 +594,8 @@ class CustomPlayerActivity() : FlutterActivity() {
             //////
             viewBinding.videoTitle.text = episodeMedia?.mediaGroup?.tvShow?.title.toString()
             viewBinding.videoSubTitle.text = videoSubTitle[startVideoPosition]
-
+            /////
+            setGreenColorForDownloadButtonIfIsDownloaded(mediaType)
         } else {
             Toast.makeText(
                 this,
@@ -599,6 +605,20 @@ class CustomPlayerActivity() : FlutterActivity() {
         }
     }
 
+    private fun setGreenColorForDownloadButtonIfIsDownloaded(mediaType:String){
+        var downloadInfo = HashMap<String, Any>()
+        if(mediaType == "series") {
+            downloadInfo = DatabaseHelper(context).getDownloadInfoFromDB(episodeMedia?.mediaGroup?.episodes?.get(startVideoPosition)?.id.toString(), mediaType)
+        }else{
+            downloadInfo = DatabaseHelper(context).getDownloadInfoFromDB(movieMedia?.mediaID.toString(), mediaType)
+        }
+        //////////
+        if (downloadInfo["status"] == DownloadManagerSTATUS.STATUS_SUCCESSFUL && downloadInfo["status"] != null) {
+            viewBinding.downloadButton.setColorFilter(Color.parseColor("#00FF0A"));
+        } else {
+            viewBinding.downloadButton.setColorFilter(Color.parseColor("#ffffff"));
+        }
+    }
     public override fun onResume() {
         super.onResume()
         hideSystemUi()

@@ -123,8 +123,7 @@ class _MyAppState extends State<MyApp> {
     movieMedia = MovieMedia(
         title: "The Simpsons in Plusaversary",
         subTitle: "",
-        url:
-            "https://thekee.gcdn.co/video/m-159n/English/Animation&Family/The.Simpsons.in.Plusaversary.2021.1080.mp4?md5=QA-5PWsq9OIEaa0EM79p9A&expires=1678670074",
+        url: "https://thekee.gcdn.co/video/m-159n/English/Animation&Family/The.Simpsons.in.Plusaversary.2021.1080.mp4?md5=QA-5PWsq9OIEaa0EM79p9A&expires=1678670074",
         mediaId: "377530",
         mediaType: "movie",
         userId: "245394",
@@ -137,8 +136,7 @@ class _MyAppState extends State<MyApp> {
     downloadMovie = DownloadMovie(
         title: "The Simpsons in Plusaversary",
         subTitle: "",
-        url:
-            "https://thekee.gcdn.co/video/m-159n/English/Animation&Family/The.Simpsons.in.Plusaversary.2021.1080.mp4?md5=QA-5PWsq9OIEaa0EM79p9A&expires=1678670074",
+        url: "https://thekee.gcdn.co/video/m-159n/English/Animation&Family/The.Simpsons.in.Plusaversary.2021.1080.mp4?md5=QA-5PWsq9OIEaa0EM79p9A&expires=1678670074",
         mediaId: "377530",
         mediaType: "movie",
         userId: "245394",

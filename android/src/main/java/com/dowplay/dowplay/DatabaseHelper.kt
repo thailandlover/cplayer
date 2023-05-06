@@ -400,18 +400,18 @@ class DatabaseHelper(innerContext: Context) : SQLiteOpenHelper(innerContext, DAT
     }
 
     @SuppressLint("Range")
-    fun getDownloadIdAndVideoPathFromDB(
+    fun getDownloadInfoFromDB(
         media_id: String,
         media_type: String
     ): HashMap<String, Any> {
 
         val dbHelper = DatabaseHelper(context)
         val db = dbHelper.readableDatabase
-        var query = ""
-        query = if (media_type == "series") {
-            "SELECT $COL_download_id, $COL_video_path} FROM $episodes_table WHERE $COL_episode_id = ?"
+
+        var query = if (media_type == "series") {
+            "SELECT $COL_download_id, $COL_video_path, $COL_status FROM $episodes_table WHERE $COL_episode_id = ?"
         } else {
-            "SELECT $COL_download_id, $COL_video_path FROM $main_table WHERE $COL_media_id = ?"
+            "SELECT $COL_download_id, $COL_video_path, $COL_status FROM $main_table WHERE $COL_media_id = ?"
         }
 
         val selectionArgs = arrayOf(media_id)
@@ -420,8 +420,10 @@ class DatabaseHelper(innerContext: Context) : SQLiteOpenHelper(innerContext, DAT
         val downloadData = HashMap<String, Any>()
         if (cursor.moveToFirst()) {
             val downloadId = cursor.getInt(cursor.getColumnIndex(COL_download_id))
+            val status = cursor.getInt(cursor.getColumnIndex(COL_status))
             val videoPath = cursor.getString(cursor.getColumnIndex(COL_video_path))
             downloadData["download_id"] = downloadId
+            downloadData["status"] = status
             downloadData["video_path"] = videoPath
         }
 
@@ -476,7 +478,7 @@ class DatabaseHelper(innerContext: Context) : SQLiteOpenHelper(innerContext, DAT
         }
     }
 
-    fun hasMoreEpisodeRow(tv_show_id: String, season_id: String): Int {
+    private fun hasMoreEpisodeRow(tv_show_id: String, season_id: String): Int {
         val dbHelper = DatabaseHelper(context)
         val db = dbHelper.readableDatabase
         val table = episodes_table
@@ -490,7 +492,7 @@ class DatabaseHelper(innerContext: Context) : SQLiteOpenHelper(innerContext, DAT
         cursor.close()
         return count
     }
-    fun hasMoreSeasonRow(tv_show_id: String): Int {
+    private fun hasMoreSeasonRow(tv_show_id: String): Int {
         val dbHelper = DatabaseHelper(context)
         val db = dbHelper.readableDatabase
         val table = seasons_table

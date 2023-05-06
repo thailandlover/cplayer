@@ -30,32 +30,37 @@ class DownloaderDowPlay(innerContext: Context) {
         //for save in public pkg app
         //var dirPath = "${context.getExternalFilesDir(null)}"
         //for save in private pkg app
-        val dirPath = context.filesDir.path+"/downplay"
-        val videoName = generateRandomToken(50)+".mp4"
-        println("Bom Dir: $dirPath")
-        println("Bom Dir: ${"$dirPath/$videoName"}")
-        val intent = Intent(context, DownloadService::class.java).apply {
-            putExtra("url", url)
-            putExtra("dir_path", dirPath)
-            putExtra("video_name", videoName)
-            putExtra("full_path", "$dirPath/$videoName")
-            putExtra("media_type", mediaType)
-            putExtra("media_id", mediaId)
-            putExtra("media_name", name)
-            putExtra("media_data", mediaData)
-            putExtra("user_id", userId)
-            putExtra("profile_id", profileId)
-            putExtra("season_id", seasonId)
-            putExtra("episode_id", episodeId)
-            putExtra("season_order", seasonOrder)
-            putExtra("episode_order", episodeOrder)
-            putExtra("season_name", seasonName)
-            putExtra("episode_name", episodeName)
+        val downloadInfo = DatabaseHelper(context).getDownloadInfoFromDB(mediaId, mediaType)
+        if(downloadInfo["status"] == DownloadManagerSTATUS.STATUS_SUCCESSFUL){
+            Log.d("startDownload Method","this video is downloaded...")
+        }else {
+            val dirPath = context.filesDir.path + "/downplay"
+            val videoName = generateRandomToken(50) + ".mp4"
+            println("Bom Dir: $dirPath")
+            println("Bom Dir: ${"$dirPath/$videoName"}")
+            val intent = Intent(context, DownloadService::class.java).apply {
+                putExtra("url", url)
+                putExtra("dir_path", dirPath)
+                putExtra("video_name", videoName)
+                putExtra("full_path", "$dirPath/$videoName")
+                putExtra("media_type", mediaType)
+                putExtra("media_id", mediaId)
+                putExtra("media_name", name)
+                putExtra("media_data", mediaData)
+                putExtra("user_id", userId)
+                putExtra("profile_id", profileId)
+                putExtra("season_id", seasonId)
+                putExtra("episode_id", episodeId)
+                putExtra("season_order", seasonOrder)
+                putExtra("episode_order", episodeOrder)
+                putExtra("season_name", seasonName)
+                putExtra("episode_name", episodeName)
+            }
+            context.startService(intent)
         }
-        context.startService(intent)
     }
     fun pauseDownload(media_id: String,media_type: String) {
-        val downloadData = DatabaseHelper(context).getDownloadIdAndVideoPathFromDB(media_id,media_type)
+        val downloadData = DatabaseHelper(context).getDownloadInfoFromDB(media_id,media_type)
         val downloadId = downloadData["download_id"]
         if(downloadId.toString().trim().isNotEmpty() && downloadId != null) {
             PRDownloader.pause(downloadId.toString().toInt())
@@ -63,14 +68,14 @@ class DownloaderDowPlay(innerContext: Context) {
     }
 
     fun resumeDownload(media_id: String,media_type: String) {
-        val downloadData = DatabaseHelper(context).getDownloadIdAndVideoPathFromDB(media_id,media_type)
+        val downloadData = DatabaseHelper(context).getDownloadInfoFromDB(media_id,media_type)
         val downloadId = downloadData["download_id"]
         if(downloadId.toString().trim().isNotEmpty() && downloadId != null) {
             PRDownloader.resume(downloadId.toString().toInt())
         }
     }
     fun cancelDownload(media_id: String,media_type: String) {
-        val downloadData = DatabaseHelper(context).getDownloadIdAndVideoPathFromDB(media_id,media_type)
+        val downloadData = DatabaseHelper(context).getDownloadInfoFromDB(media_id,media_type)
         val downloadId = downloadData["download_id"]
         val videoPath = downloadData["video_path"]
         if(downloadId.toString().trim().isNotEmpty() && downloadId != null) {

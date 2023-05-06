@@ -202,7 +202,7 @@ class DownloadService : Service() {
         } else {
             DatabaseHelper(applicationContext).updateDownloadDataInDB(
                 downloadId,
-                DownloadManagerSTATUS.STATUS_FAILED,
+                status,
                 currentProgressPercent,
             )
         }
