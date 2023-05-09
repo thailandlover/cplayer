@@ -267,7 +267,7 @@ class DatabaseHelper(innerContext: Context) : SQLiteOpenHelper(innerContext, DAT
     }
 
     @SuppressLint("Range")
-    fun getAllDownloadDataFromDB(): List<HashMap<String, Any>> {
+    fun getAllDownloadDataFromDB(user_id: String, profile_id: String): List<HashMap<String, Any>> {
 
         val dbHelper = DatabaseHelper(context)
         val db = dbHelper.readableDatabase
@@ -276,9 +276,9 @@ class DatabaseHelper(innerContext: Context) : SQLiteOpenHelper(innerContext, DAT
                 "${COL_status}, ${COL_progress}, ${COL_video_path}," +
                 "${COL_name},${COL_media_type}," +
                 "${COL_media_id},${COL_media_data}, " +
-                "${COL_user_id},${COL_profile_id} FROM $main_table"
-
-        val cursor = db.rawQuery(query, null)
+                "${COL_user_id},${COL_profile_id} FROM $main_table WHERE $COL_user_id = ? AND $COL_profile_id = ?"
+        val selectionArgs = arrayOf(user_id, profile_id)
+        val cursor = db.rawQuery(query, selectionArgs)
 
         val allDownloadData = ArrayList<HashMap<String, Any>>()
 
@@ -308,8 +308,8 @@ class DatabaseHelper(innerContext: Context) : SQLiteOpenHelper(innerContext, DAT
             allDownloadData += mapData
         }
 
-        Log.d("Sqlite Data:", "${allDownloadData[0]["media_type"]}")
-        Log.d("Sqlite Data:", "${allDownloadData[1]["media_type"]}")
+        //Log.d("Sqlite Data:", "${allDownloadData[0]["media_type"]}")
+        //Log.d("Sqlite Data:", "${allDownloadData[1]["media_type"]}")
 
         cursor.close()
         db.close()

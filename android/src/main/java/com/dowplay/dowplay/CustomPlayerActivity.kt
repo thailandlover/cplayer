@@ -1,26 +1,29 @@
 package com.dowplay.dowplay
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.app.PictureInPictureParams
 import android.content.Context
+import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.Color
-import android.graphics.drawable.ColorDrawable
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.VibrationEffect
 import android.os.Vibrator
+import android.provider.Settings
 import android.util.Log
 import android.util.Rational
-import android.view.DragEvent
 import android.view.LayoutInflater
-import android.view.MotionEvent
 import android.view.View
 import android.widget.LinearLayout
 import android.widget.RadioButton
 import android.widget.TextView
 import android.widget.Toast
 import androidx.annotation.RequiresApi
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.*
 import androidx.media3.common.AudioAttributes
@@ -38,9 +41,8 @@ import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.DefaultTrackNameProvider
 import androidx.media3.ui.PlayerView
 import com.dowplay.dowplay.databinding.ActivityCustomPlayerBinding
-import com.dowplay.dowplay.databinding.SettingBinding
 import com.dowplay.dowplay.databinding.CustomControlViewBinding
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.dowplay.dowplay.databinding.SettingBinding
 import io.flutter.embedding.android.FlutterActivity
 
 @UnstableApi
@@ -68,8 +70,8 @@ class CustomPlayerActivity() : FlutterActivity() {
     var videoTitle = arrayOf<String>()
     var videoSubTitle = arrayOf<String>()
 
-    val movie:String = "movie"
-    val series:String = "series"
+    val movie: String = "movie"
+    val series: String = "series"
     /*listOf(
        "Video 1","Klaus","Video 2"
     )*/
@@ -80,7 +82,7 @@ class CustomPlayerActivity() : FlutterActivity() {
     ///////////////////////////////////////////////////////////////////////////////////////////////
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Log.d("current stats screen:","onCreate")
+        Log.d("current stats screen:", "onCreate")
         setContentView(viewBinding.root)
 
         initializeBinding()
@@ -116,7 +118,7 @@ class CustomPlayerActivity() : FlutterActivity() {
     }
 
     private fun seekToLastWatching() {
-        if(playbackPosition == 0L) {
+        if (playbackPosition == 0L) {
             if (mediaType == movie) {
                 movieMedia?.info?.watching?.currentTime?.toLong()?.let {
                     player?.seekTo(it * 1000)
@@ -129,7 +131,7 @@ class CustomPlayerActivity() : FlutterActivity() {
                         print("B7b creent time :::: " + it * 1000)
                     }
             }
-        }else{
+        } else {
             player?.seekTo(playbackPosition)
             print("B7b creent time :::: $playbackPosition")
         }
@@ -170,8 +172,6 @@ class CustomPlayerActivity() : FlutterActivity() {
     @SuppressLint("NewApi")
     private fun initializeBinding() {
 
-        // Hide the include contents
-        //includeView.visibility = View.VISIBLE //
         /////////////////////////////////////////
         viewBinding.backButton.setOnClickListener {
             vibratePhone()
@@ -212,15 +212,14 @@ class CustomPlayerActivity() : FlutterActivity() {
             vibratePhone()
             if (player != null) {
                 settingScreen()
-                //includeView.visibility = View.VISIBLE
             }
         }
         viewBinding.playerSettingText.setOnClickListener {
-                    vibratePhone()
-                    if (player != null) {
-                        settingScreen()
-                    }
-         }
+            vibratePhone()
+            if (player != null) {
+                settingScreen()
+            }
+        }
         viewBinding.downloadButton.setOnClickListener {
             vibratePhone()
             download()
@@ -533,22 +532,30 @@ class CustomPlayerActivity() : FlutterActivity() {
 
     private fun download() {
         var result = 0
-        if(mediaType == movie){
-            result = DownloaderDowPlay(context).startDownload(
+        if (mediaType == movie) {
+            result = DownloaderDowPlay(context, activity).startDownload(
                 movieMedia?.info?.downloadURL.toString(),
                 movieMedia?.title.toString(),
                 movieMedia?.mediaType.toString(),
-                movieMedia?.mediaID.toString(), jsonPlayMovieData?:"",
-                movieMedia?.userID.toString(), movieMedia?.profileID.toString(), "", "", "", "", "", ""
+                movieMedia?.mediaID.toString(),
+                jsonPlayMovieData ?: "",
+                movieMedia?.userID.toString(),
+                movieMedia?.profileID.toString(),
+                "",
+                "",
+                "",
+                "",
+                "",
+                ""
             )
-        }else{
+        } else {
             //episodeMedia?.mediaGroup?.episodes?.get(startVideoPosition)?.id.toString()
-            result = DownloaderDowPlay(context).startDownload(
+            result = DownloaderDowPlay(context, activity).startDownload(
                 episodeMedia?.mediaGroup?.episodes?.get(startVideoPosition)?.downloadURL.toString(),
                 episodeMedia?.mediaGroup!!.tvShow!!.title!!,
                 episodeMedia!!.mediaType!!,
                 episodeMedia!!.mediaGroup!!.itemsIDS!!.tvShowID!!,
-                jsonPlayEpisodeData?:"",
+                jsonPlayEpisodeData ?: "",
                 episodeMedia!!.userID!!,
                 episodeMedia!!.profileID!!,
                 episodeMedia!!.mediaGroup!!.itemsIDS!!.seasonID!!,
@@ -560,7 +567,12 @@ class CustomPlayerActivity() : FlutterActivity() {
             )
         }
         if (result == 1) {
-            viewBinding.downloadButton.setColorFilter( ContextCompat.getColor(context, R.color.blue_download));
+            viewBinding.downloadButton.setColorFilter(
+                ContextCompat.getColor(
+                    context,
+                    R.color.blue_download
+                )
+            );
         } else {
             //viewBinding.downloadButton.setColorFilter(Color.parseColor("#ffffff"));
         }
@@ -589,15 +601,13 @@ class CustomPlayerActivity() : FlutterActivity() {
     }
 
 
-
-
     private var movieMedia: MovieMedia? = null
     private var episodeMedia: EpisodeMedia? = null
     private var mediaType: String = ""
     private var startVideoPosition: Int = 0
     private var currentLanguage: String = "en"
-    private var jsonPlayMovieData:String? = null
-    private var jsonPlayEpisodeData:String? = null
+    private var jsonPlayMovieData: String? = null
+    private var jsonPlayEpisodeData: String? = null
     private fun initToGetDataFromIntentAndTypeMedia() {
         //System.out.println("Bom Gson::: "+json);
         print("Bom 101:::")
@@ -634,9 +644,10 @@ class CustomPlayerActivity() : FlutterActivity() {
                 //Log.d("Path URL MEDIA:",item.mediaURL.toString())
             }
             ///////
-            val index = episodeMedia?.mediaGroup?.episodes?.indexOfFirst { info -> info.id == episodeMedia?.info?.id }
-            startVideoPosition = index?:0
-            print("what the hell ? "+startVideoPosition)
+            val index =
+                episodeMedia?.mediaGroup?.episodes?.indexOfFirst { info -> info.id == episodeMedia?.info?.id }
+            startVideoPosition = index ?: 0
+            print("what the hell ? " + startVideoPosition)
             /*startVideoPosition = episodeMedia?.info?.order?.toIntOrNull() ?: 0
             if (startVideoPosition > 0) {
                 startVideoPosition -= 1
@@ -655,25 +666,46 @@ class CustomPlayerActivity() : FlutterActivity() {
         }
     }
 
-    private fun setGreenColorForDownloadButtonIfIsDownloaded(mediaType:String){
-        var downloadInfo= HashMap<String, Any>()
-        if(mediaType == series) {
-            downloadInfo = DatabaseHelper(context).getDownloadInfoFromDB(episodeMedia?.mediaGroup?.episodes?.get(startVideoPosition)?.id.toString(), mediaType)
+    private fun setGreenColorForDownloadButtonIfIsDownloaded(mediaType: String) {
+        var downloadInfo = HashMap<String, Any>()
+        if (mediaType == series) {
+            downloadInfo = DatabaseHelper(context).getDownloadInfoFromDB(
+                episodeMedia?.mediaGroup?.episodes?.get(startVideoPosition)?.id.toString(),
+                mediaType
+            )
             //videoUris[startVideoPosition] = downloadInfo["video_path"].toString()
-        }else{
-            downloadInfo = DatabaseHelper(context).getDownloadInfoFromDB(movieMedia?.mediaID.toString(), mediaType)
+        } else {
+            downloadInfo = DatabaseHelper(context).getDownloadInfoFromDB(
+                movieMedia?.mediaID.toString(),
+                mediaType
+            )
         }
         //////////
         //Log.d("1122334455","${downloadInfo["status"]}")*/
         if (downloadInfo["status"] == DownloadManagerSTATUS.STATUS_SUCCESSFUL && downloadInfo["status"] != null) {
-            if(downloadInfo["video_path"].toString() != "" && downloadInfo["video_path"] != null) {
+            if (downloadInfo["video_path"].toString() != "" && downloadInfo["video_path"] != null) {
                 videoUris[startVideoPosition] = downloadInfo["video_path"].toString()
             }
-            viewBinding.downloadButton.setColorFilter( ContextCompat.getColor(context, R.color.green_download));
-        }else if (downloadInfo["status"] == DownloadManagerSTATUS.STATUS_RUNNING && downloadInfo["status"] != null) {
-            viewBinding.downloadButton.setColorFilter( ContextCompat.getColor(context, R.color.blue_download));
-        }else if (downloadInfo["status"] == DownloadManagerSTATUS.STATUS_FAILED && downloadInfo["status"] != null) {
-            viewBinding.downloadButton.setColorFilter( ContextCompat.getColor(context, R.color.red_download));
+            viewBinding.downloadButton.setColorFilter(
+                ContextCompat.getColor(
+                    context,
+                    R.color.green_download
+                )
+            );
+        } else if (downloadInfo["status"] == DownloadManagerSTATUS.STATUS_RUNNING && downloadInfo["status"] != null) {
+            viewBinding.downloadButton.setColorFilter(
+                ContextCompat.getColor(
+                    context,
+                    R.color.blue_download
+                )
+            );
+        } else if (downloadInfo["status"] == DownloadManagerSTATUS.STATUS_FAILED && downloadInfo["status"] != null) {
+            viewBinding.downloadButton.setColorFilter(
+                ContextCompat.getColor(
+                    context,
+                    R.color.red_download
+                )
+            );
         } else {
             viewBinding.downloadButton.setColorFilter(Color.parseColor("#ffffff"));
         }
@@ -692,7 +724,8 @@ class CustomPlayerActivity() : FlutterActivity() {
 
         val exoPositionView = viewBinding.playerView.findViewById<TextView>(R.id.exo_position)
         val exoDurationView = viewBinding.playerView.findViewById<TextView>(R.id.exo_duration)
-        val exoContentTimeBar = viewBinding.playerView.findViewById<LinearLayout>(R.id.exo_content_time_bar)
+        val exoContentTimeBar =
+            viewBinding.playerView.findViewById<LinearLayout>(R.id.exo_content_time_bar)
         viewBinding.playerView.showController()
         viewBinding.playerView.setControllerVisibilityListener(PlayerView.ControllerVisibilityListener {
             if (viewBinding.playerView.isControllerFullyVisible) {
@@ -704,7 +737,7 @@ class CustomPlayerActivity() : FlutterActivity() {
                 //exoContentTimeBar.setBackgroundColor(0X42000000)
                 //viewBinding.downloadButton.setColorFilter( ContextCompat.getColor(context, R.color.green_download));
                 //viewBinding.playerView.showController()
-                Log.d("Heel-VISIBLE","A7a")
+                Log.d("Heel-VISIBLE", "A7a")
             } else {
                 viewBinding.topController.visibility = View.GONE
                 viewBinding.bottomController.visibility = View.GONE
@@ -713,7 +746,7 @@ class CustomPlayerActivity() : FlutterActivity() {
                 exoContentTimeBar.visibility = View.GONE
                 //exoContentTimeBar.setBackgroundColor(Color.TRANSPARENT)
                 //viewBinding.playerView.hideController()
-                Log.d("Heel-GONE","A7a")
+                Log.d("Heel-GONE", "A7a")
             }
         })
 
@@ -754,7 +787,7 @@ class CustomPlayerActivity() : FlutterActivity() {
 
     public override fun onStart() {
         super.onStart()
-        Log.d("current stats screen:","onStart")
+        Log.d("current stats screen:", "onStart")
         initToGetDataFromIntentAndTypeMedia()
         if (Util.SDK_INT > 23) {
             initializePlayer()
@@ -764,7 +797,7 @@ class CustomPlayerActivity() : FlutterActivity() {
     public override fun onResume() {
         super.onResume()
         Log.d("current playbackPosi", "> $playbackPosition")
-        Log.d("current stats screen:","onResume")
+        Log.d("current stats screen:", "onResume")
         hideSystemUi()
         if ((Util.SDK_INT <= 23)) {
             initializePlayer()
@@ -776,7 +809,7 @@ class CustomPlayerActivity() : FlutterActivity() {
         super.onPause()
         //addToWatchingList()
         //player?.currentPosition
-        Log.d("current stats screen:","onPause")
+        Log.d("current stats screen:", "onPause")
         showVideoAsPictureOnPicture()
         if (Util.SDK_INT <= 23) {
             releasePlayer()
@@ -786,7 +819,7 @@ class CustomPlayerActivity() : FlutterActivity() {
     @RequiresApi(Build.VERSION_CODES.N)
     public override fun onStop() {
         super.onStop()
-        Log.d("current stats screen:","onStop")
+        Log.d("current stats screen:", "onStop")
         //showVideoAsPictureOnPicture()
         addToWatchingList()
         if (Util.SDK_INT > 23) {
@@ -796,7 +829,7 @@ class CustomPlayerActivity() : FlutterActivity() {
 
     public override fun onDestroy() {
         super.onDestroy()
-        Log.d("current stats screen:","onDestroy")
+        Log.d("current stats screen:", "onDestroy")
         addToWatchingList()
         //finish()
         /*if (Util.SDK_INT > 23) {
@@ -807,7 +840,7 @@ class CustomPlayerActivity() : FlutterActivity() {
     override fun onBackPressed() {
         releasePlayer()
         moveTaskToBack(true)
-        Log.d("current stats screen:","onBackPressed")
+        Log.d("current stats screen:", "onBackPressed")
 
     }
 
@@ -824,4 +857,7 @@ class CustomPlayerActivity() : FlutterActivity() {
         }
         player = null
     }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
 }

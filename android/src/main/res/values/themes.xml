@@ -23,4 +23,7 @@
         <item name="android:windowContentOverlay">@null</item>
     </style>
 
+    <style name="ScreenDialogTheme" parent="Theme.MaterialComponents.Dialog.Alert.Bridge"/>
+
+
 </resources>

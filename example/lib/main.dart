@@ -42,7 +42,7 @@ class _MyAppState extends State<MyApp> {
       "description":
           "يتبع The Simpsons أثناء استضافتهم لحفلة Disney Day مع الأصدقاء من جميع أنحاء الخدمة ، وكل شخص موجود في القائمة - باستثناء Homer\r\n\r\n\r\nFollows The Simpsons\" as they host a Disney+ Day party with friends from across the service, everyone is on the list - except Homer.",
       "download_url":
-          "https://s-ed1.cloud.gcore.lu/video/m-159n/English/Animation&Family/Klaus.2019.720p.mp4",
+          "https://thekee.gcdn.co/video/m-159n/English/Animation&Family/The.Simpsons.in.Plusaversary.2021.1080.mp4?md5=QA-5PWsq9OIEaa0EM79p9A&expires=1678670074",
       "hd_url":
           "https://thekee.gcdn.co/video/m-159n/English/Animation&Family/Klaus.2019.720p.mp4?md5=ipbkWahE7MGcaEAdHHRS8g&expires=1678668998",
       "trailer_url": null,

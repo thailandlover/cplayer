@@ -7,7 +7,9 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Build;
+import android.provider.Settings;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -19,6 +21,7 @@ import androidx.media3.common.util.UnstableApi;
 
 import com.beust.klaxon.Klaxon;
 
+import io.flutter.embedding.android.FlutterActivity;
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
 import io.flutter.embedding.engine.plugins.activity.ActivityAware;
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding;
@@ -34,7 +37,7 @@ import java.util.List;
 
 @UnstableApi
 /** DowplayPlugin */
-public class DowplayPlugin extends Activity implements FlutterPlugin, MethodCallHandler,ActivityAware {
+public class DowplayPlugin extends FlutterActivity implements FlutterPlugin, MethodCallHandler, ActivityAware {
     private static final String TAG = "DowplayPlugin";
     /// The MethodChannel that will the communication between Flutter and native Android
     ///
@@ -43,6 +46,9 @@ public class DowplayPlugin extends Activity implements FlutterPlugin, MethodCall
     private MethodChannel channel;
     private Context context;
     private Activity activity;
+    String userId = "";
+    String profileId = "";
+    String lang = "";
 
     @Override
     public void onAttachedToActivity(ActivityPluginBinding binding) {
@@ -103,20 +109,24 @@ public class DowplayPlugin extends Activity implements FlutterPlugin, MethodCall
         } else if (call.method.equals("config_downloader")) {
             Log.d(TAG, "onMethodCall: config_downloader");
             Log.d(TAG, "onMethodCall: " + call.arguments.toString());
-            //checkPermissions();
+            ///{user_id=245394, profile_id=562674, lang=ar}
+            userId = call.arguments.toString().replaceAll(".*user_id=(\\d+).*", "$1");
+            profileId = call.arguments.toString().replaceAll(".*profile_id=(\\d+).*", "$1");
+            lang = call.arguments.toString().replaceAll(".*lang=(.+).*", "$1");
             result.success(true);
 //////////////////////////////////////////////////////////////////////////////////////////////////
         } else if (call.method.equals("get_downloads_list")) {
-            Log.d(TAG, "onMethodCall: get_downloads_list");
-            result.success(new DownloaderDowPlay(context).getAllDownloadMedia());
+            Log.d(TAG, "onMethodCall: get_downloads_list: " + userId + " > " + profileId + " > " + lang);
+            //showDownloadStatePermission();
+            result.success(new DownloaderDowPlay(context, activity).getAllDownloadMedia(userId, profileId));
 //////////////////////////////////////////////////////////////////////////////////////////////////
         } else if (call.method.equals("tvshow_seasons_downloads_list")) {
             Log.d(TAG, "onMethodCall: tvshow_seasons_downloads_list");
             Log.d(TAG, "onMethodCall: " + call.arguments.toString());
             //{tvshow_id=1532}
             String tvshowId = call.arguments.toString().replaceAll(".*tvshow_id=(\\d+).*", "$1");
-            Log.d(TAG, "onMethodCall: > "+tvshowId);
-            result.success(new DownloaderDowPlay(context).getAllSeasons(tvshowId));
+            Log.d(TAG, "onMethodCall: > " + tvshowId);
+            result.success(new DownloaderDowPlay(context, activity).getAllSeasons(tvshowId));
 //////////////////////////////////////////////////////////////////////////////////////////////////
         } else if (call.method.equals("season_episodes_downloads_list")) {
             Log.d(TAG, "onMethodCall: season_episodes_downloads_list");
@@ -124,34 +134,34 @@ public class DowplayPlugin extends Activity implements FlutterPlugin, MethodCall
             //String input = "{season_id=3236, tvshow_id=1532}";
             String seasonId = call.arguments.toString().replaceAll(".*season_id=(\\d+).*", "$1");
             String tvshowId = call.arguments.toString().replaceAll(".*tvshow_id=(\\d+).*", "$1");
-            Log.d(TAG, "onMethodCall: " + seasonId+" > "+tvshowId);
-            result.success(new DownloaderDowPlay(context).getAllEpisodes(seasonId, tvshowId));
+            Log.d(TAG, "onMethodCall: " + seasonId + " > " + tvshowId);
+            result.success(new DownloaderDowPlay(context, activity).getAllEpisodes(seasonId, tvshowId));
 //////////////////////////////////////////////////////////////////////////////////////////////////
         } else if (call.method.equals("start_download_movie")) {
-            Log.d(TAG, "onMethodCall: start_download_movie");
-            Log.d(TAG, "onMethodCall: " + call.arguments.toString());
-            Gson gson = new Gson();
-            String json = gson.toJson(call.arguments);
-            MovieMedia movieMedia = MovieMedia.Companion.fromJson(json);
-            System.out.println("B7b Gson::: " + movieMedia);
-            new DownloaderDowPlay(context).startDownload(movieMedia.getInfo().getDownloadURL(), movieMedia.getTitle(), movieMedia.getMediaType(),
-                    movieMedia.getMediaID(), call.arguments.toString(), movieMedia.getUserID(), movieMedia.getProfileID(), "", "", "", "", "", "");
-            List returnData = new ArrayList();
-            result.success(returnData);
+                Log.d(TAG, "onMethodCall: start_download_movie");
+                Log.d(TAG, "onMethodCall: " + call.arguments.toString());
+                Gson gson = new Gson();
+                String json = gson.toJson(call.arguments);
+                MovieMedia movieMedia = MovieMedia.Companion.fromJson(json);
+                System.out.println("B7b Gson::: " + movieMedia);
+                new DownloaderDowPlay(context, activity).startDownload(movieMedia.getInfo().getDownloadURL(), movieMedia.getTitle(), movieMedia.getMediaType(),
+                        movieMedia.getMediaID(), call.arguments.toString(), movieMedia.getUserID(), movieMedia.getProfileID(), "", "", "", "", "", "");
+                List returnData = new ArrayList();
+                result.success(returnData);
 //////////////////////////////////////////////////////////////////////////////////////////////////
         } else if (call.method.equals("start_download_episode")) {
-            Log.d(TAG, "onMethodCall: start_download_episode");
-            Log.d(TAG, "onMethodCall: " + call.arguments.toString());
-            Gson gson = new Gson();
-            String json = gson.toJson(call.arguments);
-            EpisodeMedia episodeMedia = EpisodeMedia.Companion.fromJson(json);
-            System.out.println("B7b Gson::: " + episodeMedia);
-            new DownloaderDowPlay(context).startDownload(episodeMedia.getInfo().getDownloadURL(), episodeMedia.getMediaGroup().getTvShow().getTitle(), episodeMedia.getMediaType(),
-                    episodeMedia.getMediaGroup().getItemsIDS().getTvShowID(), call.arguments.toString(), episodeMedia.getUserID(), episodeMedia.getProfileID(),
-                    episodeMedia.getMediaGroup().getItemsIDS().getSeasonID(), episodeMedia.getInfo().getId().toString(), episodeMedia.getMediaGroup().getSeason().getSeasonNumber(),
-                    episodeMedia.getInfo().getOrder(), episodeMedia.getMediaGroup().getSeason().getTitle(), episodeMedia.getInfo().getTitle());
-            List returnData = new ArrayList();
-            result.success(returnData);
+                Log.d(TAG, "onMethodCall: start_download_episode");
+                Log.d(TAG, "onMethodCall: " + call.arguments.toString());
+                Gson gson = new Gson();
+                String json = gson.toJson(call.arguments);
+                EpisodeMedia episodeMedia = EpisodeMedia.Companion.fromJson(json);
+                System.out.println("B7b Gson::: " + episodeMedia);
+                new DownloaderDowPlay(context, activity).startDownload(episodeMedia.getInfo().getDownloadURL(), episodeMedia.getMediaGroup().getTvShow().getTitle(), episodeMedia.getMediaType(),
+                        episodeMedia.getMediaGroup().getItemsIDS().getTvShowID(), call.arguments.toString(), episodeMedia.getUserID(), episodeMedia.getProfileID(),
+                        episodeMedia.getMediaGroup().getItemsIDS().getSeasonID(), episodeMedia.getInfo().getId().toString(), episodeMedia.getMediaGroup().getSeason().getSeasonNumber(),
+                        episodeMedia.getInfo().getOrder(), episodeMedia.getMediaGroup().getSeason().getTitle(), episodeMedia.getInfo().getTitle());
+                List returnData = new ArrayList();
+                result.success(returnData);
 //////////////////////////////////////////////////////////////////////////////////////////////////
         } else if (call.method.equals("pause_download")) {
             Log.d(TAG, "onMethodCall: pause_download");
@@ -159,7 +169,7 @@ public class DowplayPlugin extends Activity implements FlutterPlugin, MethodCall
             //{mediaType=movie, mediaId=377530}
             String mediaType = call.arguments.toString().replaceAll(".*mediaType=(\\d+).*", "$1");
             String mediaId = call.arguments.toString().replaceAll(".*mediaId=(\\d+).*", "$1");
-            new DownloaderDowPlay(context).pauseDownload(mediaId,mediaType);
+            new DownloaderDowPlay(context, activity).pauseDownload(mediaId, mediaType);
             List returnData = new ArrayList();
             result.success(returnData);
 //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -169,7 +179,7 @@ public class DowplayPlugin extends Activity implements FlutterPlugin, MethodCall
             //{mediaType=movie, mediaId=377530}
             String mediaType = call.arguments.toString().replaceAll(".*mediaType=(\\d+).*", "$1");
             String mediaId = call.arguments.toString().replaceAll(".*mediaId=(\\d+).*", "$1");
-            new DownloaderDowPlay(context).resumeDownload(mediaId,mediaType);
+            new DownloaderDowPlay(context, activity).resumeDownload(mediaId, mediaType);
             List returnData = new ArrayList();
             result.success(returnData);
 //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -179,7 +189,7 @@ public class DowplayPlugin extends Activity implements FlutterPlugin, MethodCall
             //{mediaType=movie, mediaId=377530}
             String mediaType = call.arguments.toString().replaceAll(".*mediaType=(\\d+).*", "$1");
             String mediaId = call.arguments.toString().replaceAll(".*mediaId=(\\d+).*", "$1");
-            new DownloaderDowPlay(context).cancelDownload(mediaId,mediaType);
+            new DownloaderDowPlay(context, activity).cancelDownload(mediaId, mediaType);
             List returnData = new ArrayList();
             result.success(returnData);
 //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -188,34 +198,16 @@ public class DowplayPlugin extends Activity implements FlutterPlugin, MethodCall
         }
     }
 
-    /////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////
+
     @Override
     public void onDetachedFromEngine(@NonNull FlutterPluginBinding binding) {
         channel.setMethodCallHandler(null);
     }
-    ////////////////////////////////////////////
-/*
-    public void checkPermissions1(){
-        if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE)
-                != PackageManager.PERMISSION_GRANTED ||
-                ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                        != PackageManager.PERMISSION_GRANTED) {
-                // Request the permissions
-                ActivityCompat.requestPermissions(activity,
-                        new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE},
-                        1997);
-            Log.d("onMethodCall", "11111");
 
-        } else {
-            Log.d("onMethodCall", "22222");
-            // Permission has already been granted
-            // Do your operation here
-        }
-
-    }*/
-    ////////////////////
-
+    //////////////////////////////////////////////////////////
+    /*
+    int myRequestCode = 1997;
     private void showPhoneStatePermission() {
 
         if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE)
@@ -223,61 +215,89 @@ public class DowplayPlugin extends Activity implements FlutterPlugin, MethodCall
                 ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE)
                         != PackageManager.PERMISSION_GRANTED) {
             Log.d("onMethodCall", ":2:");
-            //requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE},1997);
-            ActivityCompat.requestPermissions(activity,
-                    new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE},
-                    1997);
+            //requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE},requestCode);
 
-            /*if (ActivityCompat.shouldShowRequestPermissionRationale(activity,
+            if (ActivityCompat.shouldShowRequestPermissionRationale(activity,
                     Manifest.permission.READ_EXTERNAL_STORAGE) || ActivityCompat.shouldShowRequestPermissionRationale(activity,
                     Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
                 showExplanation("Permission Needed", " > ");
                 Log.d("onMethodCall", ":1:");
             } else {
 
-            }*/
+            }
         } else {
             Log.d("onMethodCall", ":3:");
             Toast.makeText(activity, "Permission (already) Granted!", Toast.LENGTH_SHORT).show();
         }
+    }*/
+////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////
+////FOR Permission
+    /*
+    int myRequestCode = 1997;
+    boolean permissionToDownload = false;
+
+    private void showDownloadStatePermission() {
+        if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED ||
+                ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                        != PackageManager.PERMISSION_GRANTED) {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(activity,
+                    Manifest.permission.READ_EXTERNAL_STORAGE) || ActivityCompat.shouldShowRequestPermissionRationale(activity,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+                if (lang.equalsIgnoreCase("en")) {
+                    showExplanation("Permission Needed", "Media and file access must be granted to start downloading movies and series through the app permissions option", true);
+                } else {
+                    showExplanation("منح الإذن", "يجب منح صلاحية الوصول للوسائط والملفات لبدء تحميل الافلام والمسلسلات من خلال خيار اذونات التطبيق", true);
+                }
+            } else {
+                if (lang.equalsIgnoreCase("en")) {
+                    showExplanation("Permission Needed", "You must grant access to media and files to start downloading movies and series", false);
+                } else {
+                    showExplanation("منح الإذن", "يجب منح صلاحية الوصول للوسائط والملفات لبدء تحميل الافلام والمسلسلات", false);
+                }
+            }
+        } else {
+            //Toast.makeText(activity, "Permission (already) Granted!", Toast.LENGTH_SHORT).show();
+            permissionToDownload = true;
+        }
     }
-//////////////////////
+
+    private void showExplanation(String title, String message, boolean openSettingScreen) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(activity, R.style.ScreenDialogTheme);
+        builder.setTitle(title)
+                .setMessage(message)
+                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        if (openSettingScreen) {
+                            Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                            Uri uri = Uri.fromParts("package", context.getPackageName(), null);
+                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            intent.setData(uri);
+                            context.startActivity(intent);
+                        } else {
+                            ActivityCompat.requestPermissions(activity,
+                                    new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                                    myRequestCode);
+                        }
+                    }
+                });
+        builder.create().show();
+    }*/
+    /*
     @Override
     public void onRequestPermissionsResult(
             int requestCode,
             String permissions[],
             int[] grantResults) {
-        Log.d("onMethodCall", ":4:");
-                if (grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    Log.d("onMethodCall", ":5:");
-                    Toast.makeText(activity, "Permission Granted!", Toast.LENGTH_SHORT).show();
-                } else {
-                    Log.d("onMethodCall", ":6:");
-                    Toast.makeText(activity, "Permission Denied!", Toast.LENGTH_SHORT).show();
-                }
 
-    }
-    private void showExplanation(String title,
-                                 String message) {
-        Log.d("onMethodCall", ":7:");
-        AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-        builder.setTitle(title)
-                .setMessage(message)
-                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        Log.d("onMethodCall", ":8:");
-                        ActivityCompat.requestPermissions(activity,
-                                new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE},
-                                1997);
-                        Log.d("onMethodCall", ":9:");
-                    }
-                });
-        builder.create().show();
-    }
-    ///////////////////////////////////////////////////////////////////////////
-    ///////////////////////////////////////////////////////////////////////////
-    ///////////////////////////////////////////////////////////////////////////
-    ///////////////////////////////////////////////////////////////////////////
-
+        if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            //Toast.makeText(activity, "Permission Granted!1111111111", Toast.LENGTH_SHORT).show();
+            //
+        } else {
+            //Toast.makeText(activity, "Permission Denied!22222222222", Toast.LENGTH_SHORT).show();
+        }
+    }*/
+///////////////////////////////////////////////////////////////////////////
 }

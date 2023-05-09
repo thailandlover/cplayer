@@ -136,7 +136,7 @@ class DownloadService : Service() {
                             (progress.currentBytes * 100 / progress.totalBytes).toInt()
                         val notification = NotificationCompat.Builder(this, "${abs(downloadId)}")
                             .setContentTitle("$mediaName")
-                            .setContentText("$seasonName-$episodeName")
+                            .setContentText(if(mediaType == "series") ("$seasonName-$episodeName") else (""))
                             .setSmallIcon(R.drawable.play_icon)
                             .setProgress(100, progress, false)
                             .build()
