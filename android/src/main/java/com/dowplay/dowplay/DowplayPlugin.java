@@ -1,12 +1,20 @@
 package com.dowplay.dowplay;
 
+import android.Manifest;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.util.Log;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.media3.common.util.UnstableApi;
 
 import com.beust.klaxon.Klaxon;
@@ -26,7 +34,7 @@ import java.util.List;
 
 @UnstableApi
 /** DowplayPlugin */
-public class DowplayPlugin implements FlutterPlugin, MethodCallHandler {
+public class DowplayPlugin extends Activity implements FlutterPlugin, MethodCallHandler,ActivityAware {
     private static final String TAG = "DowplayPlugin";
     /// The MethodChannel that will the communication between Flutter and native Android
     ///
@@ -34,12 +42,34 @@ public class DowplayPlugin implements FlutterPlugin, MethodCallHandler {
     /// when the Flutter Engine is detached from the Activity
     private MethodChannel channel;
     private Context context;
+    private Activity activity;
+
+    @Override
+    public void onAttachedToActivity(ActivityPluginBinding binding) {
+        activity = binding.getActivity();
+    }
+
+    @Override
+    public void onDetachedFromActivityForConfigChanges() {
+
+    }
+
+    @Override
+    public void onReattachedToActivityForConfigChanges(@NonNull ActivityPluginBinding binding) {
+        activity = binding.getActivity();
+    }
+
+    @Override
+    public void onDetachedFromActivity() {
+
+    }
 
     @Override
     public void onAttachedToEngine(@NonNull FlutterPluginBinding flutterPluginBinding) {
         channel = new MethodChannel(flutterPluginBinding.getBinaryMessenger(), "dowplay");
         channel.setMethodCallHandler(this);
         context = flutterPluginBinding.getApplicationContext();
+        Log.d(TAG, "onMethodCall Test: config_downloader");
     }
 
     @Override
@@ -73,6 +103,7 @@ public class DowplayPlugin implements FlutterPlugin, MethodCallHandler {
         } else if (call.method.equals("config_downloader")) {
             Log.d(TAG, "onMethodCall: config_downloader");
             Log.d(TAG, "onMethodCall: " + call.arguments.toString());
+            //checkPermissions();
             result.success(true);
 //////////////////////////////////////////////////////////////////////////////////////////////////
         } else if (call.method.equals("get_downloads_list")) {
@@ -163,4 +194,90 @@ public class DowplayPlugin implements FlutterPlugin, MethodCallHandler {
     public void onDetachedFromEngine(@NonNull FlutterPluginBinding binding) {
         channel.setMethodCallHandler(null);
     }
+    ////////////////////////////////////////////
+/*
+    public void checkPermissions1(){
+        if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED ||
+                ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                        != PackageManager.PERMISSION_GRANTED) {
+                // Request the permissions
+                ActivityCompat.requestPermissions(activity,
+                        new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                        1997);
+            Log.d("onMethodCall", "11111");
+
+        } else {
+            Log.d("onMethodCall", "22222");
+            // Permission has already been granted
+            // Do your operation here
+        }
+
+    }*/
+    ////////////////////
+
+    private void showPhoneStatePermission() {
+
+        if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED ||
+                ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                        != PackageManager.PERMISSION_GRANTED) {
+            Log.d("onMethodCall", ":2:");
+            //requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE},1997);
+            ActivityCompat.requestPermissions(activity,
+                    new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                    1997);
+
+            /*if (ActivityCompat.shouldShowRequestPermissionRationale(activity,
+                    Manifest.permission.READ_EXTERNAL_STORAGE) || ActivityCompat.shouldShowRequestPermissionRationale(activity,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+                showExplanation("Permission Needed", " > ");
+                Log.d("onMethodCall", ":1:");
+            } else {
+
+            }*/
+        } else {
+            Log.d("onMethodCall", ":3:");
+            Toast.makeText(activity, "Permission (already) Granted!", Toast.LENGTH_SHORT).show();
+        }
+    }
+//////////////////////
+    @Override
+    public void onRequestPermissionsResult(
+            int requestCode,
+            String permissions[],
+            int[] grantResults) {
+        Log.d("onMethodCall", ":4:");
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Log.d("onMethodCall", ":5:");
+                    Toast.makeText(activity, "Permission Granted!", Toast.LENGTH_SHORT).show();
+                } else {
+                    Log.d("onMethodCall", ":6:");
+                    Toast.makeText(activity, "Permission Denied!", Toast.LENGTH_SHORT).show();
+                }
+
+    }
+    private void showExplanation(String title,
+                                 String message) {
+        Log.d("onMethodCall", ":7:");
+        AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+        builder.setTitle(title)
+                .setMessage(message)
+                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        Log.d("onMethodCall", ":8:");
+                        ActivityCompat.requestPermissions(activity,
+                                new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                                1997);
+                        Log.d("onMethodCall", ":9:");
+                    }
+                });
+        builder.create().show();
+    }
+    ///////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////
+
 }

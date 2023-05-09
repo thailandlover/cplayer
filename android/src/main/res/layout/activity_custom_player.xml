@@ -29,6 +29,8 @@
             android:indeterminateDuration="800" />
     </androidx.media3.ui.PlayerView>
 
+
+
     <LinearLayout
         android:id="@+id/topController"
         android:layout_width="match_parent"
@@ -193,12 +195,11 @@
                 android:id="@+id/pictureOnPictureButton"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
-                android:src="@drawable/picture_on_picture_icon"
+                android:src="@drawable/p_in_p_icon"
                 android:backgroundTint="@android:color/transparent"
-                app:tint="@color/white"
+
                 android:layout_weight="0"/>
         </LinearLayout>
         <!--**********************************************************-->
     </LinearLayout>
-
 </androidx.constraintlayout.widget.ConstraintLayout>

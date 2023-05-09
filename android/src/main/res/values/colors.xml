@@ -13,4 +13,6 @@
     <color name="forground_timebar">#F44B4B</color>
     <color name="backgound_timebar">#707070</color>
     <color name="buffered_timebar">#FFA1A1</color>
+    <color name="transparent">#00000000</color>
+    <color name="transparent_dialog">#CC000000</color>
 </resources>

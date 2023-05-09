@@ -1,12 +1,9 @@
 package com.dowplay.dowplay
 
 import android.annotation.SuppressLint
-import android.app.DownloadManager
-import android.app.NotificationManager
+import android.app.AlertDialog
 import android.app.PictureInPictureParams
-import android.content.BroadcastReceiver
 import android.content.Context
-import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Build
@@ -15,12 +12,15 @@ import android.os.VibrationEffect
 import android.os.Vibrator
 import android.util.Log
 import android.util.Rational
+import android.view.DragEvent
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
+import android.widget.LinearLayout
 import android.widget.RadioButton
+import android.widget.TextView
 import android.widget.Toast
 import androidx.annotation.RequiresApi
-import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.*
 import androidx.media3.common.AudioAttributes
@@ -39,6 +39,7 @@ import androidx.media3.ui.DefaultTrackNameProvider
 import androidx.media3.ui.PlayerView
 import com.dowplay.dowplay.databinding.ActivityCustomPlayerBinding
 import com.dowplay.dowplay.databinding.SettingBinding
+import com.dowplay.dowplay.databinding.CustomControlViewBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import io.flutter.embedding.android.FlutterActivity
 
@@ -50,6 +51,10 @@ class CustomPlayerActivity() : FlutterActivity() {
 
     private val viewBinding by lazy(LazyThreadSafetyMode.NONE) {
         ActivityCustomPlayerBinding.inflate(layoutInflater)
+    }
+
+    private val viewCustomControlViewBinding by lazy(LazyThreadSafetyMode.NONE) {
+        CustomControlViewBinding.inflate(layoutInflater)
     }
     private var player: ExoPlayer? = null
 
@@ -75,7 +80,9 @@ class CustomPlayerActivity() : FlutterActivity() {
     ///////////////////////////////////////////////////////////////////////////////////////////////
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        Log.d("current stats screen:","onCreate")
         setContentView(viewBinding.root)
+
         initializeBinding()
     }
 
@@ -109,17 +116,22 @@ class CustomPlayerActivity() : FlutterActivity() {
     }
 
     private fun seekToLastWatching() {
-        if (mediaType == movie) {
-            movieMedia?.info?.watching?.currentTime?.toLong()?.let {
-                player?.seekTo(it * 1000)
-                print("B7b creent time :::: " + it * 1000)
-            }
-        } else if (mediaType == series) {
-            episodeMedia?.mediaGroup?.episodes?.get(startVideoPosition)?.watching?.currentTime?.toLong()
-                ?.let {
+        if(playbackPosition == 0L) {
+            if (mediaType == movie) {
+                movieMedia?.info?.watching?.currentTime?.toLong()?.let {
                     player?.seekTo(it * 1000)
                     print("B7b creent time :::: " + it * 1000)
                 }
+            } else if (mediaType == series) {
+                episodeMedia?.mediaGroup?.episodes?.get(startVideoPosition)?.watching?.currentTime?.toLong()
+                    ?.let {
+                        player?.seekTo(it * 1000)
+                        print("B7b creent time :::: " + it * 1000)
+                    }
+            }
+        }else{
+            player?.seekTo(playbackPosition)
+            print("B7b creent time :::: $playbackPosition")
         }
     }
 
@@ -157,11 +169,14 @@ class CustomPlayerActivity() : FlutterActivity() {
 
     @SuppressLint("NewApi")
     private fun initializeBinding() {
+
+        // Hide the include contents
+        //includeView.visibility = View.VISIBLE //
         /////////////////////////////////////////
         viewBinding.backButton.setOnClickListener {
             vibratePhone()
             addToWatchingList()
-            finish()
+            this.finish()
         }
         viewBinding.fullScreenScale.setOnClickListener {
             vibratePhone()
@@ -197,8 +212,15 @@ class CustomPlayerActivity() : FlutterActivity() {
             vibratePhone()
             if (player != null) {
                 settingScreen()
+                //includeView.visibility = View.VISIBLE
             }
         }
+        viewBinding.playerSettingText.setOnClickListener {
+                    vibratePhone()
+                    if (player != null) {
+                        settingScreen()
+                    }
+         }
         viewBinding.downloadButton.setOnClickListener {
             vibratePhone()
             download()
@@ -263,6 +285,7 @@ class CustomPlayerActivity() : FlutterActivity() {
             setGreenColorForDownloadButtonIfIsDownloaded(mediaType)
             player?.seekToPreviousMediaItem()
             viewBinding.videoSubTitle.text = videoSubTitle[startVideoPosition]
+            playbackPosition = 0L
             seekToLastWatching()
         } else {
             Toast.makeText(
@@ -280,6 +303,7 @@ class CustomPlayerActivity() : FlutterActivity() {
             setGreenColorForDownloadButtonIfIsDownloaded(mediaType)
             player?.seekToNextMediaItem()
             viewBinding.videoSubTitle.text = videoSubTitle[startVideoPosition]
+            playbackPosition = 0L
             seekToLastWatching()
         } else {
             Toast.makeText(
@@ -294,6 +318,7 @@ class CustomPlayerActivity() : FlutterActivity() {
     var radioButtonSubtitleSelected = 0;
     private fun settingScreen() {
         pauseVideo()
+
         val customDialog =
             LayoutInflater.from(this).inflate(R.layout.setting, viewBinding.root, false)
         val bindingMF = SettingBinding.bind(customDialog)
@@ -378,19 +403,14 @@ class CustomPlayerActivity() : FlutterActivity() {
             }
 
             //////////////////////////////////////////////
-            val dialog = MaterialAlertDialogBuilder(this).setView(customDialog)
-                .setOnCancelListener { playVideo() }
-                .setCancelable(false)
-                .setBackground(ColorDrawable(0xCC232833.toInt()))
-                .create()
-            //dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-            //dialog.setContentView(R.layout.setting);
-            //dialog.window?.setLayout(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.MATCH_PARENT);
-            dialog.show()
+            val builderDialog = AlertDialog.Builder(context, R.style.FullScreenDialogTheme)
+            builderDialog.setView(customDialog)
+            val alertDialog = builderDialog.create()
+            alertDialog.show()
             //////////////////////////////////////////////
             bindingMF.closeSettingButton.setOnClickListener {
                 playVideo()
-                dialog.cancel()
+                alertDialog.cancel()
             }
             //////////////////////////////////////////////
         } catch (e: Exception) {
@@ -568,13 +588,7 @@ class CustomPlayerActivity() : FlutterActivity() {
         viewBinding.playerView.hideController()
     }
 
-    public override fun onStart() {
-        super.onStart()
-        initToGetDataFromIntentAndTypeMedia()
-        if (Util.SDK_INT > 23) {
-            initializePlayer()
-        }
-    }
+
 
 
     private var movieMedia: MovieMedia? = null
@@ -664,13 +678,7 @@ class CustomPlayerActivity() : FlutterActivity() {
             viewBinding.downloadButton.setColorFilter(Color.parseColor("#ffffff"));
         }
     }
-    public override fun onResume() {
-        super.onResume()
-        hideSystemUi()
-        if ((Util.SDK_INT <= 23 || player == null)) {
-            initializePlayer()
-        }
-    }
+
 
     @SuppressLint("InlinedApi")
     private fun hideSystemUi() {
@@ -681,15 +689,34 @@ class CustomPlayerActivity() : FlutterActivity() {
             controller.systemBarsBehavior =
                 WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
         }
+
+        val exoPositionView = viewBinding.playerView.findViewById<TextView>(R.id.exo_position)
+        val exoDurationView = viewBinding.playerView.findViewById<TextView>(R.id.exo_duration)
+        val exoContentTimeBar = viewBinding.playerView.findViewById<LinearLayout>(R.id.exo_content_time_bar)
+        viewBinding.playerView.showController()
         viewBinding.playerView.setControllerVisibilityListener(PlayerView.ControllerVisibilityListener {
-            if (it == 0) {
+            if (viewBinding.playerView.isControllerFullyVisible) {
                 viewBinding.topController.visibility = View.VISIBLE
                 viewBinding.bottomController.visibility = View.VISIBLE
+                exoPositionView.visibility = View.VISIBLE
+                exoDurationView.visibility = View.VISIBLE
+                exoContentTimeBar.visibility = View.VISIBLE
+                //exoContentTimeBar.setBackgroundColor(0X42000000)
+                //viewBinding.downloadButton.setColorFilter( ContextCompat.getColor(context, R.color.green_download));
+                //viewBinding.playerView.showController()
+                Log.d("Heel-VISIBLE","A7a")
             } else {
                 viewBinding.topController.visibility = View.GONE
                 viewBinding.bottomController.visibility = View.GONE
+                exoPositionView.visibility = View.GONE
+                exoDurationView.visibility = View.GONE
+                exoContentTimeBar.visibility = View.GONE
+                //exoContentTimeBar.setBackgroundColor(Color.TRANSPARENT)
+                //viewBinding.playerView.hideController()
+                Log.d("Heel-GONE","A7a")
             }
         })
+
     }
 
     private fun addToWatchingList() {
@@ -725,96 +752,76 @@ class CustomPlayerActivity() : FlutterActivity() {
         }
     }
 
+    public override fun onStart() {
+        super.onStart()
+        Log.d("current stats screen:","onStart")
+        initToGetDataFromIntentAndTypeMedia()
+        if (Util.SDK_INT > 23) {
+            initializePlayer()
+        }
+    }
+
+    public override fun onResume() {
+        super.onResume()
+        Log.d("current playbackPosi", "> $playbackPosition")
+        Log.d("current stats screen:","onResume")
+        hideSystemUi()
+        if ((Util.SDK_INT <= 23)) {
+            initializePlayer()
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.N)
     public override fun onPause() {
         super.onPause()
         //addToWatchingList()
+        //player?.currentPosition
+        Log.d("current stats screen:","onPause")
+        showVideoAsPictureOnPicture()
         if (Util.SDK_INT <= 23) {
             releasePlayer()
         }
     }
 
-    /*public override fun onDestroy() {
-        super.onDestroy()
-        addToWatchingList()
-    }*/
+    @RequiresApi(Build.VERSION_CODES.N)
     public override fun onStop() {
         super.onStop()
+        Log.d("current stats screen:","onStop")
+        //showVideoAsPictureOnPicture()
         addToWatchingList()
         if (Util.SDK_INT > 23) {
             releasePlayer()
         }
     }
 
+    public override fun onDestroy() {
+        super.onDestroy()
+        Log.d("current stats screen:","onDestroy")
+        addToWatchingList()
+        //finish()
+        /*if (Util.SDK_INT > 23) {
+            releasePlayer()
+        }*/
+    }
+
+    override fun onBackPressed() {
+        releasePlayer()
+        moveTaskToBack(true)
+        Log.d("current stats screen:","onBackPressed")
+
+    }
+
+
     private var playWhenReady = true
-    private var currentItem = 0
     private var playbackPosition = 0L
 
     private fun releasePlayer() {
         player?.let { exoPlayer ->
             playbackPosition = exoPlayer.currentPosition
-            currentItem = exoPlayer.currentMediaItemIndex
+            startVideoPosition = exoPlayer.currentMediaItemIndex
             playWhenReady = exoPlayer.playWhenReady
             exoPlayer.release()
         }
         player = null
-    }
-
-    private val downloadReceiver = object : BroadcastReceiver() {
-        @SuppressLint("Range")
-        override fun onReceive(context: Context?, intent: Intent?) {
-            val action = intent?.action
-
-            if (DownloadManager.ACTION_DOWNLOAD_COMPLETE == action) {
-                val downloadId = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, 0)
-
-                val query = DownloadManager.Query()
-                    .setFilterById(downloadId)
-
-                val downloadManager = getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
-                val cursor = downloadManager.query(query)
-
-                if (cursor.moveToFirst()) {
-                    val status = cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_STATUS))
-
-                    when (status) {
-                        DownloadManager.STATUS_SUCCESSFUL -> {
-                            // Download completed successfully, update notification
-                            val notificationManager =
-                                getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-                            notificationManager.cancel(downloadId.toInt())
-                            val notificationBuilder =
-                                NotificationCompat.Builder(this@CustomPlayerActivity, "1")
-                                    .setContentTitle("Download complete")
-                                    .setContentText("Downloaded Test")
-                                    .setSmallIcon(R.drawable.play_icon)
-                            notificationManager.notify(
-                                downloadId.toInt(),
-                                notificationBuilder.build()
-                            )
-                        }
-                        DownloadManager.STATUS_FAILED -> {
-                            // Download failed, update notification
-                            val notificationManager =
-                                getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-                            notificationManager.cancel(downloadId.toInt())
-                            val notificationBuilder =
-                                NotificationCompat.Builder(this@CustomPlayerActivity, "1")
-                                    .setContentTitle("Download failed")
-                                    .setContentText("Failed to download Test")
-                                    .setSmallIcon(R.drawable.play_icon)
-                            notificationManager.notify(
-                                downloadId.toInt(),
-                                notificationBuilder.build()
-                            )
-                        }
-                    }
-                }
-            } else if (DownloadManager.ACTION_NOTIFICATION_CLICKED == action) {
-                // User clicked on the notification, open Downloads app
-                val downloadManager = getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
-                val intent = Intent(DownloadManager.ACTION_VIEW_DOWNLOADS)
-                startActivity(intent)
-            }
-        }
     }
 }
