@@ -217,7 +217,7 @@ class DatabaseHelper(innerContext: Context) : SQLiteOpenHelper(innerContext, DAT
     }
 
     @SuppressLint("Range")
-    fun getDownloadDataFromDbByDownloadId(
+    fun getDownloadDataFromDbByMediaIdAndMediaType(
         media_id: String,
         media_type: String
     ): ArrayList<HashMap<String, Any>> {
@@ -267,7 +267,7 @@ class DatabaseHelper(innerContext: Context) : SQLiteOpenHelper(innerContext, DAT
     }
 
     @SuppressLint("Range")
-    fun getAllDownloadDataFromDB(user_id: String, profile_id: String): List<HashMap<String, Any>> {
+    fun getAllDownloadDataFromDB(user_id: String, profile_id: String): ArrayList<HashMap<String, Any>> {
 
         val dbHelper = DatabaseHelper(context)
         val db = dbHelper.readableDatabase
@@ -294,7 +294,7 @@ class DatabaseHelper(innerContext: Context) : SQLiteOpenHelper(innerContext, DAT
             val mediaData = cursor.getString(cursor.getColumnIndex(COL_media_data))
             val userId = cursor.getString(cursor.getColumnIndex(COL_user_id))
             val profileId = cursor.getString(cursor.getColumnIndex(COL_profile_id))
-            mapData["download_id"] = downloadId
+            /*mapData["download_id"] = downloadId
             mapData["status"] = status
             mapData["progress"] = progress
             mapData["video_path"] = videoPath
@@ -303,8 +303,20 @@ class DatabaseHelper(innerContext: Context) : SQLiteOpenHelper(innerContext, DAT
             mapData["media_id"] = mediaId
             mapData["media_data"] = mediaData
             mapData["user_id"] = userId
-            mapData["profile_id"] = profileId
+            mapData["profile_id"] = profileId*/
             //Log.d("Hello:::",mediaType)
+            ///////////////////////////////////
+            //mapData["download_id"] = downloadId
+            //mapData["user_id"] = userId
+            //mapData["profile_id"] = profileId
+              mapData["status"] = status
+              mapData["mediaRetrivalType"] = if(mediaType =="movie") "MovieInfo" else "SeriseInfo"
+              mapData["progress"] = progress
+              mapData["tempPath"] = videoPath
+              mapData["name"] = name
+              mapData["mediaType"] = mediaType
+              mapData["mediaId"] = mediaId
+              mapData["object"] = mediaData
             allDownloadData += mapData
         }
 
@@ -318,6 +330,7 @@ class DatabaseHelper(innerContext: Context) : SQLiteOpenHelper(innerContext, DAT
 
     @SuppressLint("Range")
     fun getAllSeasonsDownloadDataFromDB(series_id: String): List<HashMap<String, Any>> {
+        var isFirstTime :Boolean = true
 
         val dbHelper = DatabaseHelper(context)
         val db = dbHelper.readableDatabase
@@ -330,7 +343,7 @@ class DatabaseHelper(innerContext: Context) : SQLiteOpenHelper(innerContext, DAT
         val cursor = db.rawQuery(query, selectionArgs)
 
         val allDownloadData = ArrayList<HashMap<String, Any>>()
-
+        var allInfoDataForThisMedia = ArrayList<HashMap<String, Any>>()
         while (cursor.moveToNext()) {
             val mapData = HashMap<String, Any>()
             val mediaId = cursor.getString(cursor.getColumnIndex(COL_media_id))
@@ -342,10 +355,18 @@ class DatabaseHelper(innerContext: Context) : SQLiteOpenHelper(innerContext, DAT
             mapData["season_id"] = seasonId
             mapData["name"] = name
             mapData["order"] = order
-
+            if(isFirstTime){
+                allInfoDataForThisMedia = getDownloadDataFromDbByMediaIdAndMediaType(mediaId,"series")
+                isFirstTime = false
+            }
             allDownloadData += mapData
-        }
+            mapData["group"] = allInfoDataForThisMedia[0]
+            mapData["mediaRetrivalType"] = "SeasonInfo"
+            mapData["progress"] = "0"
+            mapData["status"] = "0"
+            mapData["mediaType"] = "series"
 
+        }
         Log.d("Sqlite Data:", "$allDownloadData")
 
         cursor.close()

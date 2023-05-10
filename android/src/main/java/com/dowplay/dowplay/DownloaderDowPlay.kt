@@ -288,7 +288,7 @@ class DownloaderDowPlay(initContext: Context, initActivity: Activity, initLang: 
         media_id: String,
         media_type: String
     ): ArrayList<HashMap<String, Any>> {
-        return DatabaseHelper(context).getDownloadDataFromDbByDownloadId(media_id, media_type)
+        return DatabaseHelper(context).getDownloadDataFromDbByMediaIdAndMediaType(media_id, media_type)
     }
 
     fun getAllDownloadMedia(user_id: String, profile_id: String): List<HashMap<String, Any>> {
