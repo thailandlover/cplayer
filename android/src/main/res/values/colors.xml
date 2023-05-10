@@ -15,4 +15,7 @@
     <color name="buffered_timebar">#FFA1A1</color>
     <color name="transparent">#00000000</color>
     <color name="transparent_dialog">#CC000000</color>
+    <color name="background_color_dialog">#2C323E</color>
+    <color name="background_color_details_dialog">#D0D0D0</color>
+    <color name="background_color_primary_dialog">#F44B4B</color>
 </resources>

@@ -533,7 +533,7 @@ class CustomPlayerActivity() : FlutterActivity() {
     private fun download() {
         var result = 0
         if (mediaType == movie) {
-            result = DownloaderDowPlay(context, activity).startDownload(
+            result = DownloaderDowPlay(context, activity, currentLanguage).startDownload(
                 movieMedia?.info?.downloadURL.toString(),
                 movieMedia?.title.toString(),
                 movieMedia?.mediaType.toString(),
@@ -550,7 +550,7 @@ class CustomPlayerActivity() : FlutterActivity() {
             )
         } else {
             //episodeMedia?.mediaGroup?.episodes?.get(startVideoPosition)?.id.toString()
-            result = DownloaderDowPlay(context, activity).startDownload(
+            result = DownloaderDowPlay(context, activity, currentLanguage).startDownload(
                 episodeMedia?.mediaGroup?.episodes?.get(startVideoPosition)?.downloadURL.toString(),
                 episodeMedia?.mediaGroup!!.tvShow!!.title!!,
                 episodeMedia!!.mediaType!!,

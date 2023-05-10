@@ -9,10 +9,16 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.provider.Settings
 import android.util.Log
+import android.view.Gravity
+import android.view.LayoutInflater
+import android.view.View
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.downloader.PRDownloader
 import com.downloader.Status
+import com.dowplay.dowplay.databinding.ActivityCustomPlayerBinding
+import com.dowplay.dowplay.databinding.ExplanationPermissionBinding
+import com.dowplay.dowplay.databinding.SettingBinding
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
 import java.io.File
@@ -20,14 +26,16 @@ import java.math.BigInteger
 import java.security.SecureRandom
 
 
-class DownloaderDowPlay(initContext: Context, initActivity: Activity) : ActivityAware {
+class DownloaderDowPlay(initContext: Context, initActivity: Activity, initLang: String) : ActivityAware {
 
     private var context: Context
     private var lactivity: Activity
+    private var lLang: String
 
     init {
         context = initContext
         lactivity = initActivity
+        lLang = initLang
     }
 
     fun generateRandomToken(length: Int): String {
@@ -55,7 +63,7 @@ class DownloaderDowPlay(initContext: Context, initActivity: Activity) : Activity
                     Manifest.permission.WRITE_EXTERNAL_STORAGE
                 )
             ) {
-                if ("ar".equals("en", ignoreCase = true)) {
+                if (lLang.equals("en", ignoreCase = true)) {
                     showExplanation(
                         "Permission Needed",
                         "Media and file access must be granted to start downloading movies and series through the app permissions option",
@@ -69,7 +77,7 @@ class DownloaderDowPlay(initContext: Context, initActivity: Activity) : Activity
                     )
                 }
             } else {
-                if ("ar".equals("en", ignoreCase = true)) {
+                if (lLang.equals("en", ignoreCase = true)) {
                     showExplanation(
                         "Permission Needed",
                         "You must grant access to media and files to start downloading movies and series",
@@ -88,9 +96,43 @@ class DownloaderDowPlay(initContext: Context, initActivity: Activity) : Activity
         }
     }
 
+
     private fun showExplanation(title: String, message: String, openSettingScreen: Boolean) {
         val builder = AlertDialog.Builder(lactivity, R.style.ScreenDialogTheme)
-        builder.setTitle(title)
+        var currentDialog :AlertDialog = builder.create()
+
+
+        val customDialog =
+            LayoutInflater.from(context).inflate(R.layout.explanation_permission, null, false)
+        val bindingMF = ExplanationPermissionBinding.bind(customDialog)
+        bindingMF.permissionTitle.text = title
+        bindingMF.permissionDetails.text = message
+        bindingMF.buttonExplanationPermission.text = if(lLang.lowercase() == "en") "ok" else "موافق"
+
+        bindingMF.buttonExplanationPermission.setOnClickListener{
+            if (openSettingScreen) {
+                currentDialog.dismiss()
+                val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+                val uri = Uri.fromParts("package", context.packageName, null)
+                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                intent.data = uri
+                context.startActivity(intent)
+            } else {
+                currentDialog.dismiss()
+                ActivityCompat.requestPermissions(
+                    lactivity,
+                    arrayOf(
+                        Manifest.permission.READ_EXTERNAL_STORAGE,
+                        Manifest.permission.WRITE_EXTERNAL_STORAGE
+                    ),
+                    myRequestCode
+                )
+            }
+        }
+
+        /////////////////////////
+            builder.setView(customDialog)
+            /*.setTitle(title)
             .setMessage(message)
             .setPositiveButton(
                 android.R.string.ok
@@ -111,8 +153,9 @@ class DownloaderDowPlay(initContext: Context, initActivity: Activity) : Activity
                         myRequestCode
                     )
                 }
-            }
-        builder.create().show()
+            }*/
+         currentDialog = builder.create()
+         currentDialog.show()
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -142,7 +185,8 @@ class DownloaderDowPlay(initContext: Context, initActivity: Activity) : Activity
             //for save in private pkg app
 
             val downloadInfo = DatabaseHelper(context).getDownloadInfoFromDB(mediaId, mediaType)
-            val status: Status = PRDownloader.getStatus(downloadInfo["download_id"].toString().toIntOrNull()?:-1)
+            val status: Status =
+                PRDownloader.getStatus(downloadInfo["download_id"].toString().toIntOrNull() ?: -1)
 
             Log.d(
                 "startDownload Method",
