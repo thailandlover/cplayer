@@ -352,9 +352,9 @@ class DatabaseHelper(innerContext: Context) : SQLiteOpenHelper(innerContext, DAT
             val order = cursor.getString(cursor.getColumnIndex(COL_order))
 
             mapData["media_id"] = mediaId
-            mapData["season_id"] = seasonId
+            //mapData["season_id"] = seasonId
             mapData["name"] = name
-            mapData["order"] = order
+            //mapData["order"] = order
             if(isFirstTime){
                 allInfoDataForThisMedia = getDownloadDataFromDbByMediaIdAndMediaType(mediaId,"series")
                 isFirstTime = false
