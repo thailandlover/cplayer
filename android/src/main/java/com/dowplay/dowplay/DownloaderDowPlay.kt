@@ -26,7 +26,8 @@ import java.math.BigInteger
 import java.security.SecureRandom
 
 
-class DownloaderDowPlay(initContext: Context, initActivity: Activity, initLang: String) : ActivityAware {
+class DownloaderDowPlay(initContext: Context, initActivity: Activity, initLang: String) :
+    ActivityAware {
 
     private var context: Context
     private var lactivity: Activity
@@ -50,75 +51,134 @@ class DownloaderDowPlay(initContext: Context, initActivity: Activity, initLang: 
     var permissionToDownload = false
 
     private fun showDownloadStatePermission() {
-        if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE)
-            != PackageManager.PERMISSION_GRANTED ||
-            ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE)
-            != PackageManager.PERMISSION_GRANTED
-        ) {
-            if (ActivityCompat.shouldShowRequestPermissionRationale(
-                    lactivity,
-                    Manifest.permission.READ_EXTERNAL_STORAGE
-                ) || ActivityCompat.shouldShowRequestPermissionRationale(
-                    lactivity,
-                    Manifest.permission.WRITE_EXTERNAL_STORAGE
-                )
-            ) {
+        if ((ContextCompat.checkSelfPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
+                    || ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED)
+            && (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_MEDIA_VIDEO) != PackageManager.PERMISSION_GRANTED
+                    || ContextCompat.checkSelfPermission(context, Manifest.permission.READ_MEDIA_IMAGES) != PackageManager.PERMISSION_GRANTED)) {
+            val permissionsArray = arrayOf(
+                Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                Manifest.permission.READ_MEDIA_VIDEO, Manifest.permission.READ_MEDIA_IMAGES,
+                Manifest.permission.POST_NOTIFICATIONS)
+            if (ActivityCompat.shouldShowRequestPermissionRationale(lactivity, Manifest.permission.READ_EXTERNAL_STORAGE)
+                || ActivityCompat.shouldShowRequestPermissionRationale(lactivity, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                || ActivityCompat.shouldShowRequestPermissionRationale(lactivity, Manifest.permission.READ_MEDIA_VIDEO)
+                || ActivityCompat.shouldShowRequestPermissionRationale(lactivity, Manifest.permission.READ_MEDIA_IMAGES)
+                || ActivityCompat.shouldShowRequestPermissionRationale(lactivity, Manifest.permission.POST_NOTIFICATIONS)) {
+
                 if (lLang.equals("en", ignoreCase = true)) {
-                    showExplanation(
+                    showExplanationForMediaFilePermission(
                         "Permission Needed",
                         "Media and file access must be granted to start downloading movies and series through the app permissions option",
-                        true
-                    )
+                        permissionsArray,
+                        true)
                 } else {
-                    showExplanation(
+                    showExplanationForMediaFilePermission(
                         "منح الإذن",
                         "يجب منح صلاحية الوصول للوسائط والملفات لبدء تحميل الافلام والمسلسلات من خلال خيار اذونات التطبيق",
-                        true
-                    )
+                        permissionsArray,
+                        true)
                 }
             } else {
                 if (lLang.equals("en", ignoreCase = true)) {
-                    showExplanation(
+                    showExplanationForMediaFilePermission(
                         "Permission Needed",
                         "You must grant access to media and files to start downloading movies and series",
-                        false
-                    )
+                        permissionsArray,
+                        false)
                 } else {
-                    showExplanation(
+                    showExplanationForMediaFilePermission(
                         "منح الإذن",
                         "يجب منح صلاحية الوصول للوسائط والملفات لبدء تحميل الافلام والمسلسلات",
-                        false
-                    )
+                        permissionsArray,
+                        false)
                 }
             }
         } else {
             permissionToDownload = true
         }
+        ////////////////////////////////////////////////
+        ////////////////////////////////////////////////
+        if(ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED){
+            if(ActivityCompat.shouldShowRequestPermissionRationale(lactivity, Manifest.permission.POST_NOTIFICATIONS)){
+                    if (lLang.equals("en", ignoreCase = true)) {
+                        showExplanationForMediaFilePermission(
+                            "Permission Needed",
+                            "Alerts must be granted to be able to receive notifications through the app permissions option",
+                            arrayOf(
+                                Manifest.permission.POST_NOTIFICATIONS
+                            ),
+                            true)
+                    } else {
+                        showExplanationForMediaFilePermission(
+                            "منح الإذن",
+                            "يجب منح صلاحية التنبيهات حتى تتمكن من استقبال الإشعارات من خلال خيار اذونات التطبيق",
+                            arrayOf(
+                                Manifest.permission.POST_NOTIFICATIONS
+                            ),true)
+                    }
+
+            }else{
+                    if (lLang.equals("en", ignoreCase = true)) {
+                        showExplanationForMediaFilePermission(
+                            "Permission Needed",
+                            "Alerts must be granted to be able to receive notifications",
+                            arrayOf(
+                                Manifest.permission.POST_NOTIFICATIONS
+                            ), false)
+                    } else {
+                        showExplanationForMediaFilePermission(
+                            "منح الإذن",
+                            "يجب منح صلاحية التنبيهات حتى تتمكن من استقبال الإشعارات",
+                            arrayOf(
+                                Manifest.permission.POST_NOTIFICATIONS
+                            ), false)
+                }
+            }
+        }
     }
 
 
-    private fun showExplanation(title: String, message: String, openSettingScreen: Boolean) {
+    private fun showExplanationForMediaFilePermission(title: String, message: String, permissionsArray:Array<String>, openSettingScreen: Boolean) {
         val builder = AlertDialog.Builder(lactivity, R.style.ScreenDialogTheme)
-        var currentDialog :AlertDialog = builder.create()
-
+        var currentDialog: AlertDialog = builder.create()
 
         val customDialog =
             LayoutInflater.from(context).inflate(R.layout.explanation_permission, null, false)
         val bindingMF = ExplanationPermissionBinding.bind(customDialog)
         bindingMF.permissionTitle.text = title
         bindingMF.permissionDetails.text = message
-        bindingMF.buttonExplanationPermission.text = if(lLang.lowercase() == "en") "ok" else "موافق"
+        bindingMF.buttonExplanationPermission.text =
+            if (lLang.lowercase() == "en") "ok" else "موافق"
 
-        bindingMF.buttonExplanationPermission.setOnClickListener{
+        bindingMF.buttonExplanationPermission.setOnClickListener {
             if (openSettingScreen) {
                 currentDialog.dismiss()
                 val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
                 val uri = Uri.fromParts("package", context.packageName, null)
                 intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
                 intent.data = uri
+                context.startActivity(intent) }
+            else {
+                currentDialog.dismiss()
+                ActivityCompat.requestPermissions(lactivity, permissionsArray, myRequestCode
+                )
+            }
+        }
+
+        /////////////////////////
+        builder.setView(customDialog)
+        /*.setTitle(title)
+        .setMessage(message)
+        .setPositiveButton(
+            android.R.string.ok
+        ) { dialog, id ->
+            if (openSettingScreen) {
+                val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+                val uri = Uri.fromParts("package", context.packageName, null)
+                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                intent.data = uri
                 context.startActivity(intent)
             } else {
-                currentDialog.dismiss()
                 ActivityCompat.requestPermissions(
                     lactivity,
                     arrayOf(
@@ -128,34 +188,9 @@ class DownloaderDowPlay(initContext: Context, initActivity: Activity, initLang: 
                     myRequestCode
                 )
             }
-        }
-
-        /////////////////////////
-            builder.setView(customDialog)
-            /*.setTitle(title)
-            .setMessage(message)
-            .setPositiveButton(
-                android.R.string.ok
-            ) { dialog, id ->
-                if (openSettingScreen) {
-                    val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
-                    val uri = Uri.fromParts("package", context.packageName, null)
-                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                    intent.data = uri
-                    context.startActivity(intent)
-                } else {
-                    ActivityCompat.requestPermissions(
-                        lactivity,
-                        arrayOf(
-                            Manifest.permission.READ_EXTERNAL_STORAGE,
-                            Manifest.permission.WRITE_EXTERNAL_STORAGE
-                        ),
-                        myRequestCode
-                    )
-                }
-            }*/
-         currentDialog = builder.create()
-         currentDialog.show()
+        }*/
+        currentDialog = builder.create()
+        currentDialog.show()
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -288,7 +323,10 @@ class DownloaderDowPlay(initContext: Context, initActivity: Activity, initLang: 
         media_id: String,
         media_type: String
     ): ArrayList<HashMap<String, Any>> {
-        return DatabaseHelper(context).getDownloadDataFromDbByMediaIdAndMediaType(media_id, media_type)
+        return DatabaseHelper(context).getDownloadDataFromDbByMediaIdAndMediaType(
+            media_id,
+            media_type
+        )
     }
 
     fun getAllDownloadMedia(user_id: String, profile_id: String): List<HashMap<String, Any>> {
