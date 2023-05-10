@@ -355,17 +355,16 @@ class DatabaseHelper(innerContext: Context) : SQLiteOpenHelper(innerContext, DAT
             //mapData["season_id"] = seasonId
             mapData["name"] = name
             //mapData["order"] = order
-            if(isFirstTime){
-                allInfoDataForThisMedia = getDownloadDataFromDbByMediaIdAndMediaType(mediaId,"series")
-                isFirstTime = false
-            }
-            allDownloadData += mapData
-            mapData["group"] = allInfoDataForThisMedia[0]
             mapData["mediaRetrivalType"] = "SeasonInfo"
             mapData["progress"] = "0"
             mapData["status"] = "0"
             mapData["mediaType"] = "series"
-
+            if(isFirstTime){
+                allInfoDataForThisMedia = getDownloadDataFromDbByMediaIdAndMediaType(mediaId,"series")
+                isFirstTime = false
+            }
+            mapData["group"] = allInfoDataForThisMedia[0]
+            allDownloadData += mapData
         }
         Log.d("Sqlite Data:", "$allDownloadData")
 
@@ -379,6 +378,7 @@ class DatabaseHelper(innerContext: Context) : SQLiteOpenHelper(innerContext, DAT
         season_id: String,
         tvshow_id: String
     ): List<HashMap<String, Any>> {
+        var isFirstTime :Boolean = true
 
         val dbHelper = DatabaseHelper(context)
         val db = dbHelper.readableDatabase
@@ -393,7 +393,7 @@ class DatabaseHelper(innerContext: Context) : SQLiteOpenHelper(innerContext, DAT
         val cursor = db.rawQuery(query, selectionArgs)
 
         val allDownloadData = ArrayList<HashMap<String, Any>>()
-
+        var allInfoDataForThisMedia = ArrayList<HashMap<String, Any>>()
         while (cursor.moveToNext()) {
             val mapData = HashMap<String, Any>()
             val downloadId = cursor.getInt(cursor.getColumnIndex(COL_download_id))
@@ -406,17 +406,24 @@ class DatabaseHelper(innerContext: Context) : SQLiteOpenHelper(innerContext, DAT
             val name = cursor.getString(cursor.getColumnIndex(COL_name))
             val order = cursor.getString(cursor.getColumnIndex(COL_order))
 
-            mapData["download_id"] = downloadId
-            mapData["status"] = status
-            mapData["progress"] = progress
-            mapData["video_path"] = videoPath
-            mapData["media_id"] = mediaId
-            mapData["season_id"] = seasonId
-            mapData["episode_id"] = episodeId
-            mapData["name"] = name
-            mapData["order"] = order
-
-            allDownloadData.add(mapData)
+//            mapData["download_id"] = downloadId
+              mapData["status"] = status
+              mapData["progress"] = progress
+              mapData["tempPath"] = videoPath
+              mapData["mediaType"] = "series"
+              mapData["mediaId"] = mediaId
+//            mapData["season_id"] = seasonId
+//            mapData["episode_id"] = episodeId
+              mapData["name"] = name
+              mapData["mediaRetrivalType"] = "EpisodeInfo"
+//            mapData["order"] = order
+            if(isFirstTime){
+                allInfoDataForThisMedia = getDownloadDataFromDbByMediaIdAndMediaType(mediaId,"series")
+                isFirstTime = false
+            }
+            mapData["group"] = allInfoDataForThisMedia[0]
+            mapData["object"] = allInfoDataForThisMedia[0]
+            allDownloadData += mapData
         }
 
         Log.d("Sqlite Data:", "$allDownloadData")
