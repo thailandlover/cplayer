@@ -56,11 +56,16 @@ class DownloadService : Service() {
                 //.setConnectTimeout(30000)
                 .build()
             PRDownloader.initialize(this, config)
+
             downloadId = PRDownloader.download(url, dirPath, fileName)
                 .build()
                 .setOnStartOrResumeListener {
                     // Download started or resumed
                     Log.d("Bom::: ", "Download resumed")
+                    val downloadData = DatabaseHelper(this).getDownloadInfoFromDB(mediaId.toString(),mediaType.toString())
+                    val downloadIdDB = downloadData["download_id"]
+                    Log.d("WWWWWWWWL:",downloadIdDB.toString())
+                    if(downloadIdDB.toString().trim().isEmpty() || downloadIdDB == null) {
                     DatabaseHelper(this).saveDownloadDataInDB(
                         downloadId,
                         DownloadManagerSTATUS.STATUS_RUNNING,
@@ -92,6 +97,7 @@ class DownloadService : Service() {
                             episodeOrder.toString()
                         )
                     }
+                }
                     startNotification(abs(downloadId), mediaName.toString())
                     Log.d("Bom::: ", "Download ID $downloadId")
                     //Log.d("Bom::: ", "Is Insert ID $isInsert")
