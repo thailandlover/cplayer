@@ -6,6 +6,7 @@ import android.app.AlertDialog
 import android.app.PictureInPictureParams
 import android.content.Context
 import android.content.Intent
+import android.content.pm.ActivityInfo
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.net.Uri
@@ -82,6 +83,8 @@ class CustomPlayerActivity() : FlutterActivity() {
     ///////////////////////////////////////////////////////////////////////////////////////////////
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+
         Log.d("current stats screen:", "onCreate")
         setContentView(viewBinding.root)
 
@@ -787,6 +790,7 @@ class CustomPlayerActivity() : FlutterActivity() {
 
     public override fun onStart() {
         super.onStart()
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
         Log.d("current stats screen:", "onStart")
         initToGetDataFromIntentAndTypeMedia()
         if (Util.SDK_INT > 23) {
@@ -796,6 +800,7 @@ class CustomPlayerActivity() : FlutterActivity() {
 
     public override fun onResume() {
         super.onResume()
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
         Log.d("current playbackPosi", "> $playbackPosition")
         Log.d("current stats screen:", "onResume")
         hideSystemUi()

@@ -19,7 +19,8 @@
             android:supportsPictureInPicture="true"
             android:resizeableActivity="true"
             android:theme="@style/Theme.CustomPlayerActivity"
-            android:configChanges="uiMode|orientation|screenSize|screenLayout|smallestScreenSize"
+            android:windowSoftInputMode="adjustResize"
+            android:configChanges="uiMode|orientation|screenSize|screenLayout|smallestScreenSize|screenLayout|density"
             android:exported="false"/>
         <service android:name=".DownloadService"
             android:enabled="true"
