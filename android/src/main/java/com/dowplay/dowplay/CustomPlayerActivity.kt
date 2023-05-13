@@ -650,6 +650,9 @@ class CustomPlayerActivity() : FlutterActivity() {
             val index =
                 episodeMedia?.mediaGroup?.episodes?.indexOfFirst { info -> info.id == episodeMedia?.info?.id }
             startVideoPosition = index ?: 0
+            if(0 > startVideoPosition){
+                startVideoPosition = 0
+            }
             print("what the hell ? " + startVideoPosition)
             /*startVideoPosition = episodeMedia?.info?.order?.toIntOrNull() ?: 0
             if (startVideoPosition > 0) {

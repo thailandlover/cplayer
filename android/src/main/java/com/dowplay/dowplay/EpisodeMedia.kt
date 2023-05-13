@@ -57,10 +57,10 @@ data class ItemsIDS (
 )
 
 data class Season (
-    val id: Long? = null,
+    val id: Int? = null,
 
     @Json(name = "season_id")
-    val seasonID: Long? = null,
+    val seasonID: Int? = null,
 
     @Json(name = "poster_photo")
     val posterPhoto: String? = null,
@@ -78,7 +78,7 @@ data class Season (
 )
 
 data class TvShow (
-    val id: Long? = null,
+    val id: Int? = null,
     val title: String? = null,
     val description: String? = null,
 

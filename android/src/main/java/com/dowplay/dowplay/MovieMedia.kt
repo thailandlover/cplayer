@@ -43,7 +43,7 @@ data class MovieMedia (
 }
 
 data class Info (
-    val id: Long? = null,
+    val id: Int? = null,
     val title: String? = null,
     val description: String? = null,
 
@@ -97,13 +97,13 @@ data class Info (
 )
 
 data class DirectorInfo (
-    val id: Long? = null,
+    val id: Int? = null,
     val name: String? = null,
     val image: String? = null
 )
 
 data class Tag (
-    val id: Long? = null,
+    val id: Int? = null,
     val title: String? = null
 )
 
@@ -113,11 +113,11 @@ data class Watching (
 
     val duration: String? = null,
     val title: String? = null,
-    val order: Long? = null,
+    val order: Int? = null,
     val description: String? = null,
 
     @Json(name = "last_media_id")
-    val lastMediaID: Long? = null,
+    val lastMediaID: Int? = null,
 
     @Json(name = "1080_url")
     val the1080_URL: String? = null,
