@@ -325,14 +325,14 @@ class _MyAppState extends State<MyApp> {
         lang: "ar",
         info: episodeToStart,
         mediaGroup: mediaGroup);
-    bool result = await invokePlayEpisode(media);
+    dynamic result = await invokePlayEpisode(media);
     if (kDebugMode) {
       printWrapped("Play episode result : $result");
     }
   }
 
   Future<void> playMovie() async {
-    bool result = await invokePlayMovie(movieMedia);
+    dynamic result = await invokePlayMovie(movieMedia);
     if (kDebugMode) {
       printWrapped("Play movie result : $result");
     }
@@ -535,8 +535,8 @@ class _MyAppState extends State<MyApp> {
     }
   }
 
-  Future<bool> invokePlayEpisode(EpisodeMedia media) async {
-    bool result;
+  Future<dynamic> invokePlayEpisode(EpisodeMedia media) async {
+    dynamic result;
     try {
       result = await _dowplayPlugin.playEpisode(media) ?? false;
       if (kDebugMode) {
@@ -548,8 +548,8 @@ class _MyAppState extends State<MyApp> {
     return result;
   }
 
-  Future<bool> invokePlayMovie(MovieMedia media) async {
-    bool result;
+  Future<dynamic> invokePlayMovie(MovieMedia media) async {
+    dynamic result;
     try {
       result = await _dowplayPlugin.playMovie(media) ?? false;
       if (kDebugMode) {

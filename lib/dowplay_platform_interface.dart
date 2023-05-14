@@ -25,11 +25,11 @@ abstract class DowplayPlatform extends PlatformInterface {
     _instance = instance;
   }
 
-  Future<bool?> playEpisode(EpisodeMedia media) {
+  Future<dynamic> playEpisode(EpisodeMedia media) {
     throw UnimplementedError('playEpisode() has not been implemented.');
   }
 
-  Future<bool?> playMovie(MovieMedia media) {
+  Future<dynamic> playMovie(MovieMedia media) {
     throw UnimplementedError('playMovie() has not been implemented.');
   }
 

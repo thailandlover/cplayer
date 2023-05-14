@@ -14,11 +14,9 @@ public class DowplayPlugin: NSObject, FlutterPlugin {
         switch(call.method){
         case "play_episode":
             self.playEpisode(call: call, result: result)
-            result(true)
-            break;
+            break;		
         case "play_movie":
             self.playMovie(call: call, result: result)
-            result(true)
             break;
         case "config_downloader":
             configDownloader(call: call, result: result);
@@ -57,35 +55,40 @@ public class DowplayPlugin: NSObject, FlutterPlugin {
            let media_group : [String:Any] = myArgs["media_group"] as? [String:Any],
            let info : [String:Any] = myArgs["info"] as? [String:Any],
            let lang : String = myArgs["lang"] as? String {
-            
-            let keeUser = KeeUser(userID: user_id, profileID: profile_id,token: token)
-            let hostAppSettings = HostAppSettings(KeeUser:keeUser, lang: lang,baseURL: api_base_url,apiVersion: 4,baseType: "mobile",baseVersion: "v4",acceptType: "ios")
-            let mediaType : MediaManager.MediaType = media_type == "movie" ? .movie : .series
-            let itemsIds: [String:Any] = media_group["items_ids"] as! [String : Any]
-            let episodes: [[String:Any]] = media_group["episodes"] as! [[String:Any]]
-            let playIndex: Int = Int(info["order"] as! String)! - 1;
-            var media : [Media] = []
-            let _ : [String:Any] = media_group["tv_show"] as! [String:Any]
-            let season : [String:Any] = media_group["season"] as! [String:Any]
-            let seasonNumber:Any = season["season_number"]!
-            
-            let tvShow :[String:Any]  = media_group["tv_show"]  as! [String : Any]
-            let tvShowTitle:Any = tvShow["title"]!
-            
-            for episode in episodes {
-                let mediaId = String(episode["id"] as! Int);
-                let mediaGroup : MediaGroup = MediaGroup(showId: itemsIds["tv_show_id"] as! String, seasonId: itemsIds["season_id"] as! String, episodeId: mediaId,seasonName: "Season \(seasonNumber)",showName: tvShowTitle as! String ,data: media_group)
-                let watching : [String:Any]? = episode["watching"] as? [String : Any]
-                var startAt:Float = 0.0
-                if(watching != nil) {
-                    startAt = Float(watching?["current_time"] as! String)!
-                }
-                let mediaItem = Media(title: episode["title"] as! String,subTitle: season["title"] as? String, urlToPlay: episode["media_url"] as! String,keeId: mediaId,type: mediaType, startAt: startAt,mediaGroup: mediaGroup,info: episode)
-                media.append(mediaItem)
+            Task {
+                let keeUser = KeeUser(userID: user_id, profileID: profile_id,token: token)
+                let hostAppSettings = HostAppSettings(KeeUser:keeUser, lang: lang,baseURL: api_base_url,apiVersion: 4,baseType: "mobile",baseVersion: "v4",acceptType: "ios")
+                let mediaType : MediaManager.MediaType = media_type == "movie" ? .movie : .series
+                let itemsIds: [String:Any] = media_group["items_ids"] as! [String : Any]
+                let episodes: [[String:Any]] = media_group["episodes"] as! [[String:Any]]
+                let playIndex: Int = Int(info["order"] as! String)! - 1;
+                var media : [Media] = []
+                let _ : [String:Any] = media_group["tv_show"] as! [String:Any]
+                let season : [String:Any] = media_group["season"] as! [String:Any]
+                let seasonNumber:Any = season["season_number"]!
                 
+                let tvShow :[String:Any]  = media_group["tv_show"]  as! [String : Any]
+                let tvShowTitle:Any = tvShow["title"]!
+                
+                for episode in episodes {
+                    let mediaId = String(episode["id"] as! Int);
+                    let mediaGroup : MediaGroup = MediaGroup(showId: itemsIds["tv_show_id"] as! String, seasonId: itemsIds["season_id"] as! String, episodeId: mediaId,seasonName: "Season \(seasonNumber)",showName: tvShowTitle as! String ,data: media_group)
+                    let watching : [String:Any]? = episode["watching"] as? [String : Any]
+                    var startAt:Float = 0.0
+                    if(watching != nil) {
+                        startAt = Float(watching?["current_time"] as! String)!
+                    }
+                    let mediaItem = Media(title: episode["title"] as! String,subTitle: season["title"] as? String, urlToPlay: episode["media_url"] as! String,keeId: mediaId,type: mediaType, startAt: startAt,mediaGroup: mediaGroup,info: episode)
+                    media.append(mediaItem)
+                    
+                }
+                let playerResult : [[String:Any]] = await MediaManager.default.openMediaPlayer(usingMediaList: media,playMediaIndex: playIndex,usingSettings: hostAppSettings, forViewController: flutterViewController)
+                if(playerResult.isEmpty){
+                    result(false)
+                } else {
+                    result(playerResult)
+                }
             }
-            MediaManager.default.openMediaPlayer(usingMediaList: media,playMediaIndex: playIndex,usingSettings: hostAppSettings, forViewController: flutterViewController)
-            
         } else {
             print("iOS could not extract flutter arguments in method: (playEpisode)")
             result(false)
@@ -109,18 +112,24 @@ public class DowplayPlugin: NSObject, FlutterPlugin {
            let start_at : Float = myArgs["start_at"] as? Float,
            let info : [String:Any] = myArgs["info"] as? [String:Any],
            let lang : String = myArgs["lang"] as? String {
-            
-            let keeUser = KeeUser(userID: user_id, profileID: profile_id,token: token)
-            let hostAppSettings = HostAppSettings(KeeUser:keeUser, lang: lang,baseURL: api_base_url,apiVersion: 4,baseType: "mobile",baseVersion: "v4",acceptType: "ios")
-            let mediaType : MediaManager.MediaType = media_type == "movie" ? .movie : .series
-            
-            var media : [Media] = []
-            
-            let mediaItem = Media(title: title,subTitle: sub_title, urlToPlay: url,keeId: media_id,type: mediaType, startAt: start_at,info: info)
-            media.append(mediaItem)
-            
-            MediaManager.default.openMediaPlayer(usingMediaList: media,usingSettings: hostAppSettings, forViewController: flutterViewController)
-            result(true)
+            Task {
+                let keeUser = KeeUser(userID: user_id, profileID: profile_id,token: token)
+                let hostAppSettings = HostAppSettings(KeeUser:keeUser, lang: lang,baseURL: api_base_url,apiVersion: 4,baseType: "mobile",baseVersion: "v4",acceptType: "ios")
+                let mediaType : MediaManager.MediaType = media_type == "movie" ? .movie : .series
+                
+                var media : [Media] = []
+                
+                let mediaItem = Media(title: title,subTitle: sub_title, urlToPlay: url,keeId: media_id,type: mediaType, startAt: start_at,info: info)
+                media.append(mediaItem)
+                
+                let playerResult : [[String:Any]] = await MediaManager.default.openMediaPlayer(usingMediaList: media,usingSettings: hostAppSettings, forViewController: flutterViewController)
+                if(playerResult.isEmpty){
+                    result(false)
+                } else {
+                    result(playerResult[0])
+                }
+            }
+           
             
         } else {
             print("iOS could not extract flutter arguments in method: (playMovie)")

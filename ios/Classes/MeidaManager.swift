@@ -1,10 +1,3 @@
-//
-//  MeidaManager.swift
-//  KeeCustomPlayer
-//
-//  Created by Ahmed Qazzaz on 04/01/2023.
-//
-
 import UIKit
 
 
@@ -16,9 +9,33 @@ public class MediaManager {
     
     
     private init(){}
-    
-    
+
     //MARK: -Media Player Functions.
+    
+    public func openMediaPlayer(usingMediaList list : [Media],playMediaIndex: Int = 0, usingSettings settings: HostAppSettings,  forViewController mvc: UIViewController) async ->[[String:Any]]{
+        
+        if playMediaIndex < 0 || playMediaIndex >= list.count {
+            let name = NSExceptionName("Playing index is not in the media list range")
+            NSException(name: name, reason: "Media list range is from 0 ... to \(list.count - 1), and the playing index is \(playMediaIndex)").raise()
+        }
+        
+        let vc = await KeeVideoPlayerController(nibName: "KeeVideoPlayerController", bundle: .packageBundle)
+        await vc.setSettings(settings)
+        await vc.setMediaList(mediaList: list)
+        await vc.setPlayingIndex(playMediaIndex)
+        
+        if let nvc = await mvc.navigationController {
+            await nvc.pushViewController(vc, animated: true)
+        }else{
+            await mvc.present(vc, animated: true)
+        }
+        
+        while await (vc.isOpen) {sleep(1)}
+        
+        return await vc.getPlayingInfo()
+    }
+    
+    
     @discardableResult
     public func openMediaPlayer(usingMediaList list : [Media],playMediaIndex: Int = 0, usingSettings settings: HostAppSettings,  forViewController mvc: UIViewController)->KeeVideoPlayerController {
         

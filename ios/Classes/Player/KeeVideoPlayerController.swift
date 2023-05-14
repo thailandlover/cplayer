@@ -1,15 +1,13 @@
-//
-//  KeeVideoPlayerController.swift
-//  KeeCustomPlayer
-//
-//  Created by Ahmed Qazzaz on 11/11/2022.
-//
-
 import UIKit
 import AVKit
 import MediaPlayer
 
-
+struct PlayingInfo : Codable{
+    var type = MediaManager.MediaType.movie
+    var id : String
+    var duration : Double
+    var currentTime : Double
+}
 
 
 public class KeeVideoPlayerController: UIViewController {
@@ -21,6 +19,12 @@ public class KeeVideoPlayerController: UIViewController {
     private var playerLayer : AVPlayerLayer!
     @IBOutlet weak private var playerView : UIView!
     
+    private var playingInfoList : [PlayingInfo] = []
+    
+    private var complete = false
+    public var isOpen : Bool {
+        return !complete
+    }
     private var moveToNextCounter = 5
     private var moveToNextTime : Timer?
     
@@ -111,9 +115,7 @@ public class KeeVideoPlayerController: UIViewController {
         
         self.setPlayingItemInfo()
         settingsController = KeeVideoPlayerSettingsViewController(nibName: "KeeVideoPlayerSettingsViewController", bundle: .packageBundle)
-        
-        
-        
+                        
         playerView.layer.addSublayer(playerLayer)
         self.view.addSubview(playerView)
         self.view.sendSubviewToBack(playerView)
@@ -358,10 +360,12 @@ public class KeeVideoPlayerController: UIViewController {
     
     public override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
+        self.setPlayingInfoForCurrentMedia()
         AppUtility.lockOrientation(.portrait)
         self.updateWatchTime()
         self.player.pause()
         self.player = nil
+        self.complete = true
     }
     
     private func updateWatchTime(){
@@ -401,6 +405,8 @@ public class KeeVideoPlayerController: UIViewController {
     
     @IBAction func nextAction(_ sender : UIButton?) {
 //        let nextItem = player.items()[playingIndex + 1]
+        
+        self.setPlayingInfoForCurrentMedia()
         player.pause()
         localPath = nil
         self.updateWatchTime()
@@ -413,6 +419,7 @@ public class KeeVideoPlayerController: UIViewController {
     }
     
     @IBAction func previousAction(_ sender : UIButton?) {
+        self.setPlayingInfoForCurrentMedia()
         player.pause()
         localPath = nil
         self.updateWatchTime()
@@ -422,6 +429,34 @@ public class KeeVideoPlayerController: UIViewController {
         setPlayingItem()
         try? self.validateDownloadButton()
         setTimerToHideControllers()
+    }
+    
+    func setPlayingInfoForCurrentMedia(){
+        if let duration = player.currentItem?.duration,
+           let currentTime = player.currentItem?.currentTime(),
+           let id = media?.keeId{
+            
+            let pi = PlayingInfo(type:media?.type ?? .movie,
+                                 id: id,
+                                 duration: duration.seconds,
+                                 currentTime: currentTime.seconds)
+            
+            if let index = playingInfoList.firstIndex(where: {$0.id == id}){
+                playingInfoList[index] = pi
+            }else{
+                playingInfoList.append(pi)
+            }
+        }
+    }
+    
+    public func getPlayingInfo()->[[String:Any]]{
+        if let data = try? JSONEncoder().encode(playingInfoList) {
+            if let result = try? JSONSerialization.jsonObject(with: data, options: .fragmentsAllowed) as? [[String:Any]] {
+                return result
+            }
+        }
+        
+        return []
     }
         
 //    @IBAction func seekAction(_ sender : UISlider, event : UIEvent) {
@@ -906,13 +941,18 @@ extension KeeVideoPlayerController : AVPictureInPictureControllerDelegate {
 
 //Public Functions
 extension KeeVideoPlayerController {
+    
+    func setSettings(_ settings : HostAppSettings){
+        self.settings = settings
+    }
+    
     func setMediaList(mediaList: [Media], startingIndex : Int = 0, playOnStart : Bool = true){
         self.mediaQueue = mediaList
         self.playingIndex = startingIndex
 //        self.setPlayingItem()
     }
     
-    func getPlayingMediaInfo()->[String:Any?]{
+    public func getPlayingMediaInfo()->[String:Any?]{
         var playingMediaInfo : [String : Any?] = [:]
         playingMediaInfo[.KVP_currentItem] = media
         playingMediaInfo[.KVP_playingIndex] = playingIndex
