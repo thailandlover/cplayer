@@ -317,6 +317,7 @@ class DatabaseHelper(innerContext: Context) : SQLiteOpenHelper(innerContext, DAT
               mapData["mediaType"] = mediaType
               mapData["mediaId"] = mediaId
               mapData["object"] = mediaData
+              mapData["group"] = mediaData
             allDownloadData += mapData
         }
 
