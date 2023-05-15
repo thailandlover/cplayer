@@ -323,8 +323,10 @@ class DatabaseHelper(innerContext: Context) : SQLiteOpenHelper(innerContext, DAT
                   mapData["object"] = mediaData
               }else{
                   val mediaGroup = mediaData.replace(".*media_group=(.+).*".toRegex(), "$1")
+                  Log.d("boooooo",mediaGroup)
                   val info = gson.toJson(ObjectForInfo(mediaGroup))
                   mapData["group"] = info
+                  Log.d("boooooo",info)
               }
             allDownloadData += mapData
         }
@@ -375,8 +377,8 @@ class DatabaseHelper(innerContext: Context) : SQLiteOpenHelper(innerContext, DAT
             }
             val mediaData = allInfoDataForThisMedia[0]["media_data"]
             val mediaGroup = mediaData.toString().replace(".*media_group=(.+).*".toRegex(), "$1")
-            mapDataInfo["info"] = mediaGroup
-            mapData["group"] = mapDataInfo
+            val info = gson.toJson(ObjectForInfo(mediaGroup))
+            mapData["group"] = info
             allDownloadData += mapData
         }
         Log.d("Sqlite Data:", "$allDownloadData")
@@ -437,8 +439,8 @@ class DatabaseHelper(innerContext: Context) : SQLiteOpenHelper(innerContext, DAT
             }
             val mediaData = allInfoDataForThisMedia[0]["media_data"]
             val mediaGroup = mediaData.toString().replace(".*media_group=(.+).*".toRegex(), "$1")
-            mapDataInfo["info"] = mediaGroup
-            mapData["group"] = mapDataInfo
+            val info = gson.toJson(ObjectForInfo(mediaGroup))
+            mapData["group"] = info
             mapData["object"] = allInfoDataForThisMedia[0]
             allDownloadData += mapData
         }
