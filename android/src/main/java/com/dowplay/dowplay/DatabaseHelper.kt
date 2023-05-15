@@ -281,7 +281,7 @@ class DatabaseHelper(innerContext: Context) : SQLiteOpenHelper(innerContext, DAT
         val cursor = db.rawQuery(query, selectionArgs)
 
         val allDownloadData = ArrayList<HashMap<String, Any>>()
-
+        val mapDataInfo = HashMap<String, Any>()
         while (cursor.moveToNext()) {
             val mapData = HashMap<String, Any>()
             val downloadId = cursor.getInt(cursor.getColumnIndex(COL_download_id))
@@ -320,7 +320,8 @@ class DatabaseHelper(innerContext: Context) : SQLiteOpenHelper(innerContext, DAT
                   mapData["object"] = mediaData
               }else{
                   val mediaGroup = mediaData.replace(".*media_group=(.+).*".toRegex(), "$1")
-                  mapData["group"] = "{info:$mediaGroup}"
+                  mapDataInfo["info"] = mediaGroup
+                  mapData["group"] = mapDataInfo
               }
             allDownloadData += mapData
         }
@@ -349,6 +350,7 @@ class DatabaseHelper(innerContext: Context) : SQLiteOpenHelper(innerContext, DAT
 
         val allDownloadData = ArrayList<HashMap<String, Any>>()
         var allInfoDataForThisMedia = ArrayList<HashMap<String, Any>>()
+        val mapDataInfo = HashMap<String, Any>()
         while (cursor.moveToNext()) {
             val mapData = HashMap<String, Any>()
             val mediaId = cursor.getString(cursor.getColumnIndex(COL_media_id))
@@ -370,7 +372,8 @@ class DatabaseHelper(innerContext: Context) : SQLiteOpenHelper(innerContext, DAT
             }
             val mediaData = allInfoDataForThisMedia[0]["media_data"]
             val mediaGroup = mediaData.toString().replace(".*media_group=(.+).*".toRegex(), "$1")
-            mapData["group"] = "{info:$mediaGroup}"
+            mapDataInfo["info"] = mediaGroup
+            mapData["group"] = mapDataInfo
             allDownloadData += mapData
         }
         Log.d("Sqlite Data:", "$allDownloadData")
@@ -401,6 +404,7 @@ class DatabaseHelper(innerContext: Context) : SQLiteOpenHelper(innerContext, DAT
 
         val allDownloadData = ArrayList<HashMap<String, Any>>()
         var allInfoDataForThisMedia = ArrayList<HashMap<String, Any>>()
+        val mapDataInfo = HashMap<String, Any>()
         while (cursor.moveToNext()) {
             val mapData = HashMap<String, Any>()
             val downloadId = cursor.getInt(cursor.getColumnIndex(COL_download_id))
@@ -430,8 +434,8 @@ class DatabaseHelper(innerContext: Context) : SQLiteOpenHelper(innerContext, DAT
             }
             val mediaData = allInfoDataForThisMedia[0]["media_data"]
             val mediaGroup = mediaData.toString().replace(".*media_group=(.+).*".toRegex(), "$1")
-            mapData["group"] = "{info:$mediaGroup}"
-            //mapData["group"] = allInfoDataForThisMedia[0]
+            mapDataInfo["info"] = mediaGroup
+            mapData["group"] = mapDataInfo
             mapData["object"] = allInfoDataForThisMedia[0]
             allDownloadData += mapData
         }
