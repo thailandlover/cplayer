@@ -170,6 +170,7 @@
                 android:id="@+id/nextButton"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
+                android:clickable="true"
                 android:src="@drawable/next_icon"
                 android:backgroundTint="@android:color/transparent"
                 app:tint="@color/white"

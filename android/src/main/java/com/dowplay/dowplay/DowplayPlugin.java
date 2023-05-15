@@ -77,10 +77,54 @@ public class DowplayPlugin extends FlutterActivity implements FlutterPlugin, Met
         context = flutterPluginBinding.getApplicationContext();
         Log.d(TAG, "onMethodCall Test: config_downloader");
     }
+/////////////////////////////////
 
+    private static final int REQUEST_FOR_PLAY_MOVIE = 1998;
+    private static final int REQUEST_FOR_PLAY_EPISODE = 1999;
+    static Result myResultCallback;
+/*
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        Log.d("player_result", "Start");
+        if (requestCode == REQUEST_FOR_PLAY_MOVIE) {
+            if (resultCode == RESULT_OK) {
+                String result = data.getStringExtra("player_result");
+                Log.d("player_result", result);
+                myResultCallback.success(result);
+            } else {
+                //Toast.makeText(this, "Result not OK", Toast.LENGTH_SHORT).show();
+                Log.d("player_result", "Error");
+                myResultCallback.success("{}");
+            }
+        }
+        if (requestCode == REQUEST_FOR_PLAY_EPISODE) {
+            if (resultCode == RESULT_OK) {
+                String result = data.getStringExtra("player_result");
+                Log.d("player_result", result);
+                myResultCallback.success(result);
+            } else {
+                //Toast.makeText(this, "Result not OK", Toast.LENGTH_SHORT).show();
+                Log.d("player_result", "Error");
+                List returnData = new ArrayList();
+                myResultCallback.success(returnData);
+            }
+        }
+    }*/
+
+    ///////////////////////////////
     @Override
     public void onMethodCall(@NonNull MethodCall call, @NonNull Result result) {
-        if (call.method.equals("play_movie")) {
+        if (call.method.equals("config_downloader")) {
+            Log.d(TAG, "onMethodCall: config_downloader");
+            Log.d(TAG, "onMethodCall: " + call.arguments.toString());
+            ///{user_id=245394, profile_id=562674, lang=ar}
+            userId = call.arguments.toString().replaceAll(".*user_id=(\\d+).*", "$1");
+            profileId = call.arguments.toString().replaceAll(".*profile_id=(\\d+).*", "$1");
+            lang = call.arguments.toString().replaceAll(".*lang=(.+).*", "$1");
+            result.success(true);
+///////////////////////////////////////////////////////////////////////////////////////////
+        } else if (call.method.equals("play_movie")) {
             Log.d(TAG, "onMethodCall: play_movie");
             Log.d(TAG, "onMethodCall: " + call.arguments.toString());
             Gson gson = new Gson();
@@ -92,8 +136,9 @@ public class DowplayPlugin extends FlutterActivity implements FlutterPlugin, Met
             Intent intent = new Intent(context, CustomPlayerActivity.class);
             intent.putExtra("PlayMovieData", json);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            myResultCallback = result;
             context.startActivity(intent);
-            result.success(true);
+            //result.success("{type: movie, duration: 262.891, currentTime: 11.721485617,id:377530}");
 //////////////////////////////////////////////////////////////////////////////////////////////////
         } else if (call.method.equals("play_episode")) {
             Log.d(TAG, "onMethodCall: play_episode");
@@ -103,17 +148,9 @@ public class DowplayPlugin extends FlutterActivity implements FlutterPlugin, Met
             Intent intent = new Intent(context, CustomPlayerActivity.class);
             intent.putExtra("PlayEpisodeData", json);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            myResultCallback = result;
             context.startActivity(intent);
-            result.success(true);
-//////////////////////////////////////////////////////////////////////////////////////////////////
-        } else if (call.method.equals("config_downloader")) {
-            Log.d(TAG, "onMethodCall: config_downloader");
-            Log.d(TAG, "onMethodCall: " + call.arguments.toString());
-            ///{user_id=245394, profile_id=562674, lang=ar}
-            userId = call.arguments.toString().replaceAll(".*user_id=(\\d+).*", "$1");
-            profileId = call.arguments.toString().replaceAll(".*profile_id=(\\d+).*", "$1");
-            lang = call.arguments.toString().replaceAll(".*lang=(.+).*", "$1");
-            result.success(true);
+            //result.success("[{duration: 428.569, id: 64864, type: series, currentTime: 34.420640823}, {currentTime: 9.164657244, type: series, id: 64865, duration:455.463}]");
 //////////////////////////////////////////////////////////////////////////////////////////////////
         } else if (call.method.equals("get_downloads_list")) {
             Log.d(TAG, "onMethodCall: get_downloads_list: " + userId + " > " + profileId + " > " + lang);
@@ -138,30 +175,29 @@ public class DowplayPlugin extends FlutterActivity implements FlutterPlugin, Met
             result.success(new DownloaderDowPlay(context, activity, lang).getAllEpisodes(seasonId, tvshowId));
 //////////////////////////////////////////////////////////////////////////////////////////////////
         } else if (call.method.equals("start_download_movie")) {
-                Log.d(TAG, "onMethodCall: start_download_movie");
-                Log.d(TAG, "onMethodCall: " + call.arguments.toString());
-                Gson gson = new Gson();
-                String json = gson.toJson(call.arguments);
-                MovieMedia movieMedia = MovieMedia.Companion.fromJson(json);
-                System.out.println("B7b Gson::: " + movieMedia);
-                new DownloaderDowPlay(context, activity, lang).startDownload(movieMedia.getInfo().getDownloadURL(), movieMedia.getTitle(), movieMedia.getMediaType(),
-                        movieMedia.getMediaID(), call.arguments.toString(), movieMedia.getUserID(), movieMedia.getProfileID(), "", "", "", "", "", "");
-                List returnData = new ArrayList();
-                result.success(returnData);
+            Log.d(TAG, "onMethodCall: start_download_movie");
+            Log.d(TAG, "onMethodCall: " + call.arguments.toString());
+            Gson gson = new Gson();
+            String json = gson.toJson(call.arguments);
+            MovieMedia movieMedia = MovieMedia.Companion.fromJson(json);
+            System.out.println("B7b Gson::: " + movieMedia);
+            new DownloaderDowPlay(context, activity, lang).startDownload(movieMedia.getInfo().getDownloadURL(), movieMedia.getTitle(), movieMedia.getMediaType(),
+                    movieMedia.getMediaID(), call.arguments.toString(), movieMedia.getUserID(), movieMedia.getProfileID(), "", "", "", "", "", "");
+
+            result.success(new DownloaderDowPlay(context, activity, lang).getAllDownloadMedia(userId, profileId));
 //////////////////////////////////////////////////////////////////////////////////////////////////
         } else if (call.method.equals("start_download_episode")) {
-                Log.d(TAG, "onMethodCall: start_download_episode");
-                Log.d(TAG, "onMethodCall: " + call.arguments.toString());
-                Gson gson = new Gson();
-                String json = gson.toJson(call.arguments);
-                EpisodeMedia episodeMedia = EpisodeMedia.Companion.fromJson(json);
-                System.out.println("B7b Gson::: " + episodeMedia);
-                new DownloaderDowPlay(context, activity, lang).startDownload(episodeMedia.getInfo().getDownloadURL(), episodeMedia.getMediaGroup().getTvShow().getTitle(), episodeMedia.getMediaType(),
-                        episodeMedia.getMediaGroup().getItemsIDS().getTvShowID(), call.arguments.toString(), episodeMedia.getUserID(), episodeMedia.getProfileID(),
-                        episodeMedia.getMediaGroup().getItemsIDS().getSeasonID(), episodeMedia.getInfo().getId().toString(), episodeMedia.getMediaGroup().getSeason().getSeasonNumber(),
-                        episodeMedia.getInfo().getOrder(), episodeMedia.getMediaGroup().getSeason().getTitle(), episodeMedia.getInfo().getTitle());
-                List returnData = new ArrayList();
-                result.success(returnData);
+            Log.d(TAG, "onMethodCall: start_download_episode");
+            Log.d(TAG, "onMethodCall: " + call.arguments.toString());
+            Gson gson = new Gson();
+            String json = gson.toJson(call.arguments);
+            EpisodeMedia episodeMedia = EpisodeMedia.Companion.fromJson(json);
+            System.out.println("B7b Gson::: " + episodeMedia);
+            new DownloaderDowPlay(context, activity, lang).startDownload(episodeMedia.getInfo().getDownloadURL(), episodeMedia.getMediaGroup().getTvShow().getTitle(), episodeMedia.getMediaType(),
+                    episodeMedia.getMediaGroup().getItemsIDS().getTvShowID(), call.arguments.toString(), episodeMedia.getUserID(), episodeMedia.getProfileID(),
+                    episodeMedia.getMediaGroup().getItemsIDS().getSeasonID(), episodeMedia.getInfo().getId().toString(), episodeMedia.getMediaGroup().getSeason().getSeasonNumber(),
+                    episodeMedia.getInfo().getOrder(), episodeMedia.getMediaGroup().getSeason().getTitle(), episodeMedia.getInfo().getTitle());
+            result.success(new DownloaderDowPlay(context, activity, lang).getAllDownloadMedia(userId, profileId));
 //////////////////////////////////////////////////////////////////////////////////////////////////
         } else if (call.method.equals("pause_download")) {
             Log.d(TAG, "onMethodCall: pause_download");
@@ -170,8 +206,7 @@ public class DowplayPlugin extends FlutterActivity implements FlutterPlugin, Met
             String mediaType = call.arguments.toString().replaceAll(".*mediaType=(\\d+).*", "$1");
             String mediaId = call.arguments.toString().replaceAll(".*mediaId=(\\d+).*", "$1");
             new DownloaderDowPlay(context, activity, lang).pauseDownload(mediaId, mediaType);
-            List returnData = new ArrayList();
-            result.success(returnData);
+            result.success(new DownloaderDowPlay(context, activity, lang).getAllDownloadMedia(userId, profileId));
 //////////////////////////////////////////////////////////////////////////////////////////////////
         } else if (call.method.equals("resume_download")) {
             Log.d(TAG, "onMethodCall: resume_download");
@@ -180,8 +215,7 @@ public class DowplayPlugin extends FlutterActivity implements FlutterPlugin, Met
             String mediaType = call.arguments.toString().replaceAll(".*mediaType=(\\d+).*", "$1");
             String mediaId = call.arguments.toString().replaceAll(".*mediaId=(\\d+).*", "$1");
             new DownloaderDowPlay(context, activity, lang).resumeDownload(mediaId, mediaType);
-            List returnData = new ArrayList();
-            result.success(returnData);
+            result.success(new DownloaderDowPlay(context, activity, lang).getAllDownloadMedia(userId, profileId));
 //////////////////////////////////////////////////////////////////////////////////////////////////
         } else if (call.method.equals("cancel_download")) {
             Log.d(TAG, "onMethodCall: cancel_download");
@@ -190,8 +224,7 @@ public class DowplayPlugin extends FlutterActivity implements FlutterPlugin, Met
             String mediaType = call.arguments.toString().replaceAll(".*mediaType=(\\d+).*", "$1");
             String mediaId = call.arguments.toString().replaceAll(".*mediaId=(\\d+).*", "$1");
             new DownloaderDowPlay(context, activity, lang).cancelDownload(mediaId, mediaType);
-            List returnData = new ArrayList();
-            result.success(returnData);
+            result.success(new DownloaderDowPlay(context, activity, lang).getAllDownloadMedia(userId, profileId));
 //////////////////////////////////////////////////////////////////////////////////////////////////
         } else {
             result.notImplemented();
