@@ -319,8 +319,8 @@ class DatabaseHelper(innerContext: Context) : SQLiteOpenHelper(innerContext, DAT
               if (mediaType =="movie") {
                   mapData["object"] = mediaData
               }else{
-                  val mediaGroup = mediaData.replace(".*mediaGroup=(.+).*".toRegex(), "$1")
-                  mapData["group"] = mediaGroup
+                  val mediaGroup = mediaData.replace(".*media_group=(.+).*".toRegex(), "$1")
+                  mapData["group"] = "{info:$mediaGroup}"
               }
             allDownloadData += mapData
         }
@@ -369,8 +369,8 @@ class DatabaseHelper(innerContext: Context) : SQLiteOpenHelper(innerContext, DAT
                 isFirstTime = false
             }
             val mediaData = allInfoDataForThisMedia[0]["media_data"]
-            val mediaGroup = mediaData.toString().replace(".*mediaGroup=(.+).*".toRegex(), "$1")
-            mapData["group"] = mediaGroup
+            val mediaGroup = mediaData.toString().replace(".*media_group=(.+).*".toRegex(), "$1")
+            mapData["group"] = "{info:$mediaGroup}"
             allDownloadData += mapData
         }
         Log.d("Sqlite Data:", "$allDownloadData")
@@ -429,8 +429,8 @@ class DatabaseHelper(innerContext: Context) : SQLiteOpenHelper(innerContext, DAT
                 isFirstTime = false
             }
             val mediaData = allInfoDataForThisMedia[0]["media_data"]
-            val mediaGroup = mediaData.toString().replace(".*mediaGroup=(.+).*".toRegex(), "$1")
-            mapData["group"] = mediaGroup
+            val mediaGroup = mediaData.toString().replace(".*media_group=(.+).*".toRegex(), "$1")
+            mapData["group"] = "{info:$mediaGroup}"
             //mapData["group"] = allInfoDataForThisMedia[0]
             mapData["object"] = allInfoDataForThisMedia[0]
             allDownloadData += mapData
