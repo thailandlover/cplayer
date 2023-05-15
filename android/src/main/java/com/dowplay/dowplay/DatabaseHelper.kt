@@ -6,6 +6,7 @@ import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import android.util.Log
+import com.google.gson.Gson
 
 class DatabaseHelper(innerContext: Context) : SQLiteOpenHelper(innerContext, DATABASE_NAME, null, DATABASE_VERSION) {
 
@@ -266,6 +267,8 @@ class DatabaseHelper(innerContext: Context) : SQLiteOpenHelper(innerContext, DAT
         return allDownloadData
     }
 
+    val gson = Gson()
+
     @SuppressLint("Range")
     fun getAllDownloadDataFromDB(user_id: String, profile_id: String): ArrayList<HashMap<String, Any>> {
 
@@ -320,8 +323,8 @@ class DatabaseHelper(innerContext: Context) : SQLiteOpenHelper(innerContext, DAT
                   mapData["object"] = mediaData
               }else{
                   val mediaGroup = mediaData.replace(".*media_group=(.+).*".toRegex(), "$1")
-                  mapDataInfo["info"] = mediaGroup
-                  mapData["group"] = mapDataInfo
+                  val info = gson.toJson(ObjectForInfo(mediaGroup))
+                  mapData["group"] = info
               }
             allDownloadData += mapData
         }
