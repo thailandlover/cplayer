@@ -126,7 +126,7 @@ public class DowplayPlugin: NSObject, FlutterPlugin {
                 if(playerResult.isEmpty){
                     result(false)
                 } else {
-                    result(playerResult[0])
+                    result(playerResult)
                 }
             }
            

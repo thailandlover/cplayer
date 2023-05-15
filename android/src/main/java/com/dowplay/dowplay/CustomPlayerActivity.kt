@@ -1,20 +1,16 @@
 package com.dowplay.dowplay
 
-import android.Manifest
 import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.app.PictureInPictureParams
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ActivityInfo
-import android.content.pm.PackageManager
 import android.graphics.Color
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.VibrationEffect
 import android.os.Vibrator
-import android.provider.Settings
 import android.util.Log
 import android.util.Rational
 import android.view.LayoutInflater
@@ -24,7 +20,6 @@ import android.widget.RadioButton
 import android.widget.TextView
 import android.widget.Toast
 import androidx.annotation.RequiresApi
-import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.*
 import androidx.media3.common.AudioAttributes
@@ -44,6 +39,7 @@ import androidx.media3.ui.PlayerView
 import com.dowplay.dowplay.databinding.ActivityCustomPlayerBinding
 import com.dowplay.dowplay.databinding.CustomControlViewBinding
 import com.dowplay.dowplay.databinding.SettingBinding
+import com.google.gson.Gson
 import io.flutter.embedding.android.FlutterActivity
 
 @UnstableApi
@@ -67,6 +63,7 @@ class CustomPlayerActivity() : FlutterActivity() {
          Uri.parse("https://thekee.gcdn.co/video/m-159n/English/Animation&Family/Klaus.2019.1080pAr.mp4"),
          Uri.parse("https://storage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4")
      )*/
+    var videoMediaID = arrayOf<String>()
     var videoUris = arrayOf<String>()
     var videoTitle = arrayOf<String>()
     var videoSubTitle = arrayOf<String>()
@@ -143,11 +140,15 @@ class CustomPlayerActivity() : FlutterActivity() {
     private fun playerEvent() {
         player?.addListener(object : Player.Listener {
             override fun onPlaybackStateChanged(@Player.State state: Int) {
+                /*if(player?.duration == player?.currentPosition){
+                    next()
+                }*/
                 when (state) {
                     Player.STATE_READY -> {
                         // The player is able to immediately play from its current position. The player will be playing if getPlayWhenReady() is true, and paused otherwise.
                         viewBinding.progressBarVideo.visibility = View.GONE
                         viewBinding.playPauseButton.setImageResource(R.drawable.pause_icon)
+                        isReadyPlayer = true
                     }
                     Player.STATE_BUFFERING -> {
                         // The player is not able to immediately play the media, but is doing work toward being able to do so. This state typically occurs when the player needs to buffer more data before playback can start.
@@ -163,6 +164,7 @@ class CustomPlayerActivity() : FlutterActivity() {
                     Player.STATE_ENDED -> {
                         // The player has finished playing the media.
                         viewBinding.playPauseButton.setImageResource(R.drawable.play_icon)
+                        //player?.pause()
                     }
                     else -> {
                         // Other things
@@ -172,6 +174,64 @@ class CustomPlayerActivity() : FlutterActivity() {
         })
     }
 
+    private var watchedEpisodesArray = arrayOf<ResultPlayer>()
+    fun addWatchedEpisodesToTheList(
+        idL: String,
+        durationL: String,
+        currentTimeL: String
+    ) {
+        if (mediaType == series) {
+            val isIdNotFound = watchedEpisodesArray.none { it.id == idL }
+
+            if (isIdNotFound) {
+                //println("ID $idToCheck not found in the array.")
+                val result = ResultPlayer(idL, series, durationL, currentTimeL)
+                watchedEpisodesArray += result
+            } else {
+                //println("ID $idToCheck found in the array.")
+                val updatedwatchedEpisodesArray =
+                    watchedEpisodesArray.map {
+                        if (it.id == idL) it.copy(
+                            duration = durationL,
+                            currentTime = currentTimeL
+                        ) else it
+                    }
+                        .toTypedArray()
+                watchedEpisodesArray = updatedwatchedEpisodesArray
+            }
+        }
+    }
+
+    fun returnDataAfterClosePlayer() {
+        //val resultIntent = Intent()
+        if (mediaType == movie) {
+            /*"{type: movie, duration: " + player?.duration?.div(1000)
+                .toString() + ", currentTime: " + (player?.currentPosition?.div(1000)).toString() + "}"*/
+            val result = ResultPlayer(
+                movieMedia?.mediaID ?: "",
+                movie,
+                player?.duration?.div(1000).toString(),
+                (player?.currentPosition?.div(1000)).toString()
+            )
+            var watchedMovieArray = arrayOf<ResultPlayer>()
+            watchedMovieArray += result
+
+            val gson = Gson()
+            val json = gson.toJson(watchedMovieArray)
+            DowplayPlugin.myResultCallback.success(json)
+
+            //resultIntent.putExtra("player_result", json)
+            //print("Bom result: "+json)
+        } else {
+            val gson = Gson()
+            val json = gson.toJson(watchedEpisodesArray)
+            DowplayPlugin.myResultCallback.success(json)
+            //resultIntent.putExtra("player_result", json)
+        }
+        //print("Bom result: "+resultIntent)
+        //setResult(RESULT_OK, resultIntent)
+    }
+
     @SuppressLint("NewApi")
     private fun initializeBinding() {
 
@@ -179,7 +239,8 @@ class CustomPlayerActivity() : FlutterActivity() {
         viewBinding.backButton.setOnClickListener {
             vibratePhone()
             addToWatchingList()
-            this.finish()
+            returnDataAfterClosePlayer()
+            finish()
         }
         viewBinding.fullScreenScale.setOnClickListener {
             vibratePhone()
@@ -611,6 +672,7 @@ class CustomPlayerActivity() : FlutterActivity() {
     private var currentLanguage: String = "en"
     private var jsonPlayMovieData: String? = null
     private var jsonPlayEpisodeData: String? = null
+    private var isReadyPlayer = false
     private fun initToGetDataFromIntentAndTypeMedia() {
         //System.out.println("Bom Gson::: "+json);
         print("Bom 101:::")
@@ -624,13 +686,13 @@ class CustomPlayerActivity() : FlutterActivity() {
             currentLanguage = movieMedia?.lang ?: "en"
             setPlayerLanguage(currentLanguage, null)
 
+            videoMediaID = arrayOf(movieMedia?.mediaID.toString())!!
             videoUris = arrayOf(movieMedia?.url.toString())!!
             videoTitle = arrayOf(movieMedia?.title.toString())!!
             viewBinding.videoTitle.text = videoTitle[0]
             videoSubTitle += ("")
             ////////////////////////
             setGreenColorForDownloadButtonIfIsDownloaded(mediaType)
-
         } else if (jsonPlayEpisodeData != null) {
             episodeMedia = EpisodeMedia.fromJson(jsonPlayEpisodeData.toString())
 
@@ -642,6 +704,7 @@ class CustomPlayerActivity() : FlutterActivity() {
 
             for ((index, item) in episodeMedia?.mediaGroup?.episodes?.withIndex()!!) {
                 println("Item $index is $item")
+                videoMediaID += arrayOf(item.id.toString())
                 videoUris += (item.mediaURL.toString())
                 videoSubTitle += (item.title.toString())
                 //Log.d("Path URL MEDIA:",item.mediaURL.toString())
@@ -650,7 +713,7 @@ class CustomPlayerActivity() : FlutterActivity() {
             val index =
                 episodeMedia?.mediaGroup?.episodes?.indexOfFirst { info -> info.id == episodeMedia?.info?.id }
             startVideoPosition = index ?: 0
-            if(0 > startVideoPosition){
+            if (0 > startVideoPosition) {
                 startVideoPosition = 0
             }
             print("what the hell ? " + startVideoPosition)
@@ -664,6 +727,7 @@ class CustomPlayerActivity() : FlutterActivity() {
             /////
             setGreenColorForDownloadButtonIfIsDownloaded(mediaType)
         } else {
+            isReadyPlayer = false
             Toast.makeText(
                 this,
                 if (currentLanguage == "en") "There is no content to display" else "لا يوجد محتوى للعرض",
@@ -743,7 +807,7 @@ class CustomPlayerActivity() : FlutterActivity() {
                 //exoContentTimeBar.setBackgroundColor(0X42000000)
                 //viewBinding.downloadButton.setColorFilter( ContextCompat.getColor(context, R.color.green_download));
                 //viewBinding.playerView.showController()
-                Log.d("Heel-VISIBLE", "A7a")
+                Log.d("Heel-VISIBLE", "Bom")
             } else {
                 viewBinding.topController.visibility = View.GONE
                 viewBinding.bottomController.visibility = View.GONE
@@ -752,7 +816,13 @@ class CustomPlayerActivity() : FlutterActivity() {
                 exoContentTimeBar.visibility = View.GONE
                 //exoContentTimeBar.setBackgroundColor(Color.TRANSPARENT)
                 //viewBinding.playerView.hideController()
-                Log.d("Heel-GONE", "A7a")
+                Log.d("Heel-GONE", "Bom")
+            }
+            if(isReadyPlayer) {
+                addWatchedEpisodesToTheList(
+                    videoMediaID[startVideoPosition], player?.duration?.div(1000).toString(),
+                    (player?.currentPosition?.div(1000)).toString()
+                )
             }
         })
 
@@ -866,6 +936,6 @@ class CustomPlayerActivity() : FlutterActivity() {
         player = null
     }
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////
 
 }
