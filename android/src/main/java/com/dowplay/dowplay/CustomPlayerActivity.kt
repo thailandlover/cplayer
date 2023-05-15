@@ -213,8 +213,11 @@ class CustomPlayerActivity() : FlutterActivity() {
                 player?.duration?.div(1000).toString(),
                 (player?.currentPosition?.div(1000)).toString()
             )
+            var watchedMovieArray = arrayOf<ResultPlayer>()
+            watchedMovieArray += result
+
             val gson = Gson()
-            val json = gson.toJson(result)
+            val json = gson.toJson(watchedMovieArray)
             DowplayPlugin.myResultCallback.success(json)
 
             //resultIntent.putExtra("player_result", json)
