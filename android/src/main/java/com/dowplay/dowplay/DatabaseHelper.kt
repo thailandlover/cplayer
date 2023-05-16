@@ -7,6 +7,9 @@ import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import android.util.Log
 import com.google.gson.Gson
+import com.google.gson.JsonObject
+import com.google.gson.JsonParser
+import com.google.gson.reflect.TypeToken
 
 class DatabaseHelper(innerContext: Context) : SQLiteOpenHelper(innerContext, DATABASE_NAME, null, DATABASE_VERSION) {
 
@@ -322,9 +325,15 @@ class DatabaseHelper(innerContext: Context) : SQLiteOpenHelper(innerContext, DAT
               if (mediaType =="movie") {
                   mapData["object"] = mediaData
               }else{
-                  //val mediaGroup = mediaData.replace(".*media_group=(.+).*".toRegex(), "$1")
-                  //val info = gson.toJson(ObjectForInfo(mediaGroup))
-                  mapData["group"] = mediaData
+                  ////////////////////////////////////////////////////////////////////////////////////////////////////
+                  // Parse the JSON string
+                  val jsonObject = JsonParser.parseString(mediaData).asJsonObject
+                  val mediaGroupObject = jsonObject.getAsJsonObject("media_group")
+                  val mapType = object : TypeToken<Map<String, Any>>() {}.type
+                  val map: Map<String, Any> = gson.fromJson(mediaGroupObject, mapType)
+                  mapDataInfo["info"]=map
+                  mapData["group"] = mapDataInfo
+
               }
             allDownloadData += mapData
         }
@@ -373,10 +382,13 @@ class DatabaseHelper(innerContext: Context) : SQLiteOpenHelper(innerContext, DAT
                 allInfoDataForThisMedia = getDownloadDataFromDbByMediaIdAndMediaType(mediaId,"series")
                 isFirstTime = false
             }
-            val mediaData = allInfoDataForThisMedia[0]["media_data"]
-            //val mediaGroup = mediaData.toString().replace(".*media_group=(.+).*".toRegex(), "$1")
-            //mapDataInfo["info"] = mediaGroup
-            mapData["group"] = mediaData.toString()
+            val mediaData = ""+allInfoDataForThisMedia[0]["media_data"]
+            val jsonObject = JsonParser.parseString(mediaData).asJsonObject
+            val mediaGroupObject = jsonObject.getAsJsonObject("media_group")
+            val mapType = object : TypeToken<Map<String, Any>>() {}.type
+            val map: Map<String, Any> = gson.fromJson(mediaGroupObject, mapType)
+            mapDataInfo["info"]=map
+            mapData["group"] = mapDataInfo
             allDownloadData += mapData
         }
         Log.d("Sqlite Data:", "$allDownloadData")
@@ -435,11 +447,14 @@ class DatabaseHelper(innerContext: Context) : SQLiteOpenHelper(innerContext, DAT
                 allInfoDataForThisMedia = getDownloadDataFromDbByMediaIdAndMediaType(mediaId,"series")
                 isFirstTime = false
             }
-            val mediaData = allInfoDataForThisMedia[0]["media_data"]
-            //val mediaGroup = mediaData.toString().replace(".*media_group=(.+).*".toRegex(), "$1")
-            //mapDataInfo["info"] = mediaGroup
-            mapData["group"] = mediaData.toString()
-            mapData["object"] = mediaData.toString()
+            val mediaData = ""+allInfoDataForThisMedia[0]["media_data"]
+            val jsonObject = JsonParser.parseString(mediaData).asJsonObject
+            val mediaGroupObject = jsonObject.getAsJsonObject("media_group")
+            val mapType = object : TypeToken<Map<String, Any>>() {}.type
+            val map: Map<String, Any> = gson.fromJson(mediaGroupObject, mapType)
+            mapDataInfo["info"]=map
+            mapData["group"] = mapDataInfo
+            mapData["object"] = mapDataInfo
             allDownloadData += mapData
         }
 
