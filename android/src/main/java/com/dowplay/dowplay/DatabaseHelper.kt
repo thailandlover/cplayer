@@ -427,7 +427,6 @@ class DatabaseHelper(innerContext: Context) : SQLiteOpenHelper(innerContext, DAT
 
         val allDownloadData = ArrayList<HashMap<String, Any>>()
         var allInfoDataForThisMedia = ArrayList<HashMap<String, Any>>()
-        val mapDataInfo = HashMap<String, Any>()
         while (cursor.moveToNext()) {
             val mapData = HashMap<String, Any>()
             val downloadId = cursor.getInt(cursor.getColumnIndex(COL_download_id))
@@ -455,13 +454,22 @@ class DatabaseHelper(innerContext: Context) : SQLiteOpenHelper(innerContext, DAT
                 allInfoDataForThisMedia = getDownloadDataFromDbByMediaIdAndMediaType(mediaId,"series")
                 isFirstTime = false
             }
+            val mapDataGroup = HashMap<String, Any>()
+            val mapDataInfo = HashMap<String, Any>()
             val mediaData = ""+allInfoDataForThisMedia[0]["media_data"]
+            //Log.d("AAASSS:::","****************************************")
+            //Log.d("AAASSS:::",mediaData)
+            //Log.d("AAASSS:::","****************************************")
             val jsonObject = JsonParser.parseString(mediaData).asJsonObject
             val mediaGroupObject = jsonObject.getAsJsonObject("media_group")
+            val infoObject = jsonObject.getAsJsonObject("info")
             val mapType = object : TypeToken<Map<String, Any>>() {}.type
-            val map: Map<String, Any> = gson.fromJson(mediaGroupObject, mapType)
-            mapDataInfo["info"]=map
-            mapData["group"] = mapDataInfo
+            val mapGroup: Map<String, Any> = gson.fromJson(mediaGroupObject, mapType)
+            val mapInfo: Map<String, Any> = gson.fromJson(infoObject, mapType)
+            mapDataGroup["info"]=mapGroup
+            mapDataInfo["info"]=mapInfo
+
+            mapData["group"] = mapDataGroup
             mapData["object"] = mapDataInfo
             allDownloadData += mapData
         }
