@@ -323,7 +323,13 @@ class DatabaseHelper(innerContext: Context) : SQLiteOpenHelper(innerContext, DAT
               mapData["mediaType"] = mediaType
               mapData["mediaId"] = mediaId
               if (mediaType =="movie") {
-                  mapData["object"] = mediaData
+                  //mapData["object"] = mediaData
+                  val jsonObject = JsonParser.parseString(mediaData).asJsonObject
+                  val mediaGroupObject = jsonObject.getAsJsonObject("media_group")
+                  val mapType = object : TypeToken<Map<String, Any>>() {}.type
+                  val map: Map<String, Any> = gson.fromJson(mediaGroupObject, mapType)
+                  mapDataInfo["info"]=map
+                  mapData["object"] = mapDataInfo
               }else{
                   ////////////////////////////////////////////////////////////////////////////////////////////////////
                   // Parse the JSON string
