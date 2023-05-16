@@ -322,9 +322,9 @@ class DatabaseHelper(innerContext: Context) : SQLiteOpenHelper(innerContext, DAT
               if (mediaType =="movie") {
                   mapData["object"] = mediaData
               }else{
-                  val mediaGroup = mediaData.replace(".*media_group=(.+).*".toRegex(), "$1")
-                  val info = gson.toJson(ObjectForInfo(mediaGroup))
-                  mapData["group"] = info
+                  //val mediaGroup = mediaData.replace(".*media_group=(.+).*".toRegex(), "$1")
+                  //val info = gson.toJson(ObjectForInfo(mediaGroup))
+                  mapData["group"] = mediaData
               }
             allDownloadData += mapData
         }
@@ -374,9 +374,9 @@ class DatabaseHelper(innerContext: Context) : SQLiteOpenHelper(innerContext, DAT
                 isFirstTime = false
             }
             val mediaData = allInfoDataForThisMedia[0]["media_data"]
-            val mediaGroup = mediaData.toString().replace(".*media_group=(.+).*".toRegex(), "$1")
-            mapDataInfo["info"] = mediaGroup
-            mapData["group"] = mapDataInfo
+            //val mediaGroup = mediaData.toString().replace(".*media_group=(.+).*".toRegex(), "$1")
+            //mapDataInfo["info"] = mediaGroup
+            mapData["group"] = mediaData.toString()
             allDownloadData += mapData
         }
         Log.d("Sqlite Data:", "$allDownloadData")
@@ -436,10 +436,10 @@ class DatabaseHelper(innerContext: Context) : SQLiteOpenHelper(innerContext, DAT
                 isFirstTime = false
             }
             val mediaData = allInfoDataForThisMedia[0]["media_data"]
-            val mediaGroup = mediaData.toString().replace(".*media_group=(.+).*".toRegex(), "$1")
-            mapDataInfo["info"] = mediaGroup
-            mapData["group"] = mapDataInfo
-            mapData["object"] = allInfoDataForThisMedia[0]
+            //val mediaGroup = mediaData.toString().replace(".*media_group=(.+).*".toRegex(), "$1")
+            //mapDataInfo["info"] = mediaGroup
+            mapData["group"] = mediaData.toString()
+            mapData["object"] = mediaData.toString()
             allDownloadData += mapData
         }
 
