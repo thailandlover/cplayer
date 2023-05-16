@@ -370,7 +370,7 @@ class DatabaseHelper(innerContext: Context) : SQLiteOpenHelper(innerContext, DAT
             val name = cursor.getString(cursor.getColumnIndex(COL_name))
             val order = cursor.getString(cursor.getColumnIndex(COL_order))
 
-            mapData["media_id"] = mediaId
+            mapData["media_id"] = seasonId
             //mapData["season_id"] = seasonId
             mapData["name"] = name
             //mapData["order"] = order
@@ -437,7 +437,7 @@ class DatabaseHelper(innerContext: Context) : SQLiteOpenHelper(innerContext, DAT
               mapData["progress"] = progress
               mapData["tempPath"] = videoPath
               mapData["mediaType"] = "series"
-              mapData["mediaId"] = mediaId
+              mapData["mediaId"] = episodeId
 //            mapData["season_id"] = seasonId
 //            mapData["episode_id"] = episodeId
               mapData["name"] = name
