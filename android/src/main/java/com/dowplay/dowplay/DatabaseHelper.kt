@@ -287,7 +287,7 @@ class DatabaseHelper(innerContext: Context) : SQLiteOpenHelper(innerContext, DAT
         val cursor = db.rawQuery(query, selectionArgs)
 
         val allDownloadData = ArrayList<HashMap<String, Any>>()
-        val mapDataInfo = HashMap<String, Any>()
+
         while (cursor.moveToNext()) {
             val mapData = HashMap<String, Any>()
             val downloadId = cursor.getInt(cursor.getColumnIndex(COL_download_id))
@@ -322,10 +322,11 @@ class DatabaseHelper(innerContext: Context) : SQLiteOpenHelper(innerContext, DAT
               mapData["name"] = name
               mapData["mediaType"] = mediaType
               mapData["mediaId"] = mediaId
-              if (mediaType =="movie") {
-                  //mapData["object"] = mediaData
+            val jsonObject = JsonParser.parseString(mediaData).asJsonObject
+
+            if (mediaType =="movie") {
                   //Log.d("SSSS::::",mediaData)
-                  val jsonObject = JsonParser.parseString(mediaData).asJsonObject
+                  val mapDataInfo = HashMap<String, Any>()
                   val mediaGroupObject = jsonObject.getAsJsonObject("info")
                   val mapType = object : TypeToken<Map<String, Any>>() {}.type
                   val map: Map<String, Any> = gson.fromJson(mediaGroupObject, mapType)
@@ -334,13 +335,13 @@ class DatabaseHelper(innerContext: Context) : SQLiteOpenHelper(innerContext, DAT
               }else{
                   ////////////////////////////////////////////////////////////////////////////////////////////////////
                   // Parse the JSON string
-                  val jsonObject = JsonParser.parseString(mediaData).asJsonObject
+                  val mapDataInfo = HashMap<String, Any>()
                   val mediaGroupObject = jsonObject.getAsJsonObject("media_group")
                   val mapType = object : TypeToken<Map<String, Any>>() {}.type
                   val map: Map<String, Any> = gson.fromJson(mediaGroupObject, mapType)
-                  mapDataInfo["info"]=map
-                  mapData["group"] = mapDataInfo
-
+                //Log.d("SSSS::::",map.toString())
+                mapDataInfo["info"] = map
+                mapData["group"] = mapDataInfo
               }
             allDownloadData += mapData
         }
