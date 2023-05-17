@@ -11,6 +11,7 @@ import androidx.core.app.NotificationCompat
 import com.downloader.OnDownloadListener
 import com.downloader.PRDownloader
 import com.downloader.PRDownloaderConfig
+import com.downloader.Status
 import kotlin.math.abs
 
 class DownloadService : Service() {
@@ -208,6 +209,9 @@ class DownloadService : Service() {
         currentProgressPercent: Int
     ) {
         if (mediaType == "series") {
+            val status5: Status =
+                PRDownloader.getStatus(downloadId)
+            Log.d("WWW::: ","$downloadId > $status5")
             DatabaseHelper(applicationContext).updateSeriesDownloadDataInDB(
                 downloadId,
                 status,

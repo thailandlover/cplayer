@@ -123,7 +123,8 @@ class _MyAppState extends State<MyApp> {
     movieMedia = MovieMedia(
         title: "The Simpsons in Plusaversary",
         subTitle: "",
-        url: "https://thekee.gcdn.co/video/m-159n/English/Animation&Family/The.Simpsons.in.Plusaversary.2021.1080.mp4?md5=QA-5PWsq9OIEaa0EM79p9A&expires=1678670074",
+        url:
+            "https://thekee.gcdn.co/video/m-159n/English/Animation&Family/The.Simpsons.in.Plusaversary.2021.1080.mp4?md5=QA-5PWsq9OIEaa0EM79p9A&expires=1678670074",
         mediaId: "377530",
         mediaType: "movie",
         userId: "245394",
@@ -136,7 +137,8 @@ class _MyAppState extends State<MyApp> {
     downloadMovie = DownloadMovie(
         title: "The Simpsons in Plusaversary",
         subTitle: "",
-        url: "https://thekee.gcdn.co/video/m-159n/English/Animation&Family/The.Simpsons.in.Plusaversary.2021.1080.mp4?md5=QA-5PWsq9OIEaa0EM79p9A&expires=1678670074",
+        url:
+            "https://thekee.gcdn.co/video/m-159n/English/Animation&Family/The.Simpsons.in.Plusaversary.2021.1080.mp4?md5=QA-5PWsq9OIEaa0EM79p9A&expires=1678670074",
         mediaId: "377530",
         mediaType: "movie",
         userId: "245394",
@@ -401,18 +403,19 @@ class _MyAppState extends State<MyApp> {
     String type = "series";
     // Will be Episode Item model which you need to download
     Map<String, dynamic> episodeToDownload = {
-      "id": 64864,
-      "title": "Episode 2",
-      "order": "2",
+      "id": 64865,
+      "title": "Episode 3",
+      "order": "3",
       "poster_photo":
           "https://thekee-m.gcdn.co/images06012022/uploads/media/series/seasons/posters/2020-07-01/ZMx47Bf3sO03FprZ.jpg",
       "duration": "10 min",
-      "download_url": "https://thekee.gcdn.co/video/m-159n/English/Animation&Family/Tom.and.Jerry.1965/02.mp4?md5=eCp0VmIS_doipZ6lGVxwVg&expires=1678550892",
+      "download_url":
+          "https://thekee.gcdn.co/video/m-159n/English/Animation&Family/Tom.and.Jerry.1965/03.mp4?md5=eCp0VmIS_doipZ6lGVxwVg&expires=1678550892",
       "hd_url":
-          "https://thekee.gcdn.co/video/m-159n/English/Animation&Family/Tom.and.Jerry.1965/02.mp4?md5=eCp0VmIS_doipZ6lGVxwVg&expires=1678550892",
+          "https://thekee.gcdn.co/video/m-159n/English/Animation&Family/Tom.and.Jerry.1965/03.mp4?md5=eCp0VmIS_doipZ6lGVxwVg&expires=1678550892",
       "trailer_url": null,
       "media_url":
-          "https://thekee.gcdn.co/video/m-159n/English/Animation&Family/Tom.and.Jerry.1965/02.mp4?md5=eCp0VmIS_doipZ6lGVxwVg&expires=1678550892",
+          "https://thekee.gcdn.co/video/m-159n/English/Animation&Family/Tom.and.Jerry.1965/03.mp4?md5=eCp0VmIS_doipZ6lGVxwVg&expires=1678550892",
       "created_at": "2020-07-01 13:27:14",
       "release_date": "2020-07-01 00:00:00",
       "watching": null
@@ -707,7 +710,8 @@ class _MyAppState extends State<MyApp> {
                       shrinkWrap: true,
                       itemCount: _downloadsList.length,
                       itemBuilder: (context, index) {
-                        return Text("Count::: ${_downloadsList.length}+ ${_downloadsList[index]}"
+                        return Text(
+                            "Count::: ${_downloadsList.length}+ ${_downloadsList[index]}"
                             // "[${index + 1}]-> (${_downloadsList[index]['mediaType']}) : ${_downloadsList[index]['mediaType'] == "movie" ? _downloadsList[index]['object']['title'] : _downloadsList[index]['object']['info']['title']} - ${_downloadsList[index]['status']} - ${_downloadsList[index]['progress']}",
                             );
                       },
@@ -718,7 +722,6 @@ class _MyAppState extends State<MyApp> {
                   onPressed: getTvShowSeasonsDownloadList,
                   child: const Text("Print TvShow Seasons Downloads List"),
                 ),
-
                 ElevatedButton(
                   onPressed: getSeasonEpisodesDownloadList,
                   child: const Text("Print Season Episodes Downloads List"),

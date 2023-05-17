@@ -96,7 +96,7 @@ class DatabaseHelper(innerContext: Context) : SQLiteOpenHelper(innerContext, DAT
             put(COL_user_id, user_id)
             put(COL_profile_id, profile_id)
         }
-        val insertCount = db.insertWithOnConflict(main_table, null, values,SQLiteDatabase.CONFLICT_IGNORE)
+        val insertCount = db.insertWithOnConflict(main_table, null, values,SQLiteDatabase.CONFLICT_REPLACE)
         db.close()
         dbHelper.close()
         return insertCount
@@ -117,7 +117,7 @@ class DatabaseHelper(innerContext: Context) : SQLiteOpenHelper(innerContext, DAT
             put(COL_name, name)
             put(COL_order, order)
         }
-        val insertCount = db.insertWithOnConflict(seasons_table, null, values,SQLiteDatabase.CONFLICT_IGNORE)
+        val insertCount = db.insertWithOnConflict(seasons_table, null, values,SQLiteDatabase.CONFLICT_REPLACE)
 
         db.close()
         dbHelper.close()
@@ -149,7 +149,7 @@ class DatabaseHelper(innerContext: Context) : SQLiteOpenHelper(innerContext, DAT
             put(COL_name, name)
             put(COL_order, order)
         }
-        val insertCount = db.insertWithOnConflict(episodes_table, null, values,SQLiteDatabase.CONFLICT_IGNORE)
+        val insertCount = db.insertWithOnConflict(episodes_table, null, values,SQLiteDatabase.CONFLICT_REPLACE)
         db.close()
         dbHelper.close()
         return insertCount
