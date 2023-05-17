@@ -172,7 +172,7 @@ class DownloadService : Service() {
                     }
 
                     override fun onError(error: com.downloader.Error?) {
-                        Log.d("Bom::: ", "Download error $error")
+                        Log.d("Bom::: ", "Download error ${error.toString()}")
                         updateStatusDownloadInDB(
                             mediaType.toString(),
                             DownloadManagerSTATUS.STATUS_FAILED,
