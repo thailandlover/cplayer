@@ -189,7 +189,7 @@ class DownloadService : Service() {
                         )
                         notificationManager.cancel(downloadId)
                         if(checkMapValuesToEndStartForegroundService(allDownloadIdsStatus)){
-                            stopSelf()
+                            stopService()
                         }
                     }
 
@@ -206,7 +206,7 @@ class DownloadService : Service() {
                             currentProgressPercent
                         )
                         notificationManager.cancel(downloadId)
-                        stopSelf()
+                        stopService()
                     }
                 })
         }
@@ -273,10 +273,16 @@ class DownloadService : Service() {
                 DownloadManagerSTATUS.STATUS_FAILED,
                 currentProgressPercent
             )
-            stopSelf()
+            stopService()
         }*/
         PRDownloader.cancelAll()
-        stopSelf()
+        stopService()
         super.onDestroy()
+    }
+    
+    private fun stopService() {
+        // Stop the foreground service
+        stopForeground(true)
+        stopSelf()
     }
 }
