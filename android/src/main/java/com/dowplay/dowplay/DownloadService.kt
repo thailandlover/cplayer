@@ -8,6 +8,7 @@ import android.os.Build
 import android.os.IBinder
 import android.util.Log
 import androidx.core.app.NotificationCompat
+import com.downloader.Error
 import com.downloader.OnDownloadListener
 import com.downloader.PRDownloader
 import com.downloader.PRDownloaderConfig
@@ -171,8 +172,11 @@ class DownloadService : Service() {
                         stopSelf()
                     }
 
-                    override fun onError(error: com.downloader.Error?) {
+                    override fun onError(error: Error?) {
                         Log.d("Bom::: ", "Download error ${error.toString()}")
+                        Log.d("Bom::: ", "Download error $error")
+                        Log.d("Bom::: ", "Download isConnectionError ${error?.isConnectionError}")
+                        Log.d("Bom::: ", "Download isServerError ${error?.isServerError}")
                         updateStatusDownloadInDB(
                             mediaType.toString(),
                             DownloadManagerSTATUS.STATUS_FAILED,
