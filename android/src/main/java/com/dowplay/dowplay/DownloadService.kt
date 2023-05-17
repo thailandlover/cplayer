@@ -53,10 +53,11 @@ class DownloadService : Service() {
 
             val config = PRDownloaderConfig.newBuilder()
                 .setDatabaseEnabled(true)
-                //.setReadTimeout(30000)
-                //.setConnectTimeout(30000)
+                .setReadTimeout(30_000)
+                .setConnectTimeout(30_000)
                 .build()
             PRDownloader.initialize(this, config)
+
 
             downloadId = PRDownloader.download(url, dirPath, fileName)
                 .build()
@@ -72,7 +73,6 @@ class DownloadService : Service() {
                     val downloadIdDB = downloadData["download_id"]
                     Log.d("WWWWWWWWL:", downloadIdDB.toString())
                     if (downloadIdDB.toString().trim().isEmpty() || downloadIdDB == null) {
-
 
                         DatabaseHelper(this).saveDownloadDataInDB(
                             downloadId,
@@ -144,7 +144,7 @@ class DownloadService : Service() {
                         )
                     }
 
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                         val notificationManager =
                             getSystemService(NotificationManager::class.java)
                         val progress =
@@ -236,7 +236,6 @@ class DownloadService : Service() {
             stopSelf()
         }
         PRDownloader.cancel(downloadId)
-
         super.onDestroy()
     }
 }

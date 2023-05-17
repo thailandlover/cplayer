@@ -403,19 +403,19 @@ class _MyAppState extends State<MyApp> {
     String type = "series";
     // Will be Episode Item model which you need to download
     Map<String, dynamic> episodeToDownload = {
-      "id": 64865,
-      "title": "Episode 3",
-      "order": "3",
+      "id": 64864,
+      "title": "Episode 2",
+      "order": "2",
       "poster_photo":
           "https://thekee-m.gcdn.co/images06012022/uploads/media/series/seasons/posters/2020-07-01/ZMx47Bf3sO03FprZ.jpg",
       "duration": "10 min",
       "download_url":
-          "https://thekee.gcdn.co/video/m-159n/English/Animation&Family/Tom.and.Jerry.1965/03.mp4?md5=eCp0VmIS_doipZ6lGVxwVg&expires=1678550892",
+          "https://thekee.gcdn.co/video/m-159n/English/Animation&Family/Tom.and.Jerry.1965/02.mp4?md5=eCp0VmIS_doipZ6lGVxwVg&expires=1678550892",
       "hd_url":
-          "https://thekee.gcdn.co/video/m-159n/English/Animation&Family/Tom.and.Jerry.1965/03.mp4?md5=eCp0VmIS_doipZ6lGVxwVg&expires=1678550892",
+          "https://thekee.gcdn.co/video/m-159n/English/Animation&Family/Tom.and.Jerry.1965/02.mp4?md5=eCp0VmIS_doipZ6lGVxwVg&expires=1678550892",
       "trailer_url": null,
       "media_url":
-          "https://thekee.gcdn.co/video/m-159n/English/Animation&Family/Tom.and.Jerry.1965/03.mp4?md5=eCp0VmIS_doipZ6lGVxwVg&expires=1678550892",
+          "https://thekee.gcdn.co/video/m-159n/English/Animation&Family/Tom.and.Jerry.1965/02.mp4?md5=eCp0VmIS_doipZ6lGVxwVg&expires=1678550892",
       "created_at": "2020-07-01 13:27:14",
       "release_date": "2020-07-01 00:00:00",
       "watching": null
