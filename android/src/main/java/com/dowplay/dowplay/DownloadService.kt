@@ -21,8 +21,8 @@ class DownloadService : Service() {
     }
 
     var currentProgressPercent: Int = 0
-    var isDone:Boolean = false
-    var mediaType:String? = null
+    var isDone: Boolean = false
+    var mediaType: String? = null
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
 
         ///////////////
@@ -62,42 +62,50 @@ class DownloadService : Service() {
                 .setOnStartOrResumeListener {
                     // Download started or resumed
                     Log.d("Bom::: ", "Download resumed")
-                    val downloadData = DatabaseHelper(this).getDownloadInfoFromDB(mediaId.toString(),mediaType.toString())
-                    val downloadIdDB = downloadData["download_id"]
-                    Log.d("WWWWWWWWL:",downloadIdDB.toString())
-                    if(downloadIdDB.toString().trim().isEmpty() || downloadIdDB == null) {
-                    DatabaseHelper(this).saveDownloadDataInDB(
-                        downloadId,
-                        DownloadManagerSTATUS.STATUS_RUNNING,
-                        0,
-                        fullPath.toString(),
-                        mediaName.toString(),
-                        mediaType.toString(),
+                    val downloadData = DatabaseHelper(this).getDownloadInfoFromDB(
                         mediaId.toString(),
-                        mediaData.toString(),
-                        userId.toString(),
-                        profileId.toString()
+                        mediaType.toString()
                     )
-                    if (mediaType == "series") {
-                        DatabaseHelper(this).saveSeasonDataInDB(
-                            mediaId.toString(),
-                            seasonId.toString(),
-                            seasonName.toString(),
-                            seasonOrder.toString()
-                        )
-                        DatabaseHelper(this).saveEpisodeDataInDB(
+                    /*val hasOldData =
+                        DatabaseHelper(this).checkIfMediaHasDataInMainTable(mediaId.toString())*/
+                    val downloadIdDB = downloadData["download_id"]
+                    Log.d("WWWWWWWWL:", downloadIdDB.toString())
+                    if (downloadIdDB.toString().trim().isEmpty() || downloadIdDB == null) {
+
+
+                        DatabaseHelper(this).saveDownloadDataInDB(
                             downloadId,
                             DownloadManagerSTATUS.STATUS_RUNNING,
                             0,
                             fullPath.toString(),
+                            mediaName.toString(),
+                            mediaType.toString(),
                             mediaId.toString(),
-                            seasonId.toString(),
-                            episodeId.toString(),
-                            episodeName.toString(),
-                            episodeOrder.toString()
+                            mediaData.toString(),
+                            userId.toString(),
+                            profileId.toString()
                         )
+
+                        if (mediaType == "series") {
+                            DatabaseHelper(this).saveSeasonDataInDB(
+                                mediaId.toString(),
+                                seasonId.toString(),
+                                seasonName.toString(),
+                                seasonOrder.toString()
+                            )
+                            DatabaseHelper(this).saveEpisodeDataInDB(
+                                downloadId,
+                                DownloadManagerSTATUS.STATUS_RUNNING,
+                                0,
+                                fullPath.toString(),
+                                mediaId.toString(),
+                                seasonId.toString(),
+                                episodeId.toString(),
+                                episodeName.toString(),
+                                episodeOrder.toString()
+                            )
+                        }
                     }
-                }
                     startNotification(abs(downloadId), mediaName.toString())
                     Log.d("Bom::: ", "Download ID $downloadId")
                     //Log.d("Bom::: ", "Is Insert ID $isInsert")
@@ -142,7 +150,7 @@ class DownloadService : Service() {
                             (progress.currentBytes * 100 / progress.totalBytes).toInt()
                         val notification = NotificationCompat.Builder(this, "${abs(downloadId)}")
                             .setContentTitle("$mediaName")
-                            .setContentText(if(mediaType == "series") ("$seasonName-$episodeName") else (""))
+                            .setContentText(if (mediaType == "series") ("$seasonName-$episodeName") else (""))
                             .setSmallIcon(R.drawable.play_icon)
                             .setProgress(100, progress, false)
                             .build()
@@ -215,7 +223,7 @@ class DownloadService : Service() {
     }
 
     override fun onDestroy() {
-        if(!isDone) {
+        if (!isDone) {
             updateStatusDownloadInDB(
                 mediaType.toString(),
                 DownloadManagerSTATUS.STATUS_FAILED,

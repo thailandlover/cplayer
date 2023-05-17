@@ -56,8 +56,8 @@ class DatabaseHelper(innerContext: Context) : SQLiteOpenHelper(innerContext, DAT
     override fun onCreate(db: SQLiteDatabase) {
         // ON CONFLICT REPLACE
         db.execSQL("CREATE TABLE $main_table ($COL_download_id NUMBER PRIMARY KEY, $COL_status NUMBER,  $COL_progress NUMBER,$COL_video_path TEXT, $COL_name TEXT, $COL_media_type TEXT, $COL_media_id TEXT UNIQUE, $COL_media_data TEXT, $COL_user_id TEXT, $COL_profile_id TEXT)")
-        db.execSQL("CREATE TABLE $seasons_table (id INTEGER PRIMARY KEY AUTOINCREMENT, $COL_media_id TEXT,  $COL_season_id TEXT , $COL_name TEXT, $COL_order TEXT, UNIQUE($COL_media_id, $COL_season_id) ON CONFLICT REPLACE)")
-        db.execSQL("CREATE TABLE $episodes_table ($COL_download_id NUMBER PRIMARY KEY, $COL_status NUMBER,  $COL_progress NUMBER,$COL_video_path TEXT, $COL_media_id TEXT,  $COL_season_id TEXT,$COL_episode_id TEXT , $COL_name TEXT, $COL_order TEXT, UNIQUE($COL_media_id, $COL_season_id, $COL_episode_id) ON CONFLICT REPLACE)")
+        db.execSQL("CREATE TABLE $seasons_table (id INTEGER PRIMARY KEY AUTOINCREMENT, $COL_media_id TEXT,  $COL_season_id TEXT , $COL_name TEXT, $COL_order TEXT, UNIQUE($COL_media_id, $COL_season_id))")
+        db.execSQL("CREATE TABLE $episodes_table ($COL_download_id NUMBER PRIMARY KEY, $COL_status NUMBER,  $COL_progress NUMBER,$COL_video_path TEXT, $COL_media_id TEXT,  $COL_season_id TEXT,$COL_episode_id TEXT , $COL_name TEXT, $COL_order TEXT, UNIQUE($COL_media_id, $COL_season_id, $COL_episode_id))")
 
     }
 
@@ -96,7 +96,7 @@ class DatabaseHelper(innerContext: Context) : SQLiteOpenHelper(innerContext, DAT
             put(COL_user_id, user_id)
             put(COL_profile_id, profile_id)
         }
-        val insertCount = db.insert(main_table, null, values)
+        val insertCount = db.insertWithOnConflict(main_table, null, values,SQLiteDatabase.CONFLICT_IGNORE)
         db.close()
         dbHelper.close()
         return insertCount
@@ -117,7 +117,8 @@ class DatabaseHelper(innerContext: Context) : SQLiteOpenHelper(innerContext, DAT
             put(COL_name, name)
             put(COL_order, order)
         }
-        val insertCount = db.insert(seasons_table, null, values)
+        val insertCount = db.insertWithOnConflict(seasons_table, null, values,SQLiteDatabase.CONFLICT_IGNORE)
+
         db.close()
         dbHelper.close()
         return insertCount
@@ -148,7 +149,7 @@ class DatabaseHelper(innerContext: Context) : SQLiteOpenHelper(innerContext, DAT
             put(COL_name, name)
             put(COL_order, order)
         }
-        val insertCount = db.insert(episodes_table, null, values)
+        val insertCount = db.insertWithOnConflict(episodes_table, null, values,SQLiteDatabase.CONFLICT_IGNORE)
         db.close()
         dbHelper.close()
         return insertCount
@@ -479,6 +480,33 @@ class DatabaseHelper(innerContext: Context) : SQLiteOpenHelper(innerContext, DAT
         cursor.close()
         db.close()
         return allDownloadData
+    }
+
+    @SuppressLint("Range")
+    fun checkIfMediaHasDataInMainTable(
+        media_id: String
+    ): Int {
+
+        val dbHelper = DatabaseHelper(context)
+        val db = dbHelper.readableDatabase
+
+        var query = "SELECT COUNT(*) FROM $main_table WHERE $COL_media_id = ?"
+
+        val selectionArgs = arrayOf(media_id)
+        val cursor = db.rawQuery(query, selectionArgs)
+
+        var rowCount = 0
+
+        if (cursor.moveToFirst()) {
+            rowCount = cursor.getInt(0)
+        }
+
+
+        Log.d("Sqlite Data count:", "$rowCount")
+
+        cursor.close()
+        db.close()
+        return rowCount
     }
 
     @SuppressLint("Range")
