@@ -3,6 +3,7 @@ package com.dowplay.dowplay
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.Service
+import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.IBinder
@@ -13,21 +14,23 @@ import com.downloader.OnDownloadListener
 import com.downloader.PRDownloader
 import com.downloader.PRDownloaderConfig
 import com.downloader.Status
-import kotlin.math.abs
 
 class DownloadService : Service() {
-    private var downloadId: Int = 0
 
     override fun onBind(intent: Intent): IBinder? {
         return null
     }
-
-    var currentProgressPercent: Int = 0
-    var isDone: Boolean = false
-    var mediaType: String? = null
+    val allDownloadIdsStatus = HashMap<String, Int>()
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-
+        //val notificationManager = getSystemService(NotificationManager::class.java)
         ///////////////
+        Thread {
+            val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
+            var downloadId: Int = 0
+            var currentProgressPercent: Int = 0
+            var isDone: Boolean = false
+            var mediaType: String? = null
         if (intent != null) {
             val url = intent.getStringExtra("url")
             val dirPath = intent.getStringExtra("dir_path")
@@ -74,7 +77,7 @@ class DownloadService : Service() {
                     val downloadIdDB = downloadData["download_id"]
                     Log.d("WWWWWWWWL:", downloadIdDB.toString())
                     if (downloadIdDB.toString().trim().isEmpty() || downloadIdDB == null) {
-
+                        allDownloadIdsStatus["$downloadId"] = DownloadManagerSTATUS.STATUS_RUNNING
                         DatabaseHelper(this).saveDownloadDataInDB(
                             downloadId,
                             DownloadManagerSTATUS.STATUS_RUNNING,
@@ -107,14 +110,17 @@ class DownloadService : Service() {
                                 episodeOrder.toString()
                             )
                         }
+                        startNotification(downloadId, mediaName.toString())
+                        Log.d("Bom::: ", "Is Insert ID is Insert")
                     }
-                    startNotification(abs(downloadId), mediaName.toString())
                     Log.d("Bom::: ", "Download ID $downloadId")
-                    //Log.d("Bom::: ", "Is Insert ID $isInsert")
+
                 }
                 .setOnPauseListener {
                     // Download paused
+                    allDownloadIdsStatus["$downloadId"] = DownloadManagerSTATUS.STATUS_PAUSED
                     updateStatusDownloadInDB(
+                        downloadId,
                         mediaType.toString(),
                         DownloadManagerSTATUS.STATUS_PAUSED,
                         currentProgressPercent
@@ -123,22 +129,26 @@ class DownloadService : Service() {
                 }
                 .setOnCancelListener {
                     // Download cancelled
+                    allDownloadIdsStatus["$downloadId"] = DownloadManagerSTATUS.STATUS_FAILED
                     updateStatusDownloadInDB(
+                        downloadId,
                         mediaType.toString(),
                         DownloadManagerSTATUS.STATUS_FAILED,
                         currentProgressPercent
                     )
+                    notificationManager.cancel(downloadId)
                     Log.d("Bom::: ", "Download cancelled")
                 }
                 .setOnProgressListener { progress ->
                     // Download progress updated
-
+                    allDownloadIdsStatus["$downloadId"] = DownloadManagerSTATUS.STATUS_RUNNING
                     val progressPercent = progress.currentBytes * 100 / progress.totalBytes
 
                     if (progressPercent.toInt() != currentProgressPercent) {
                         Log.d("Bom::: ", "Download progress: ${progressPercent.toInt()}%")
                         currentProgressPercent = progressPercent.toInt()
                         updateStatusDownloadInDB(
+                            downloadId,
                             mediaType.toString(),
                             DownloadManagerSTATUS.STATUS_RUNNING,
                             currentProgressPercent
@@ -146,52 +156,68 @@ class DownloadService : Service() {
                     }
 
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                        val notificationManager =
-                            getSystemService(NotificationManager::class.java)
+
                         val progress =
                             (progress.currentBytes * 100 / progress.totalBytes).toInt()
-                        val notification = NotificationCompat.Builder(this, "${abs(downloadId)}")
+                        val notification = NotificationCompat.Builder(this, "$downloadId")
                             .setContentTitle("$mediaName")
                             .setContentText(if (mediaType == "series") ("$seasonName-$episodeName") else (""))
                             .setSmallIcon(R.drawable.play_icon)
+                            .setAutoCancel(true)
+                           /* .addAction(
+                                R.drawable.cancel_button_icon,
+                                "Cancel",
+                                cancelPendingIntent
+                            )*/
+
                             .setProgress(100, progress, false)
                             .build()
-                        notificationManager.notify(abs(downloadId), notification)
+                        notificationManager.notify(downloadId, notification)
+
                     }
                 }
                 .start(object : OnDownloadListener {
                     override fun onDownloadComplete() {
                         // Download completed
+                        allDownloadIdsStatus["$downloadId"] = DownloadManagerSTATUS.STATUS_SUCCESSFUL
                         Log.d("Bom::: ", "Download completed")
                         updateStatusDownloadInDB(
+                            downloadId,
                             mediaType.toString(),
                             DownloadManagerSTATUS.STATUS_SUCCESSFUL,
                             100
                         )
-                        isDone = true
-                        stopSelf()
+                        notificationManager.cancel(downloadId)
+                        if(checkMapValuesToEndStartForegroundService(allDownloadIdsStatus)){
+                            stopSelf()
+                        }
                     }
 
                     override fun onError(error: Error?) {
+                        allDownloadIdsStatus["$downloadId"] = DownloadManagerSTATUS.STATUS_FAILED
                         Log.d("Bom::: ", "Download error ${error.toString()}")
                         Log.d("Bom::: ", "Download error $error")
                         Log.d("Bom::: ", "Download isConnectionError ${error?.isConnectionError}")
                         Log.d("Bom::: ", "Download isServerError ${error?.isServerError}")
                         updateStatusDownloadInDB(
+                            downloadId,
                             mediaType.toString(),
                             DownloadManagerSTATUS.STATUS_FAILED,
                             currentProgressPercent
                         )
+                        notificationManager.cancel(downloadId)
                         stopSelf()
                     }
                 })
         }
+        }.start()
         return START_NOT_STICKY
     }
 
     private fun startNotification(downloadId: Int, title: String) {
         Log.d("Bom::: ", "Download Started")
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            Log.d("Bom::: ", "Download ******")
             val channel = NotificationChannel(
                 "$downloadId",
                 title,
@@ -203,11 +229,13 @@ class DownloadService : Service() {
         val notification = NotificationCompat.Builder(this, "$downloadId")
             .setContentTitle("Downloading...")
             .setSmallIcon(R.drawable.play_icon)
+            .setAutoCancel(true)
             .build()
         startForeground(downloadId, notification)
     }
 
     private fun updateStatusDownloadInDB(
+        downloadId:Int,
         mediaType: String,
         status: Int,
         currentProgressPercent: Int
@@ -222,6 +250,9 @@ class DownloadService : Service() {
                 currentProgressPercent,
             )
         } else {
+            val status5: Status =
+                PRDownloader.getStatus(downloadId)
+            Log.d("WWW::: ","$downloadId > $status5")
             DatabaseHelper(applicationContext).updateDownloadDataInDB(
                 downloadId,
                 status,
@@ -230,16 +261,22 @@ class DownloadService : Service() {
         }
     }
 
+    fun checkMapValuesToEndStartForegroundService(map: Map<String, Int>): Boolean {
+        val values = map.values
+        return !values.any { it == 0 }
+    }
+
     override fun onDestroy() {
-        if (!isDone) {
+        /*if (!isDone) {
             updateStatusDownloadInDB(
                 mediaType.toString(),
                 DownloadManagerSTATUS.STATUS_FAILED,
                 currentProgressPercent
             )
             stopSelf()
-        }
-        PRDownloader.cancel(downloadId)
+        }*/
+        PRDownloader.cancelAll()
+        stopSelf()
         super.onDestroy()
     }
 }

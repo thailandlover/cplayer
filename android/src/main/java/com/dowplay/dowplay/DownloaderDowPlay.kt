@@ -284,7 +284,7 @@ class DownloaderDowPlay(initContext: Context, initActivity: Activity, initLang: 
                 "startDownload Method",
                 "this video is downloaded..."+ status +" > " +downloadInfo["download_id"]+" > "+ mediaId + " > " + mediaType + " > " + downloadInfo["status"]
             )
-            if (downloadInfo["status"] == DownloadManagerSTATUS.STATUS_SUCCESSFUL || status == Status.RUNNING) {
+            if ((downloadInfo["status"] == DownloadManagerSTATUS.STATUS_SUCCESSFUL || status == Status.RUNNING) && downloadInfo["status"] != null) {
                 Log.d("startDownload Method", "this video is downloaded...")
                 return 0
             } else {
@@ -294,6 +294,7 @@ class DownloaderDowPlay(initContext: Context, initActivity: Activity, initLang: 
                     || status == Status.FAILED
                     || status == Status.CANCELLED
                     || status == Status.UNKNOWN
+                    || downloadInfo["status"] == null
                 ) {
                     cancelDownload(mediaId, mediaType)
                 }
