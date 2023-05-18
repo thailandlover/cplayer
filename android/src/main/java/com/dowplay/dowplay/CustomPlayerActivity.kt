@@ -637,7 +637,17 @@ class CustomPlayerActivity() : FlutterActivity() {
                     R.color.blue_download
                 )
             );
+            Toast.makeText(
+                this,
+                if (currentLanguage == "en") "Start downloading..." else "جاري التحميل...",
+                Toast.LENGTH_LONG
+            ).show()
         } else {
+            Toast.makeText(
+                this,
+                if (currentLanguage == "en") "Video was downloaded" else "تم تحميل الفيديو",
+                Toast.LENGTH_LONG
+            ).show()
             //viewBinding.downloadButton.setColorFilter(Color.parseColor("#ffffff"));
         }
     }
