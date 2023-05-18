@@ -80,7 +80,6 @@ class CustomPlayerActivity() : FlutterActivity() {
     ///////////////////////////////////////////////////////////////////////////////////////////////
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
 
         Log.d("current stats screen:", "onCreate")
         setContentView(viewBinding.root)
@@ -873,9 +872,10 @@ class CustomPlayerActivity() : FlutterActivity() {
 
     public override fun onStart() {
         super.onStart()
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
         Log.d("current stats screen:", "onStart")
-        initToGetDataFromIntentAndTypeMedia()
+        if(startVideoPosition==0) {
+            initToGetDataFromIntentAndTypeMedia()
+        }
         if (Util.SDK_INT > 23) {
             initializePlayer()
         }
@@ -883,7 +883,6 @@ class CustomPlayerActivity() : FlutterActivity() {
 
     public override fun onResume() {
         super.onResume()
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
         Log.d("current playbackPosi", "> $playbackPosition")
         Log.d("current stats screen:", "onResume")
         hideSystemUi()
