@@ -616,17 +616,17 @@ class CustomPlayerActivity() : FlutterActivity() {
             //episodeMedia?.mediaGroup?.episodes?.get(startVideoPosition)?.id.toString()
             result = DownloaderDowPlay(context, activity, currentLanguage).startDownload(
                 episodeMedia?.mediaGroup?.episodes?.get(startVideoPosition)?.downloadURL.toString(),
-                episodeMedia?.mediaGroup!!.tvShow!!.title!!,
-                episodeMedia!!.mediaType!!,
-                episodeMedia!!.mediaGroup!!.itemsIDS!!.tvShowID!!,
+                episodeMedia?.mediaGroup?.tvShow?.title?:"",
+                episodeMedia?.mediaType?:"",
+                episodeMedia?.mediaGroup?.itemsIDS?.tvShowID?:"",
                 jsonPlayEpisodeData ?: "",
-                episodeMedia!!.userID!!,
-                episodeMedia!!.profileID!!,
-                episodeMedia!!.mediaGroup!!.itemsIDS!!.seasonID!!,
+                episodeMedia?.userID?:"",
+                episodeMedia?.profileID?:"",
+                episodeMedia?.mediaGroup?.itemsIDS?.seasonID?:"",
                 episodeMedia?.mediaGroup?.episodes?.get(startVideoPosition)?.id.toString(),
-                episodeMedia!!.mediaGroup!!.season!!.seasonNumber!!,
+                episodeMedia?.mediaGroup?.season?.seasonNumber?:"",
                 episodeMedia?.mediaGroup?.episodes?.get(startVideoPosition)?.order.toString(),
-                episodeMedia!!.mediaGroup!!.season!!.title!!,
+                episodeMedia?.mediaGroup?.season?.title?:"",
                 episodeMedia?.mediaGroup?.episodes?.get(startVideoPosition)?.title.toString()
             )
         }
@@ -686,9 +686,9 @@ class CustomPlayerActivity() : FlutterActivity() {
             currentLanguage = movieMedia?.lang ?: "en"
             setPlayerLanguage(currentLanguage, null)
 
-            videoMediaID = arrayOf(movieMedia?.mediaID.toString())!!
-            videoUris = arrayOf(movieMedia?.url.toString())!!
-            videoTitle = arrayOf(movieMedia?.title.toString())!!
+            videoMediaID = arrayOf(movieMedia?.mediaID.toString())
+            videoUris = arrayOf(movieMedia?.url.toString())
+            videoTitle = arrayOf(movieMedia?.title.toString())
             viewBinding.videoTitle.text = videoTitle[0]
             videoSubTitle += ("")
             ////////////////////////
