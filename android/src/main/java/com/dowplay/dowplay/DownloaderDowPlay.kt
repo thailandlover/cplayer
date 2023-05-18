@@ -372,6 +372,9 @@ class DownloaderDowPlay(initContext: Context, initActivity: Activity, initLang: 
             val file = File(videoPath.toString())
             if (file.exists()) {
                 file.delete()
+                Log.d("FileISDeleted","True")
+            }else{
+                Log.d("FileISDeleted","False")
             }
             DatabaseHelper(context).deleteMediaFromDB(media_id, media_type)
         }

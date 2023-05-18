@@ -569,7 +569,7 @@ class DatabaseHelper(innerContext: Context) : SQLiteOpenHelper(innerContext, DAT
             if (hasMoreEpisodeRow(tvShowId, seasonId) <= 0) {
                 db.delete(
                     seasons_table,
-                    "$COL_media_id = ? and $COL_season_id",
+                    "$COL_media_id = ? and $COL_season_id = ?",
                     arrayOf(tvShowId, seasonId)
                 )
             }
@@ -594,7 +594,7 @@ class DatabaseHelper(innerContext: Context) : SQLiteOpenHelper(innerContext, DAT
         val table = episodes_table
         val columns = arrayOf("COUNT(*)")
         //AND $COL_season_id = ?
-        val selection = "$COL_media_id = ? AND $COL_season_id"
+        val selection = "$COL_media_id = ? AND $COL_season_id = ?"
         val selectionArgs = arrayOf(tv_show_id, season_id)
         val cursor = db.query(table, columns, selection, selectionArgs, null, null, null)
         cursor.moveToFirst()
