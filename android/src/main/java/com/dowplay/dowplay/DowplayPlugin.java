@@ -223,6 +223,7 @@ public class DowplayPlugin extends FlutterActivity implements FlutterPlugin, Met
             //{mediaType=movie, mediaId=377530}
             String mediaType = call.arguments.toString().replaceAll(".*mediaType=(\\d+).*", "$1");
             String mediaId = call.arguments.toString().replaceAll(".*mediaId=(\\d+).*", "$1");
+            Log.d(TAG, "onMethodCall: "+mediaType+" > "+mediaId);
             new DownloaderDowPlay(context, activity, lang).cancelDownload(mediaId, mediaType);
             result.success(new DownloaderDowPlay(context, activity, lang).getAllDownloadMedia(userId, profileId));
 //////////////////////////////////////////////////////////////////////////////////////////////////
