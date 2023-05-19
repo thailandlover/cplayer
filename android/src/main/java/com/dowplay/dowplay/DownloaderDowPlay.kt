@@ -364,6 +364,7 @@ class DownloaderDowPlay(initContext: Context, initActivity: Activity, initLang: 
     }
 
     fun cancelDownload(media_id: String, media_type: String) {
+        print("Start Delete Media...")
         val downloadData = DatabaseHelper(context).getDownloadInfoFromDB(media_id, media_type)
         val downloadId = downloadData["download_id"]
         val videoPath = downloadData["video_path"]
@@ -372,9 +373,9 @@ class DownloaderDowPlay(initContext: Context, initActivity: Activity, initLang: 
             val file = File(videoPath.toString())
             if (file.exists()) {
                 file.delete()
-                Log.d("FileISDeleted","True")
+                print("Start Delete Media...FileISDeleted True")
             }else{
-                Log.d("FileISDeleted","False")
+                print("Start Delete Media...FileISDeleted False")
             }
             DatabaseHelper(context).deleteMediaFromDB(media_id, media_type)
         }
