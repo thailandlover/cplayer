@@ -14,6 +14,7 @@ import android.os.Vibrator
 import android.util.Log
 import android.util.Rational
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.widget.LinearLayout
 import android.widget.RadioButton
@@ -148,6 +149,7 @@ class CustomPlayerActivity() : FlutterActivity() {
                         viewBinding.progressBarVideo.visibility = View.GONE
                         viewBinding.playPauseButton.setImageResource(R.drawable.pause_icon)
                         isReadyPlayer = true
+                        callAddWatchedEpisodesToTheList()
                     }
                     Player.STATE_BUFFERING -> {
                         // The player is not able to immediately play the media, but is doing work toward being able to do so. This state typically occurs when the player needs to buffer more data before playback can start.
@@ -175,10 +177,10 @@ class CustomPlayerActivity() : FlutterActivity() {
 
     ////////////////////////////////////////////////////////////////////////
     fun lastMediaWatchingData(
-        id: String,
+        id: Int,
         type: String,
-        duration: String,
-        currentTime: String
+        duration: Double,
+        currentTime: Double
     ): HashMap<String, Any> {
         val result = HashMap<String, Any>()
         result["id"] = id
@@ -189,11 +191,21 @@ class CustomPlayerActivity() : FlutterActivity() {
         return result
     }
 
+    fun callAddWatchedEpisodesToTheList(){
+        if (isReadyPlayer) {
+            addWatchedEpisodesToTheList(
+                videoMediaID[startVideoPosition].toIntOrNull() ?: 0,
+                player?.duration?.div(1000)?.toDouble() ?: 0.0,
+                (player?.currentPosition?.div(1000))?.toDouble() ?: 0.0,
+            )
+        }
+    }
+
     private var watchedEpisodesArray: List<HashMap<String, Any>> = listOf()
     fun addWatchedEpisodesToTheList(
-        idL: String,
-        durationL: String,
-        currentTimeL: String
+        idL: Int,
+        durationL: Double,
+        currentTimeL: Double
     ) {
         if (mediaType == series) {
             val isIdNotFound = watchedEpisodesArray.none { it["id"] == idL }
@@ -218,14 +230,15 @@ class CustomPlayerActivity() : FlutterActivity() {
         if (mediaType == movie) {
             /*"{type: movie, duration: " + player?.duration?.div(1000)
                 .toString() + ", currentTime: " + (player?.currentPosition?.div(1000)).toString() + "}"*/
+
             val result = lastMediaWatchingData(
-                movieMedia?.mediaID ?: "",
+                movieMedia?.mediaID?.toInt() ?: 0,
                 movie,
-                player?.duration?.div(1000).toString(),
-                (player?.currentPosition?.div(1000)).toString()
+                player?.duration?.div(1000)?.toDouble() ?: 0.0,
+                (player?.currentPosition?.div(1000))?.toDouble() ?: 0.0
             )
 
-            var watchedMovieArray : List<HashMap<String, Any>> = listOf(result)
+            var watchedMovieArray: List<HashMap<String, Any>> = listOf(result)
             DowplayPlugin.myResultCallback.success(watchedMovieArray)
 
         } else {
@@ -240,7 +253,7 @@ class CustomPlayerActivity() : FlutterActivity() {
         /////////////////////////////////////////
         viewBinding.backButton.setOnClickListener {
             vibratePhone()
-            addToWatchingList()
+            addToWatchingListAPI()
             returnDataAfterClosePlayer()
             finish()
         }
@@ -345,7 +358,7 @@ class CustomPlayerActivity() : FlutterActivity() {
 
     private fun previous() {
         if (startVideoPosition > 0) {
-            addToWatchingList()
+            addToWatchingListAPI()
             startVideoPosition = (startVideoPosition - 1 + videoUris.size) % videoUris.size
             setGreenColorForDownloadButtonIfIsDownloaded(mediaType)
             player?.seekToPreviousMediaItem()
@@ -363,7 +376,7 @@ class CustomPlayerActivity() : FlutterActivity() {
 
     private fun next() {
         if (videoUris.size - 1 > startVideoPosition) {
-            addToWatchingList()
+            addToWatchingListAPI()
             startVideoPosition = (startVideoPosition + 1) % videoUris.size
             setGreenColorForDownloadButtonIfIsDownloaded(mediaType)
             player?.seekToNextMediaItem()
@@ -794,7 +807,7 @@ class CustomPlayerActivity() : FlutterActivity() {
     }
 
 
-    @SuppressLint("InlinedApi")
+    @SuppressLint("InlinedApi", "ClickableViewAccessibility")
     private fun hideSystemUi() {
 
         WindowCompat.setDecorFitsSystemWindows(window, false)
@@ -830,17 +843,11 @@ class CustomPlayerActivity() : FlutterActivity() {
                 //viewBinding.playerView.hideController()
                 Log.d("Heel-GONE", "Bom")
             }
-            if (isReadyPlayer) {
-                addWatchedEpisodesToTheList(
-                    videoMediaID[startVideoPosition], player?.duration?.div(1000).toString(),
-                    (player?.currentPosition?.div(1000)).toString()
-                )
-            }
+            callAddWatchedEpisodesToTheList()
         })
-
     }
 
-    private fun addToWatchingList() {
+    private fun addToWatchingListAPI() {
         if (player != null && (player?.currentPosition ?: 0) > 0 && (player?.duration ?: 0) > 0) {
             if (mediaType == movie) {
                 //movie
@@ -911,7 +918,7 @@ class CustomPlayerActivity() : FlutterActivity() {
         super.onStop()
         Log.d("current stats screen:", "onStop")
         //showVideoAsPictureOnPicture()
-        addToWatchingList()
+        addToWatchingListAPI()
         if (Util.SDK_INT > 23) {
             releasePlayer()
         }
@@ -920,7 +927,7 @@ class CustomPlayerActivity() : FlutterActivity() {
     public override fun onDestroy() {
         super.onDestroy()
         Log.d("current stats screen:", "onDestroy")
-        addToWatchingList()
+        addToWatchingListAPI()
         //finish()
         /*if (Util.SDK_INT > 23) {
             releasePlayer()
