@@ -9,16 +9,12 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.provider.Settings
 import android.util.Log
-import android.view.Gravity
 import android.view.LayoutInflater
-import android.view.View
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.downloader.PRDownloader
 import com.downloader.Status
-import com.dowplay.dowplay.databinding.ActivityCustomPlayerBinding
 import com.dowplay.dowplay.databinding.ExplanationPermissionBinding
-import com.dowplay.dowplay.databinding.SettingBinding
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
 import java.io.File
@@ -364,7 +360,7 @@ class DownloaderDowPlay(initContext: Context, initActivity: Activity, initLang: 
     }
 
     fun cancelDownload(media_id: String, media_type: String) {
-        print("Start Delete Media...")
+        Log.d("cancelDownload","Start Delete Media...")
         val downloadData = DatabaseHelper(context).getDownloadInfoFromDB(media_id, media_type)
         val downloadId = downloadData["download_id"]
         val videoPath = downloadData["video_path"]
@@ -373,9 +369,9 @@ class DownloaderDowPlay(initContext: Context, initActivity: Activity, initLang: 
             val file = File(videoPath.toString())
             if (file.exists()) {
                 file.delete()
-                print("Start Delete Media...FileISDeleted True")
+                Log.d("cancelDownload","Start Delete Media...FileISDeleted True")
             }else{
-                print("Start Delete Media...FileISDeleted False")
+                Log.d("cancelDownload","Start Delete Media...FileISDeleted False")
             }
             DatabaseHelper(context).deleteMediaFromDB(media_id, media_type)
         }

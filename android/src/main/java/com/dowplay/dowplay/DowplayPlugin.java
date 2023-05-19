@@ -120,9 +120,16 @@ public class DowplayPlugin extends FlutterActivity implements FlutterPlugin, Met
             Log.d(TAG, "onMethodCall: config_downloader");
             Log.d(TAG, "onMethodCall: " + call.arguments.toString());
             ///{user_id=245394, profile_id=562674, lang=ar}
-            userId = call.arguments.toString().replaceAll(".*user_id=(\\d+).*", "$1");
-            profileId = call.arguments.toString().replaceAll(".*profile_id=(\\d+).*", "$1");
-            lang = call.arguments.toString().replaceAll(".*lang=(.+).*", "$1");
+            //userId = call.arguments.toString().replaceAll(".*user_id=(\\d+).*", "$1");
+            //profileId = call.arguments.toString().replaceAll(".*profile_id=(\\d+).*", "$1");
+            //lang = call.arguments.toString().replaceAll(".*lang=(.+).*", "$1");
+            Gson gson = new Gson();
+            String json = gson.toJson(call.arguments);
+            HashMap<String, Object> object = gson.fromJson(json, HashMap.class);
+            userId = (String) object.get("user_id");
+            profileId = (String) object.get("profile_id");
+            lang = (String) object.get("lang");
+
             result.success(true);
 ///////////////////////////////////////////////////////////////////////////////////////////
         } else if (call.method.equals("play_movie")) {
@@ -162,7 +169,12 @@ public class DowplayPlugin extends FlutterActivity implements FlutterPlugin, Met
             Log.d(TAG, "onMethodCall: tvshow_seasons_downloads_list");
             Log.d(TAG, "onMethodCall: " + call.arguments.toString());
             //{tvshow_id=1532}
-            String tvshowId = call.arguments.toString().replaceAll(".*tvshow_id=(\\d+).*", "$1");
+            //String tvshowId = call.arguments.toString().replaceAll(".*tvshow_id=(\\d+).*", "$1");
+            Gson gson = new Gson();
+            String json = gson.toJson(call.arguments);
+            HashMap<String, Object> object = gson.fromJson(json, HashMap.class);
+            String tvshowId = (String) object.get("tvshow_id");
+
             Log.d(TAG, "onMethodCall: > " + tvshowId);
             result.success(new DownloaderDowPlay(context, activity, lang).getAllSeasons(tvshowId));
 //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -170,8 +182,14 @@ public class DowplayPlugin extends FlutterActivity implements FlutterPlugin, Met
             Log.d(TAG, "onMethodCall: season_episodes_downloads_list");
             Log.d(TAG, "onMethodCall: " + call.arguments.toString());
             //String input = "{season_id=3236, tvshow_id=1532}";
-            String seasonId = call.arguments.toString().replaceAll(".*season_id=(\\d+).*", "$1");
-            String tvshowId = call.arguments.toString().replaceAll(".*tvshow_id=(\\d+).*", "$1");
+            //String seasonId = call.arguments.toString().replaceAll(".*season_id=(\\d+).*", "$1");
+            //String tvshowId = call.arguments.toString().replaceAll(".*tvshow_id=(\\d+).*", "$1");
+            Gson gson = new Gson();
+            String json = gson.toJson(call.arguments);
+            HashMap<String, Object> object = gson.fromJson(json, HashMap.class);
+            String seasonId = (String) object.get("season_id");
+            String tvshowId = (String) object.get("tvshow_id");
+
             Log.d(TAG, "onMethodCall: " + seasonId + " > " + tvshowId);
             result.success(new DownloaderDowPlay(context, activity, lang).getAllEpisodes(seasonId, tvshowId));
 //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -204,8 +222,6 @@ public class DowplayPlugin extends FlutterActivity implements FlutterPlugin, Met
             Log.d(TAG, "onMethodCall: pause_download");
             Log.d(TAG, "onMethodCall: " + call.arguments.toString());
             //{mediaType=movie, mediaId=377530}
-            //String mediaType = call.arguments.toString().replaceAll(".*mediaType=(.+).*", "$1");
-            //String mediaId = call.arguments.toString().replaceAll(".*mediaId=(\\d+).*", "$1");
 
             Gson gson = new Gson();
             String json = gson.toJson(call.arguments);
@@ -220,8 +236,7 @@ public class DowplayPlugin extends FlutterActivity implements FlutterPlugin, Met
             Log.d(TAG, "onMethodCall: resume_download");
             Log.d(TAG, "onMethodCall: " + call.arguments.toString());
             //{mediaType=movie, mediaId=377530}
-            //String mediaType = call.arguments.toString().replaceAll(".*mediaType=(.+).*", "$1");
-            //String mediaId = call.arguments.toString().replaceAll(".*mediaId=(\\d+).*", "$1");
+
             Gson gson = new Gson();
             String json = gson.toJson(call.arguments);
             HashMap<String, Object> object = gson.fromJson(json, HashMap.class);
@@ -235,8 +250,7 @@ public class DowplayPlugin extends FlutterActivity implements FlutterPlugin, Met
             Log.d(TAG, "onMethodCall: cancel_download");
             Log.d(TAG, "onMethodCall: " + call.arguments.toString());
             //{mediaType=movie, mediaId=377530}
-            //String mediaType = call.arguments.toString().replaceAll(".*mediaType=(.+).*", "$1");
-            //String mediaId = call.arguments.toString().replaceAll(".*mediaId=(\\d+).*", "$1");
+
             Gson gson = new Gson();
             String json = gson.toJson(call.arguments);
             HashMap<String, Object> object = gson.fromJson(json, HashMap.class);
