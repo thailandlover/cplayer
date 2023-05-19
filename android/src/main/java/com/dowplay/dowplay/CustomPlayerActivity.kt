@@ -173,64 +173,67 @@ class CustomPlayerActivity() : FlutterActivity() {
         })
     }
 
-    private var watchedEpisodesArray = arrayOf<ResultPlayer>()
+    ////////////////////////////////////////////////////////////////////////
+    fun lastMediaWatchingData(
+        id: String,
+        type: String,
+        duration: String,
+        currentTime: String
+    ): HashMap<String, Any> {
+        val result = HashMap<String, Any>()
+        result["id"] = id
+        result["type"] = type
+        result["duration"] = duration
+        result["currentTime"] = currentTime
+
+        return result
+    }
+
+    private var watchedEpisodesArray: List<HashMap<String, Any>> = listOf()
     fun addWatchedEpisodesToTheList(
         idL: String,
         durationL: String,
         currentTimeL: String
     ) {
         if (mediaType == series) {
-            val isIdNotFound = watchedEpisodesArray.none { it.id == idL }
+            val isIdNotFound = watchedEpisodesArray.none { it["id"] == idL }
 
             if (isIdNotFound) {
                 //println("ID $idToCheck not found in the array.")
-                val result = ResultPlayer(idL, series, durationL, currentTimeL)
+                val result = lastMediaWatchingData(idL, series, durationL, currentTimeL)
                 watchedEpisodesArray += result
             } else {
                 //println("ID $idToCheck found in the array.")
-                val updatedwatchedEpisodesArray =
-                    watchedEpisodesArray.map {
-                        if (it.id == idL) it.copy(
-                            duration = durationL,
-                            currentTime = currentTimeL
-                        ) else it
+                for (map in watchedEpisodesArray) {
+                    if (map["id"] == idL) {
+                        map["duration"] = durationL
+                        map["currentTime"] = currentTimeL
                     }
-                        .toTypedArray()
-                watchedEpisodesArray = updatedwatchedEpisodesArray
+                }
             }
         }
     }
 
     fun returnDataAfterClosePlayer() {
-        //val resultIntent = Intent()
         if (mediaType == movie) {
             /*"{type: movie, duration: " + player?.duration?.div(1000)
                 .toString() + ", currentTime: " + (player?.currentPosition?.div(1000)).toString() + "}"*/
-            val result = ResultPlayer(
+            val result = lastMediaWatchingData(
                 movieMedia?.mediaID ?: "",
                 movie,
                 player?.duration?.div(1000).toString(),
                 (player?.currentPosition?.div(1000)).toString()
             )
-            var watchedMovieArray = arrayOf<ResultPlayer>()
-            watchedMovieArray += result
 
-            val gson = Gson()
-            val json = gson.toJson(watchedMovieArray)
-            DowplayPlugin.myResultCallback.success(json)
+            var watchedMovieArray : List<HashMap<String, Any>> = listOf(result)
+            DowplayPlugin.myResultCallback.success(watchedMovieArray)
 
-            //resultIntent.putExtra("player_result", json)
-            //print("Bom result: "+json)
         } else {
-            val gson = Gson()
-            val json = gson.toJson(watchedEpisodesArray)
-            DowplayPlugin.myResultCallback.success(json)
-            //resultIntent.putExtra("player_result", json)
+            DowplayPlugin.myResultCallback.success(watchedEpisodesArray)
         }
-        //print("Bom result: "+resultIntent)
-        //setResult(RESULT_OK, resultIntent)
     }
 
+    ////////////////////////////////////////////////////////////////////////////////
     @SuppressLint("NewApi")
     private fun initializeBinding() {
 
@@ -615,17 +618,17 @@ class CustomPlayerActivity() : FlutterActivity() {
             //episodeMedia?.mediaGroup?.episodes?.get(startVideoPosition)?.id.toString()
             result = DownloaderDowPlay(context, activity, currentLanguage).startDownload(
                 episodeMedia?.mediaGroup?.episodes?.get(startVideoPosition)?.downloadURL.toString(),
-                episodeMedia?.mediaGroup?.tvShow?.title?:"",
-                episodeMedia?.mediaType?:"",
-                episodeMedia?.mediaGroup?.itemsIDS?.tvShowID?:"",
+                episodeMedia?.mediaGroup?.tvShow?.title ?: "",
+                episodeMedia?.mediaType ?: "",
+                episodeMedia?.mediaGroup?.itemsIDS?.tvShowID ?: "",
                 jsonPlayEpisodeData ?: "",
-                episodeMedia?.userID?:"",
-                episodeMedia?.profileID?:"",
-                episodeMedia?.mediaGroup?.itemsIDS?.seasonID?:"",
+                episodeMedia?.userID ?: "",
+                episodeMedia?.profileID ?: "",
+                episodeMedia?.mediaGroup?.itemsIDS?.seasonID ?: "",
                 episodeMedia?.mediaGroup?.episodes?.get(startVideoPosition)?.id.toString(),
-                episodeMedia?.mediaGroup?.season?.seasonNumber?:"",
+                episodeMedia?.mediaGroup?.season?.seasonNumber ?: "",
                 episodeMedia?.mediaGroup?.episodes?.get(startVideoPosition)?.order.toString(),
-                episodeMedia?.mediaGroup?.season?.title?:"",
+                episodeMedia?.mediaGroup?.season?.title ?: "",
                 episodeMedia?.mediaGroup?.episodes?.get(startVideoPosition)?.title.toString()
             )
         }
@@ -827,7 +830,7 @@ class CustomPlayerActivity() : FlutterActivity() {
                 //viewBinding.playerView.hideController()
                 Log.d("Heel-GONE", "Bom")
             }
-            if(isReadyPlayer) {
+            if (isReadyPlayer) {
                 addWatchedEpisodesToTheList(
                     videoMediaID[startVideoPosition], player?.duration?.div(1000).toString(),
                     (player?.currentPosition?.div(1000)).toString()
@@ -873,7 +876,7 @@ class CustomPlayerActivity() : FlutterActivity() {
     public override fun onStart() {
         super.onStart()
         Log.d("current stats screen:", "onStart")
-        if(startVideoPosition==0) {
+        if (startVideoPosition == 0) {
             initToGetDataFromIntentAndTypeMedia()
         }
         if (Util.SDK_INT > 23) {
