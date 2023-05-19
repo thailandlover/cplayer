@@ -33,6 +33,7 @@ import io.flutter.plugin.common.MethodChannel.Result;
 import com.google.gson.Gson;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 @UnstableApi
@@ -203,8 +204,14 @@ public class DowplayPlugin extends FlutterActivity implements FlutterPlugin, Met
             Log.d(TAG, "onMethodCall: pause_download");
             Log.d(TAG, "onMethodCall: " + call.arguments.toString());
             //{mediaType=movie, mediaId=377530}
-            String mediaType = call.arguments.toString().replaceAll(".*mediaType=(.+).*", "$1");
-            String mediaId = call.arguments.toString().replaceAll(".*mediaId=(\\d+).*", "$1");
+            //String mediaType = call.arguments.toString().replaceAll(".*mediaType=(.+).*", "$1");
+            //String mediaId = call.arguments.toString().replaceAll(".*mediaId=(\\d+).*", "$1");
+
+            Gson gson = new Gson();
+            HashMap<String, Object> object = gson.fromJson(call.arguments.toString(), HashMap.class);
+            String mediaType = (String) object.get("mediaType");
+            String mediaId = (String) object.get("mediaId");
+
             new DownloaderDowPlay(context, activity, lang).pauseDownload(mediaId, mediaType);
             result.success(new DownloaderDowPlay(context, activity, lang).getAllDownloadMedia(userId, profileId));
 //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -212,8 +219,13 @@ public class DowplayPlugin extends FlutterActivity implements FlutterPlugin, Met
             Log.d(TAG, "onMethodCall: resume_download");
             Log.d(TAG, "onMethodCall: " + call.arguments.toString());
             //{mediaType=movie, mediaId=377530}
-            String mediaType = call.arguments.toString().replaceAll(".*mediaType=(.+).*", "$1");
-            String mediaId = call.arguments.toString().replaceAll(".*mediaId=(\\d+).*", "$1");
+            //String mediaType = call.arguments.toString().replaceAll(".*mediaType=(.+).*", "$1");
+            //String mediaId = call.arguments.toString().replaceAll(".*mediaId=(\\d+).*", "$1");
+            Gson gson = new Gson();
+            HashMap<String, Object> object = gson.fromJson(call.arguments.toString(), HashMap.class);
+            String mediaType = (String) object.get("mediaType");
+            String mediaId = (String) object.get("mediaId");
+
             new DownloaderDowPlay(context, activity, lang).resumeDownload(mediaId, mediaType);
             result.success(new DownloaderDowPlay(context, activity, lang).getAllDownloadMedia(userId, profileId));
 //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -221,9 +233,14 @@ public class DowplayPlugin extends FlutterActivity implements FlutterPlugin, Met
             Log.d(TAG, "onMethodCall: cancel_download");
             Log.d(TAG, "onMethodCall: " + call.arguments.toString());
             //{mediaType=movie, mediaId=377530}
-            String mediaType = call.arguments.toString().replaceAll(".*mediaType=(.+).*", "$1");
-            String mediaId = call.arguments.toString().replaceAll(".*mediaId=(\\d+).*", "$1");
-            Log.d(TAG, "onMethodCall: "+mediaType+" > "+mediaId);
+            //String mediaType = call.arguments.toString().replaceAll(".*mediaType=(.+).*", "$1");
+            //String mediaId = call.arguments.toString().replaceAll(".*mediaId=(\\d+).*", "$1");
+            Gson gson = new Gson();
+            HashMap<String, Object> object = gson.fromJson(call.arguments.toString(), HashMap.class);
+            String mediaType = (String) object.get("mediaType");
+            String mediaId = (String) object.get("mediaId");
+
+            Log.d(TAG, "onMethodCall???: "+mediaType+" > "+mediaId);
             new DownloaderDowPlay(context, activity, lang).cancelDownload(mediaId, mediaType);
             result.success(new DownloaderDowPlay(context, activity, lang).getAllDownloadMedia(userId, profileId));
 //////////////////////////////////////////////////////////////////////////////////////////////////
