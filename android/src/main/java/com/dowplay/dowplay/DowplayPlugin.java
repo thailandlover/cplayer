@@ -240,6 +240,8 @@ public class DowplayPlugin extends FlutterActivity implements FlutterPlugin, Met
             Gson gson = new Gson();
             String json = gson.toJson(call.arguments);
             HashMap<String, Object> object = gson.fromJson(json, HashMap.class);
+            Log.d(TAG, "onMethodCall???: "+object);
+
             String mediaType = (String) object.get("mediaType");
             String mediaId = (String) object.get("mediaId");
 
