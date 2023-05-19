@@ -208,7 +208,8 @@ public class DowplayPlugin extends FlutterActivity implements FlutterPlugin, Met
             //String mediaId = call.arguments.toString().replaceAll(".*mediaId=(\\d+).*", "$1");
 
             Gson gson = new Gson();
-            HashMap<String, Object> object = gson.fromJson(call.arguments.toString(), HashMap.class);
+            String json = gson.toJson(call.arguments);
+            HashMap<String, Object> object = gson.fromJson(json, HashMap.class);
             String mediaType = (String) object.get("mediaType");
             String mediaId = (String) object.get("mediaId");
 
@@ -222,7 +223,8 @@ public class DowplayPlugin extends FlutterActivity implements FlutterPlugin, Met
             //String mediaType = call.arguments.toString().replaceAll(".*mediaType=(.+).*", "$1");
             //String mediaId = call.arguments.toString().replaceAll(".*mediaId=(\\d+).*", "$1");
             Gson gson = new Gson();
-            HashMap<String, Object> object = gson.fromJson(call.arguments.toString(), HashMap.class);
+            String json = gson.toJson(call.arguments);
+            HashMap<String, Object> object = gson.fromJson(json, HashMap.class);
             String mediaType = (String) object.get("mediaType");
             String mediaId = (String) object.get("mediaId");
 
@@ -236,7 +238,8 @@ public class DowplayPlugin extends FlutterActivity implements FlutterPlugin, Met
             //String mediaType = call.arguments.toString().replaceAll(".*mediaType=(.+).*", "$1");
             //String mediaId = call.arguments.toString().replaceAll(".*mediaId=(\\d+).*", "$1");
             Gson gson = new Gson();
-            HashMap<String, Object> object = gson.fromJson(call.arguments.toString(), HashMap.class);
+            String json = gson.toJson(call.arguments);
+            HashMap<String, Object> object = gson.fromJson(json, HashMap.class);
             String mediaType = (String) object.get("mediaType");
             String mediaId = (String) object.get("mediaId");
 
