@@ -203,7 +203,7 @@ public class DowplayPlugin extends FlutterActivity implements FlutterPlugin, Met
             Log.d(TAG, "onMethodCall: pause_download");
             Log.d(TAG, "onMethodCall: " + call.arguments.toString());
             //{mediaType=movie, mediaId=377530}
-            String mediaType = call.arguments.toString().replaceAll(".*mediaType=(\\d+).*", "$1");
+            String mediaType = call.arguments.toString().replaceAll(".*mediaType=(.+).*", "$1");
             String mediaId = call.arguments.toString().replaceAll(".*mediaId=(\\d+).*", "$1");
             new DownloaderDowPlay(context, activity, lang).pauseDownload(mediaId, mediaType);
             result.success(new DownloaderDowPlay(context, activity, lang).getAllDownloadMedia(userId, profileId));
@@ -212,7 +212,7 @@ public class DowplayPlugin extends FlutterActivity implements FlutterPlugin, Met
             Log.d(TAG, "onMethodCall: resume_download");
             Log.d(TAG, "onMethodCall: " + call.arguments.toString());
             //{mediaType=movie, mediaId=377530}
-            String mediaType = call.arguments.toString().replaceAll(".*mediaType=(\\d+).*", "$1");
+            String mediaType = call.arguments.toString().replaceAll(".*mediaType=(.+).*", "$1");
             String mediaId = call.arguments.toString().replaceAll(".*mediaId=(\\d+).*", "$1");
             new DownloaderDowPlay(context, activity, lang).resumeDownload(mediaId, mediaType);
             result.success(new DownloaderDowPlay(context, activity, lang).getAllDownloadMedia(userId, profileId));
@@ -221,7 +221,7 @@ public class DowplayPlugin extends FlutterActivity implements FlutterPlugin, Met
             Log.d(TAG, "onMethodCall: cancel_download");
             Log.d(TAG, "onMethodCall: " + call.arguments.toString());
             //{mediaType=movie, mediaId=377530}
-            String mediaType = call.arguments.toString().replaceAll(".*mediaType=(\\d+).*", "$1");
+            String mediaType = call.arguments.toString().replaceAll(".*mediaType=(.+).*", "$1");
             String mediaId = call.arguments.toString().replaceAll(".*mediaId=(\\d+).*", "$1");
             Log.d(TAG, "onMethodCall: "+mediaType+" > "+mediaId);
             new DownloaderDowPlay(context, activity, lang).cancelDownload(mediaId, mediaType);
