@@ -137,6 +137,9 @@ class DownloadService : Service() {
                         currentProgressPercent
                     )
                     notificationManager.cancel(downloadId)
+                    if(checkMapValuesToEndStartForegroundService(allDownloadIdsStatus)){
+                        stopService()
+                    }
                     Log.d("Bom::: ", "Download cancelled")
                 }
                 .setOnProgressListener { progress ->
@@ -206,7 +209,9 @@ class DownloadService : Service() {
                             currentProgressPercent
                         )
                         notificationManager.cancel(downloadId)
-                        stopService()
+                        if(checkMapValuesToEndStartForegroundService(allDownloadIdsStatus)){
+                            stopService()
+                        }
                     }
                 })
         }
