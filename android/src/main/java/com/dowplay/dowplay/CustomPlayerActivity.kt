@@ -27,6 +27,7 @@ import androidx.media3.common.*
 import androidx.media3.common.util.Assertions
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.common.util.Util
+import androidx.media3.exoplayer.ExoPlaybackException
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.source.TrackGroupArray
 import androidx.media3.exoplayer.trackselection.DefaultTrackSelector
@@ -86,34 +87,45 @@ class CustomPlayerActivity() : FlutterActivity() {
     }
 
     private fun initializePlayer() {
-        playerEventError()
-        playerEventStateChanged()
-        trackSelection = DefaultTrackSelector(this).apply {
-            setParameters(buildUponParameters().setMaxVideoSizeSd())
-        }
-        player = ExoPlayer.Builder(this)
-            .setSkipSilenceEnabled(true)
-            .setTrackSelector(trackSelection)
-            .setVideoScalingMode(2)
-            .setAudioAttributes(AudioAttributes.DEFAULT, false)
-
-            .build()
-            .also { exoPlayer ->
-                //val mediaItem = MediaItem.fromUri("https://thekee.gcdn.co/video/m-159n/English/Animation&Family/Klaus.2019.1080pAr.mp4")
-                //val mediaItem = MediaItem.fromUri("/data/user/0/com.dowplay.dowplay_example/files/downplay/qvapqtuqtd0fgokeenfelnqli.mp4")
-                //////////////////////
-
-                val mediaItem = videoUris.map { MediaItem.fromUri(it) }
-                /////////////////////
-                exoPlayer.setMediaItems(mediaItem)
-                exoPlayer.seekToDefaultPosition(startVideoPosition)
-                exoPlayer.prepare()
-                exoPlayer.play()
-                viewBinding.playerView.player = exoPlayer
-                player?.playWhenReady = true
+        try {
+            trackSelection = DefaultTrackSelector(this).apply {
+                setParameters(buildUponParameters().setMaxVideoSizeSd())
             }
-        seekToLastWatching()
+            player = ExoPlayer.Builder(this)
+                .setSkipSilenceEnabled(true)
+                .setTrackSelector(trackSelection)
+                .setVideoScalingMode(2)
+                .setAudioAttributes(AudioAttributes.DEFAULT, false)
 
+                .build()
+                .also { exoPlayer ->
+                    //val mediaItem = MediaItem.fromUri("https://thekee.gcdn.co/video/m-159n/English/Animation&Family/Klaus.2019.1080pAr.mp4")
+                    //val mediaItem = MediaItem.fromUri("/data/user/0/com.dowplay.dowplay_example/files/downplay/qvapqtuqtd0fgokeenfelnqli.mp4")
+                    //val mediaItemTest = MediaItem.fromUri("https://thekee.gcdn.co")
+                    //////////////////////
+
+                    val mediaItem = videoUris.map { MediaItem.fromUri(it) }
+                    /////////////////////
+                    exoPlayer.setMediaItems(mediaItem)
+                    exoPlayer.seekToDefaultPosition(startVideoPosition)
+                    exoPlayer.prepare()
+                    exoPlayer.play()
+                    viewBinding.playerView.player = exoPlayer
+                    player?.playWhenReady = true
+                }
+        } catch (e: ExoPlaybackException) {
+            if (e.type == ExoPlaybackException.TYPE_SOURCE) {
+                // Handle source error
+                val sourceException = e.sourceException
+                // Perform specific actions for source error
+                // ...
+            } else {
+                // Handle other types of ExoPlaybackException
+                // ...
+            }
+        }
+        seekToLastWatching()
+        playerEvent()
     }
 
     private fun seekToLastWatching() {
@@ -136,16 +148,8 @@ class CustomPlayerActivity() : FlutterActivity() {
         }
     }
 
-    private fun playerEventError() {
-        player?.addListener(object : Player.Listener {
-            override fun onPlayerError(error: PlaybackException){
-                // Handle the player error here
-                Log.d("What the hell???", " Error in player...")
-            }
-    })
-    }
-
-    private fun playerEventStateChanged() {
+    var playerHasError = false
+    private fun playerEvent() {
         player?.addListener(object : Player.Listener {
             override fun onPlaybackStateChanged(@Player.State state: Int) {
                 /*if(player?.duration == player?.currentPosition){
@@ -154,14 +158,21 @@ class CustomPlayerActivity() : FlutterActivity() {
                 when (state) {
                     Player.STATE_READY -> {
                         // The player is able to immediately play from its current position. The player will be playing if getPlayWhenReady() is true, and paused otherwise.
-                        viewBinding.progressBarVideo.visibility = View.GONE
+                        viewBinding.progressLoadingVideo.visibility = View.GONE
+                        viewBinding.errorContent.visibility = View.GONE
+                        playerHasError = false
                         viewBinding.playPauseButton.setImageResource(R.drawable.pause_icon)
                         isReadyPlayer = true
                         callAddWatchedEpisodesToTheList()
                     }
                     Player.STATE_BUFFERING -> {
                         // The player is not able to immediately play the media, but is doing work toward being able to do so. This state typically occurs when the player needs to buffer more data before playback can start.
-                        viewBinding.progressBarVideo.visibility = View.VISIBLE
+                        if (playerHasError) {
+                            viewBinding.progressLoadingVideo.visibility = View.GONE
+                            viewBinding.errorContent.visibility = View.VISIBLE
+                        } else {
+                            viewBinding.progressLoadingVideo.visibility = View.VISIBLE
+                        }
                         viewBinding.playPauseButton.setImageResource(R.drawable.play_icon)
                     }
                     Player.STATE_IDLE -> {
@@ -179,6 +190,34 @@ class CustomPlayerActivity() : FlutterActivity() {
                         // Other things
                     }
                 }
+            }
+
+            override fun onPlayerError(error: PlaybackException) {
+                // Handle the player error here
+                playerHasError = true
+                viewBinding.errorContent.visibility = View.VISIBLE
+                viewBinding.progressLoadingVideo.visibility = View.GONE
+                if (error.errorCode == PlaybackException.ERROR_CODE_IO_FILE_NOT_FOUND) {
+                    player?.stop()
+                    player = null
+                    viewBinding.errorText.text =
+                        if (currentLanguage == "en") "Something is wrong" else "هناك خطأ ما"
+                } else if (error.errorCode == PlaybackException.ERROR_CODE_IO_NETWORK_CONNECTION_FAILED
+                    || error.errorCode == PlaybackException.ERROR_CODE_IO_NETWORK_CONNECTION_TIMEOUT
+                ) {
+                    viewBinding.errorText.text =
+                        if (currentLanguage == "en") "Check your internet connection" else "قم بفحص اتصال الانترنت"
+                } else if (error.errorCode == PlaybackException.ERROR_CODE_IO_BAD_HTTP_STATUS
+                ) {
+                    player?.stop()
+                    player = null
+                    viewBinding.errorText.text =
+                        if (currentLanguage == "en") "URL error" else "خطأ في عنوان URL"
+                }
+                Log.d("Player Error", "${error.errorCode}")
+                Log.d("Player Error", "${error.errorCodeName}")
+                Log.d("Player Error", "${error.message}")
+                Log.d("Player Error", "Url Media not valid or has other error....")
             }
         })
     }
@@ -772,11 +811,15 @@ class CustomPlayerActivity() : FlutterActivity() {
         //hide download icon if download url is empty...
         if (mediaType == movie) {
             viewBinding.downloadButton.visibility =
-                if (movieMedia?.info?.downloadURL.toString().isEmpty()) View.GONE else View.VISIBLE;
+                if (movieMedia?.info?.downloadURL.toString().trim()
+                        .isEmpty() || movieMedia?.info?.downloadURL == null
+                ) View.GONE else View.VISIBLE;
         } else {
             viewBinding.downloadButton.visibility =
                 if (episodeMedia?.mediaGroup?.episodes?.get(startVideoPosition)?.downloadURL.toString()
+                        .trim()
                         .isEmpty()
+                    || episodeMedia?.mediaGroup?.episodes?.get(startVideoPosition)?.downloadURL == null
                 ) View.GONE else View.VISIBLE;
         }
         ////////////////////////////////////////////////////////////////////////////////////////////
