@@ -483,6 +483,75 @@ class DatabaseHelper(innerContext: Context) : SQLiteOpenHelper(innerContext, DAT
     }
 
     @SuppressLint("Range")
+    fun getMediaDownloadDataFromDB(
+        mediaID: String,
+        mediaType: String
+    ): List<HashMap<String, Any>> {
+
+        val dbHelper = DatabaseHelper(context)
+        val db = dbHelper.readableDatabase
+
+        var query = if(mediaType =="movie") {
+            "SELECT ${COL_download_id}, " +
+                    "${COL_status}, ${COL_progress}, ${COL_video_path}," +
+                    "${COL_name},"+
+                    "$COL_media_id FROM $main_table WHERE $COL_media_id = ?"
+        }else {
+            "SELECT ${COL_download_id},${COL_status}," +
+                    "${COL_progress},${COL_video_path}," +
+                    "${COL_media_id}," +
+                    "$COL_name FROM $episodes_table WHERE $COL_episode_id = ?"
+        }
+        val selectionArgs = arrayOf(mediaID)
+
+        val cursor = db.rawQuery(query, selectionArgs)
+
+        val allDownloadData = ArrayList<HashMap<String, Any>>()
+        var allInfoDataForThisMedia = ArrayList<HashMap<String, Any>>()
+        if (cursor.moveToFirst()) {
+            val mapData = HashMap<String, Any>()
+            val downloadId = cursor.getInt(cursor.getColumnIndex(COL_download_id))
+            val status = cursor.getInt(cursor.getColumnIndex(COL_status))
+            val progress = cursor.getInt(cursor.getColumnIndex(COL_progress))
+            val videoPath = cursor.getString(cursor.getColumnIndex(COL_video_path))
+            val mediaId = cursor.getString(cursor.getColumnIndex(COL_media_id))
+            val name = cursor.getString(cursor.getColumnIndex(COL_name))
+
+            mapData["status"] = status
+            mapData["progress"] = progress
+            mapData["tempPath"] = videoPath
+            mapData["mediaType"] = mediaType
+            mapData["mediaId"] = mediaID
+            mapData["name"] = name
+            mapData["mediaRetrivalType"] = "DownloadInfo"
+            allInfoDataForThisMedia = getDownloadDataFromDbByMediaIdAndMediaType(mediaId,mediaType)
+
+            val mapDataGroup = HashMap<String, Any>()
+            val mapDataInfo = HashMap<String, Any>()
+            val mediaData = ""+allInfoDataForThisMedia[0]["media_data"]
+
+            val jsonObject = JsonParser.parseString(mediaData).asJsonObject
+            val mediaGroupObject = jsonObject.getAsJsonObject("media_group")
+            val infoObject = jsonObject.getAsJsonObject("info")
+            val mapType = object : TypeToken<Map<String, Any>>() {}.type
+            val mapGroup: Map<String, Any> = gson.fromJson(mediaGroupObject, mapType)
+            val mapInfo: Map<String, Any> = gson.fromJson(infoObject, mapType)
+            mapDataGroup["info"]=mapGroup
+            mapDataInfo["info"]=mapInfo
+
+            mapData["group"] = mapDataGroup
+            mapData["object"] = mapDataInfo
+            allDownloadData += mapData
+        }
+
+        Log.d("Sqlite Data:", "$allDownloadData")
+
+        cursor.close()
+        db.close()
+        return allDownloadData
+    }
+
+    @SuppressLint("Range")
     fun checkIfMediaHasDataInMainTable(
         media_id: String
     ): Int {
