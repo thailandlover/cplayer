@@ -23,10 +23,7 @@ import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
 import androidx.core.view.*
-import androidx.media3.common.AudioAttributes
-import androidx.media3.common.C
-import androidx.media3.common.MediaItem
-import androidx.media3.common.Player
+import androidx.media3.common.*
 import androidx.media3.common.util.Assertions
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.common.util.Util
@@ -89,6 +86,8 @@ class CustomPlayerActivity() : FlutterActivity() {
     }
 
     private fun initializePlayer() {
+        playerEventError()
+        playerEventStateChanged()
         trackSelection = DefaultTrackSelector(this).apply {
             setParameters(buildUponParameters().setMaxVideoSizeSd())
         }
@@ -114,7 +113,7 @@ class CustomPlayerActivity() : FlutterActivity() {
                 player?.playWhenReady = true
             }
         seekToLastWatching()
-        playerEvent()
+
     }
 
     private fun seekToLastWatching() {
@@ -137,7 +136,16 @@ class CustomPlayerActivity() : FlutterActivity() {
         }
     }
 
-    private fun playerEvent() {
+    private fun playerEventError() {
+        player?.addListener(object : Player.Listener {
+            override fun onPlayerError(error: PlaybackException){
+                // Handle the player error here
+                Log.d("What the hell???", " Error in player...")
+            }
+    })
+    }
+
+    private fun playerEventStateChanged() {
         player?.addListener(object : Player.Listener {
             override fun onPlaybackStateChanged(@Player.State state: Int) {
                 /*if(player?.duration == player?.currentPosition){
@@ -191,7 +199,7 @@ class CustomPlayerActivity() : FlutterActivity() {
         return result
     }
 
-    fun callAddWatchedEpisodesToTheList(){
+    fun callAddWatchedEpisodesToTheList() {
         if (isReadyPlayer) {
             addWatchedEpisodesToTheList(
                 videoMediaID[startVideoPosition].toIntOrNull() ?: 0,
@@ -734,7 +742,6 @@ class CustomPlayerActivity() : FlutterActivity() {
                 videoSubTitle += (item.title.toString())
                 //Log.d("Path URL MEDIA:",item.mediaURL.toString())
             }
-            ///////
             val index =
                 episodeMedia?.mediaGroup?.episodes?.indexOfFirst { info -> info.id == episodeMedia?.info?.id }
             startVideoPosition = index ?: 0
@@ -759,6 +766,21 @@ class CustomPlayerActivity() : FlutterActivity() {
                 Toast.LENGTH_LONG
             ).show()
         }
+
+        ///////
+        ////////////////////////////////////////////////////////////////////////////////////////////
+        //hide download icon if download url is empty...
+        if (mediaType == movie) {
+            viewBinding.downloadButton.visibility =
+                if (movieMedia?.info?.downloadURL.toString().isEmpty()) View.GONE else View.VISIBLE;
+        } else {
+            viewBinding.downloadButton.visibility =
+                if (episodeMedia?.mediaGroup?.episodes?.get(startVideoPosition)?.downloadURL.toString()
+                        .isEmpty()
+                ) View.GONE else View.VISIBLE;
+        }
+        ////////////////////////////////////////////////////////////////////////////////////////////
+        ///////
     }
 
     private fun setGreenColorForDownloadButtonIfIsDownloaded(mediaType: String) {
