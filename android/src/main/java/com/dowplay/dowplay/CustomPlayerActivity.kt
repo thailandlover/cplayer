@@ -87,43 +87,32 @@ class CustomPlayerActivity() : FlutterActivity() {
     }
 
     private fun initializePlayer() {
-        try {
-            trackSelection = DefaultTrackSelector(this).apply {
-                setParameters(buildUponParameters().setMaxVideoSizeSd())
-            }
-            player = ExoPlayer.Builder(this)
-                .setSkipSilenceEnabled(true)
-                .setTrackSelector(trackSelection)
-                .setVideoScalingMode(2)
-                .setAudioAttributes(AudioAttributes.DEFAULT, false)
 
-                .build()
-                .also { exoPlayer ->
-                    //val mediaItem = MediaItem.fromUri("https://thekee.gcdn.co/video/m-159n/English/Animation&Family/Klaus.2019.1080pAr.mp4")
-                    //val mediaItem = MediaItem.fromUri("/data/user/0/com.dowplay.dowplay_example/files/downplay/qvapqtuqtd0fgokeenfelnqli.mp4")
-                    //val mediaItemTest = MediaItem.fromUri("https://thekee.gcdn.co")
-                    //////////////////////
-
-                    val mediaItem = videoUris.map { MediaItem.fromUri(it) }
-                    /////////////////////
-                    exoPlayer.setMediaItems(mediaItem)
-                    exoPlayer.seekToDefaultPosition(startVideoPosition)
-                    exoPlayer.prepare()
-                    exoPlayer.play()
-                    viewBinding.playerView.player = exoPlayer
-                    player?.playWhenReady = true
-                }
-        } catch (e: ExoPlaybackException) {
-            if (e.type == ExoPlaybackException.TYPE_SOURCE) {
-                // Handle source error
-                val sourceException = e.sourceException
-                // Perform specific actions for source error
-                // ...
-            } else {
-                // Handle other types of ExoPlaybackException
-                // ...
-            }
+        trackSelection = DefaultTrackSelector(this).apply {
+            setParameters(buildUponParameters().setMaxVideoSizeSd())
         }
+        player = ExoPlayer.Builder(this)
+            .setSkipSilenceEnabled(true)
+            .setTrackSelector(trackSelection)
+            .setVideoScalingMode(2)
+            .setAudioAttributes(AudioAttributes.DEFAULT, false)
+
+            .build()
+            .also { exoPlayer ->
+                //val mediaItem = MediaItem.fromUri("https://thekee.gcdn.co/video/m-159n/English/Animation&Family/Klaus.2019.1080pAr.mp4")
+                //val mediaItem = MediaItem.fromUri("/data/user/0/com.dowplay.dowplay_example/files/downplay/qvapqtuqtd0fgokeenfelnqli.mp4")
+                //val mediaItemTest = MediaItem.fromUri("https://thekee.gcdn.co")
+                //////////////////////
+
+                val mediaItem = videoUris.map { MediaItem.fromUri(it) }
+                /////////////////////
+                exoPlayer.setMediaItems(mediaItem)
+                exoPlayer.seekToDefaultPosition(startVideoPosition)
+                exoPlayer.prepare()
+                exoPlayer.play()
+                viewBinding.playerView.player = exoPlayer
+                player?.playWhenReady = true
+            }
         seekToLastWatching()
         playerEvent()
     }
@@ -408,7 +397,8 @@ class CustomPlayerActivity() : FlutterActivity() {
             addToWatchingListAPI()
             startVideoPosition = (startVideoPosition - 1 + videoUris.size) % videoUris.size
             setGreenColorForDownloadButtonIfIsDownloaded(mediaType)
-            player?.seekToPreviousMediaItem()
+            //player?.seekToPreviousMediaItem()
+            player?.seekToDefaultPosition(startVideoPosition)
             viewBinding.videoSubTitle.text = videoSubTitle[startVideoPosition]
             playbackPosition = 0L
             seekToLastWatching()
@@ -426,7 +416,8 @@ class CustomPlayerActivity() : FlutterActivity() {
             addToWatchingListAPI()
             startVideoPosition = (startVideoPosition + 1) % videoUris.size
             setGreenColorForDownloadButtonIfIsDownloaded(mediaType)
-            player?.seekToNextMediaItem()
+            //player?.seekToNextMediaItem()
+            player?.seekToDefaultPosition(startVideoPosition)
             viewBinding.videoSubTitle.text = videoSubTitle[startVideoPosition]
             playbackPosition = 0L
             seekToLastWatching()
@@ -845,13 +836,18 @@ class CustomPlayerActivity() : FlutterActivity() {
         if (downloadInfo["status"] == DownloadManagerSTATUS.STATUS_SUCCESSFUL && downloadInfo["status"] != null) {
             if (downloadInfo["video_path"].toString() != "" && downloadInfo["video_path"] != null) {
                 videoUris[startVideoPosition] = downloadInfo["video_path"].toString()
+                viewBinding.downloadButton.setColorFilter(
+                    ContextCompat.getColor(
+                        context,
+                        R.color.green_download
+                    )
+                );
+                ///////
+                //refresh player for new urls links
+                val mediaItem = videoUris.map { MediaItem.fromUri(it) }
+                player?.setMediaItems(mediaItem)
+                ///////
             }
-            viewBinding.downloadButton.setColorFilter(
-                ContextCompat.getColor(
-                    context,
-                    R.color.green_download
-                )
-            );
         } else if (downloadInfo["status"] == DownloadManagerSTATUS.STATUS_RUNNING && downloadInfo["status"] != null) {
             viewBinding.downloadButton.setColorFilter(
                 ContextCompat.getColor(
