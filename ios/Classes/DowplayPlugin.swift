@@ -82,7 +82,7 @@ public class DowplayPlugin: NSObject, FlutterPlugin {
                     if(watching != nil) {
                         startAt = Float(watching?["current_time"] as! String)!
                     }
-                    let mediaItem = Media(title: episode["title"] as! String,subTitle: season["title"] as? String, urlToPlay: episode["media_url"] as! String,keeId: mediaId,type: mediaType, startAt: startAt,mediaGroup: mediaGroup,info: episode)
+                    let mediaItem = Media(title: episode["title"] as! String,subTitle: season["title"] as? String, urlToPlay: episode["media_url"] as! String,keeId: mediaId,type: mediaType, startAt: startAt,mediaGroup: mediaGroup,info: episode,downloadURL: episode["download_url"],currentWatchTime: startAt)
                     media.append(mediaItem)
                     
                 }
