@@ -174,7 +174,6 @@ public class DowplayPlugin: NSObject, FlutterPlugin {
            let tvshow_id : String = myArgs["tvshow_id"] as? String,
            let season_id : String = myArgs["season_id"] as? String{
             let results: DownloadedMedia? = DownloadManager.shared.getDownloadedEpisode(media_id, seasonId: season_id, tvShowId: tvshow_id)
-            
             if(results != nil){
                 result([results?.getObjectAsJSONDictionary()])
             } else {

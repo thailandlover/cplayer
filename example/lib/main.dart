@@ -375,7 +375,7 @@ class _MyAppState extends State<MyApp> {
   Future<dynamic> getDownloadEpisode() async {
     dynamic result = await invokeGetDownloadEpisode();
     if (kDebugMode) {
-      printWrapped("Returned Movie  ${jsonEncode(result)}");
+      printWrapped("Returned Episode  ${jsonEncode(result)}");
     }
   }
 
@@ -788,6 +788,10 @@ class _MyAppState extends State<MyApp> {
                 ElevatedButton(
                   onPressed: getDownloadMovie,
                   child: const Text("Get Download Movie"),
+                ),
+                ElevatedButton(
+                  onPressed: getDownloadEpisode,
+                  child: const Text("Get Download Episode"),
                 ),
               ],
             ),
