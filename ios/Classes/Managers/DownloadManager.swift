@@ -90,6 +90,32 @@ public class DownloadManager: NSObject/*, ObservableObject */{
     }
     
     
+    public func getDownloadedMovie(_ id: String)-> DownloadedMedia?{
+        if let completed = try? FilesManager.shared.getDownloadeMovieById(id){
+            return completed
+        }
+        
+        if let task = getDownloadTask(withMediaId: id, forType: .movie) as? URLSessionDownloadTask{
+            return extractMedia(usingTask: task)
+        }
+        
+        return nil
+        
+    }
+    
+    public func getDownloadedEpisode(_ id: String, seasonId: String, tvShowId: String)-> DownloadedMedia?{
+        if let completed = FilesManager.shared.getDownloadedEpisode(id: id, season: seasonId, series: tvShowId){
+            return completed
+        }
+        
+        if let task = getDownloadTask(withMediaId: id, forType: .series) as? URLSessionDownloadTask{
+            return extractMedia(usingTask: task)
+        }
+        
+        return nil
+        
+    }
+        
     //MARK: - Cancel Download Functions
     public func cancelAll(){
         if !configed {return}
@@ -184,6 +210,7 @@ public class DownloadManager: NSObject/*, ObservableObject */{
         
         return allMedia
     }
+    
     public func getAllMedia(ForSerise seriesID: String) throws -> [DownloadedMedia]{
         guard configed else {throw DonwloadManagerError.managerIsNotConfiged}
         var allMedia : [DownloadedMedia] = []
@@ -191,6 +218,7 @@ public class DownloadManager: NSObject/*, ObservableObject */{
         allMedia.append(contentsOf:FilesManager.shared.getSeasons(forSeriseID: seriesID))
         return allMedia
     }
+    
     public func getAllEpisodes(forSeason sID: String, atSeriesID id: String)throws -> [DownloadedMedia] {
         guard configed else {throw DonwloadManagerError.managerIsNotConfiged}
         var allMedia : [DownloadedMedia] = []
@@ -199,7 +227,7 @@ public class DownloadManager: NSObject/*, ObservableObject */{
         return allMedia
     }
     
-    
+
     public func getAllMediaDecoded()-> [[String:Any]] {
         return (try? self.getAllMedia().getEncodedDictionary()) ?? []
     }
@@ -363,6 +391,10 @@ extension DownloadManager: URLSessionDelegate, URLSessionDownloadDelegate {
             print("Finish")
         }
     }
+    
+    
+    
+    
 }
 
 

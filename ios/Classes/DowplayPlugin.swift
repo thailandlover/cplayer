@@ -20,6 +20,10 @@ public class DowplayPlugin: NSObject, FlutterPlugin {
             break;
         case "config_downloader":
             configDownloader(call: call, result: result);
+        case "get_download_movie":
+            getDownloadMovie(call: call, result: result)
+        case "get_download_episode":
+            getDownloadEpisode(call: call, result: result)
         case "get_downloads_list":
             getDownloadsList(call: call, result: result)
         case "start_download_movie":
@@ -141,6 +145,38 @@ public class DowplayPlugin: NSObject, FlutterPlugin {
         let downloadsList : [[String : Any]] = DownloadManager.shared.getAllMediaDecoded()
         result(downloadsList)
     }
+    
+    func getDownloadMovie(call: FlutterMethodCall,result: @escaping FlutterResult){
+        guard let args = call.arguments else {
+            return
+        }
+        if let myArgs = args as? [String: Any],
+           let media_id : String = myArgs["media_id"] as? String {
+            let results: [String:Any] = DownloadManager.shared.getDownloadedMovie(media_id) ?? []
+            result(results)
+        } else {
+            print("iOS could not extract flutter arguments in method: (getDownloadMovie)")
+            result(false)
+        }
+    }
+    
+    func getDownloadEpisode(call: FlutterMethodCall,result: @escaping FlutterResult){
+        guard let args = call.arguments else {
+            return
+        }
+        if let myArgs = args as? [String: Any],
+           let media_id : String = myArgs["media_id"] as? String,
+           let tvshow_id : String = myArgs["tvshow_id"] as? String,
+           let season_id : String = myArgs["season_id"] as? String{
+            let results: [String:Any] = DownloadManager.shared.getDownloadedEpisode(media_id, seasonId: season_id, tvShowId: tvshow_id) ?? []
+            result(results)
+        } else {
+            print("iOS could not extract flutter arguments in method: (getDownloadEpisode)")
+            result(false)
+        }
+    }
+    
+    
     
     func configDownloader(call: FlutterMethodCall,result: @escaping FlutterResult){
         guard let args = call.arguments else {

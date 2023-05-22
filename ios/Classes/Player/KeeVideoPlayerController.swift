@@ -1,3 +1,10 @@
+//
+//  KeeVideoPlayerController.swift
+//  KeeCustomPlayer
+//
+//  Created by Ahmed Qazzaz on 11/11/2022.
+//
+
 import UIKit
 import AVKit
 import MediaPlayer
@@ -194,6 +201,11 @@ public class KeeVideoPlayerController: UIViewController {
     }
     
     func validateDownloadButton() throws{
+        if media?.downloadURL == nil {
+            btn_download.isHidden = true
+            return
+        }
+        btn_download.isHidden = false
         lb_downloadPercentage.isHidden = true
         if let id = media?.keeId, let type = media?.type{
             var isDownloaded = false
@@ -594,7 +606,7 @@ public class KeeVideoPlayerController: UIViewController {
     @IBAction func downloadAction(_ sender : UIButton) {
         if btn_download.tag == 0 {
             //        DownloadManager.shared.download(link: media?.urlToPlay ?? "")
-            if let url = URL(string: media?.urlToPlay ?? "") {
+            if let url = URL(string: media?.downloadURL ?? "") {
                 DownloadManager.shared.startDownload(url: url,
                                                      forMediaId: Int(media?.keeId ?? "") ?? -1 ,
                                                      mediaName: media?.title ?? "Untitled",
