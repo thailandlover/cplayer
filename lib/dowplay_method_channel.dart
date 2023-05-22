@@ -87,4 +87,18 @@ class MethodChannelDowplay extends DowplayPlatform {
     return result;
   }
 
+  @override
+  Future<dynamic> getDownloadMovie(String mediaId) async {
+    final dynamic result = await methodChannel.invokeMethod<dynamic>(
+        'get_download_movie', {"media_id": mediaId});
+    return result;
+  }
+
+  @override
+  Future<dynamic> getDownloadEpisode(String mediaId,String tvShowId,String seasonId) async {
+    final dynamic result = await methodChannel.invokeMethod<dynamic>(
+        'get_download_episode', {"media_id": mediaId,"tvshow_id": tvShowId,"season_id":seasonId});
+    return result;
+  }
+
 }

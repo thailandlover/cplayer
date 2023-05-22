@@ -46,4 +46,12 @@ class Dowplay {
   Future<dynamic> cancelDownload(String mediaId, String mediaType) {
     return DowplayPlatform.instance.cancelDownload(mediaId, mediaType);
   }
+
+  Future<dynamic> getDownloadMovie(String mediaId) {
+    return DowplayPlatform.instance.getDownloadMovie(mediaId);
+  }
+
+  Future<dynamic> getDownloadEpisode(String mediaId,String tvShowId, String seasonId) {
+    return DowplayPlatform.instance.getDownloadEpisode(mediaId,tvShowId,seasonId);
+  }
 }

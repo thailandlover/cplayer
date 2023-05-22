@@ -152,8 +152,13 @@ public class DowplayPlugin: NSObject, FlutterPlugin {
         }
         if let myArgs = args as? [String: Any],
            let media_id : String = myArgs["media_id"] as? String {
-            let results: [String:Any] = DownloadManager.shared.getDownloadedMovie(media_id) ?? []
-            result(results)
+            let results: DownloadedMedia? = DownloadManager.shared.getDownloadedMovie(media_id)
+            
+            if(results != nil){
+                result([results?.getObjectAsJSONDictionary()])
+            } else {
+                result([])
+            }
         } else {
             print("iOS could not extract flutter arguments in method: (getDownloadMovie)")
             result(false)
@@ -168,8 +173,13 @@ public class DowplayPlugin: NSObject, FlutterPlugin {
            let media_id : String = myArgs["media_id"] as? String,
            let tvshow_id : String = myArgs["tvshow_id"] as? String,
            let season_id : String = myArgs["season_id"] as? String{
-            let results: [String:Any] = DownloadManager.shared.getDownloadedEpisode(media_id, seasonId: season_id, tvShowId: tvshow_id) ?? []
-            result(results)
+            let results: DownloadedMedia? = DownloadManager.shared.getDownloadedEpisode(media_id, seasonId: season_id, tvShowId: tvshow_id)
+            
+            if(results != nil){
+                result([results?.getObjectAsJSONDictionary()])
+            } else {
+                result([])
+            }
         } else {
             print("iOS could not extract flutter arguments in method: (getDownloadEpisode)")
             result(false)

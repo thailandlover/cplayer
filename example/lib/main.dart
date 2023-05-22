@@ -354,6 +354,24 @@ class _MyAppState extends State<MyApp> {
     }
   }
 
+  Future<dynamic> getDownloadMovie() async {
+    dynamic result = await invokeGetDownloadMovie();
+    if (kDebugMode) {
+      printWrapped(
+          "Returned Movie  ${jsonEncode(result)}");
+    }
+  }
+
+  Future<dynamic> invokeGetDownloadMovie() async {
+    dynamic result;
+    try {
+      result = await _dowplayPlugin.getDownloadMovie(movieObject['id'].toString());
+    } on PlatformException {
+      result = false;
+    }
+    return result;
+  }
+
   Future<dynamic> getTvShowSeasonsDownloadList() async {
     dynamic result = await invokeGetTvShowSeasonsDownloadList();
     if (kDebugMode) {
@@ -746,6 +764,12 @@ class _MyAppState extends State<MyApp> {
                   onPressed: cancelDownload,
                   child: const Text("Cancel Download Movie"),
                 ),
+                ElevatedButton(
+                  onPressed: getDownloadMovie,
+                  child: const Text("Get Download Movie"),
+                ),
+
+                
               ],
             ),
           ),
