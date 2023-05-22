@@ -8,9 +8,12 @@ import com.beust.klaxon.*
 
 private val klaxon = Klaxon()
 
-data class MovieMedia (
+data class MovieMedia(
     val title: String? = null,
+
+    @Json(name = "sub_title")
     val subTitle: String? = null,
+
     val url: String? = null,
 
     @Json(name = "media_id")
@@ -31,8 +34,10 @@ data class MovieMedia (
     val apiBaseURL: String? = null,
 
     val lang: String? = null,
+
     @Json(name = "start_at")
     val startAt: Double? = null,
+
     val info: Info? = null
 ) {
     public fun toJson() = klaxon.toJsonString(this)
@@ -42,11 +47,11 @@ data class MovieMedia (
     }
 }
 
-data class Info (
+data class Info(
     val id: Int? = null,
     val title: String? = null,
     val description: String? = null,
-
+    val order: String? = null,
     @Json(name = "download_url")
     val downloadURL: String? = null,
 
@@ -54,7 +59,7 @@ data class Info (
     val hdURL: String? = null,
 
     @Json(name = "trailer_url")
-    val trailerURL: Any? = null,
+    val trailerURL: String? = null,
 
     @Json(name = "media_url")
     val mediaURL: String? = null,
@@ -83,54 +88,19 @@ data class Info (
     val imdbRating: String? = null,
 
     @Json(name = "imdb_certificate")
-    val imdbCertificate: Any? = null,
+    val imdbCertificate: String? = null,
 
     val watching: Watching? = null,
-///////////////////////////////
-    val order: String? = null,
 
     @Json(name = "created_at")
     val createdAt: String? = null,
 
     @Json(name = "release_date")
-    val releaseDate: String? = null,
+    val releaseDate: String? = null
 )
 
-data class DirectorInfo (
+data class DirectorInfo(
     val id: Int? = null,
     val name: String? = null,
     val image: String? = null
-)
-
-data class Tag (
-    val id: Int? = null,
-    val title: String? = null
-)
-
-data class Watching (
-    @Json(name = "current_time")
-    val currentTime: String? = null,
-
-    val duration: String? = null,
-    val title: String? = null,
-    val order: Int? = null,
-    val description: String? = null,
-
-    @Json(name = "last_media_id")
-    val lastMediaID: Int? = null,
-
-    @Json(name = "1080_url")
-    val the1080_URL: String? = null,
-
-    @Json(name = "720_url")
-    val the720_URL: String? = null,
-
-    @Json(name = "continue_type")
-    val continueType: Any? = null,
-
-    @Json(name = "next_type")
-    val nextType: Any? = null,
-
-    @Json(name = "next_episode")
-    val nextEpisode: Any? = null
 )

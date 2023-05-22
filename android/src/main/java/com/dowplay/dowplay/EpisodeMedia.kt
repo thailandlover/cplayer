@@ -7,7 +7,7 @@ import com.beust.klaxon.*
 
 private val klaxon = Klaxon()
 
-data class EpisodeMedia (
+data class EpisodeMedia(
     @Json(name = "media_type")
     val mediaType: String? = null,
 
@@ -24,7 +24,6 @@ data class EpisodeMedia (
 
     val lang: String? = null,
     val info: Info? = null,
-
     @Json(name = "media_group")
     val mediaGroup: MediaGroup? = null
 ) {
@@ -35,8 +34,14 @@ data class EpisodeMedia (
     }
 }
 
+data class Watching(
+    @Json(name = "current_time")
+    val currentTime: String? = null,
 
-data class MediaGroup (
+    val duration: String? = null
+)
+
+data class MediaGroup(
     @Json(name = "tv_show")
     val tvShow: TvShow? = null,
 
@@ -48,7 +53,7 @@ data class MediaGroup (
     val episodes: List<Info>? = null
 )
 
-data class ItemsIDS (
+data class ItemsIDS(
     @Json(name = "season_id")
     val seasonID: String? = null,
 
@@ -56,7 +61,7 @@ data class ItemsIDS (
     val tvShowID: String? = null
 )
 
-data class Season (
+data class Season(
     val id: Int? = null,
 
     @Json(name = "season_id")
@@ -66,10 +71,10 @@ data class Season (
     val posterPhoto: String? = null,
 
     @Json(name = "cover_photo")
-    val coverPhoto: Any? = null,
+    val coverPhoto: String? = null,
 
     @Json(name = "trailer_url")
-    val trailerURL: Any? = null,
+    val trailerURL: String? = null,
 
     @Json(name = "season_number")
     val seasonNumber: String? = null,
@@ -77,13 +82,13 @@ data class Season (
     val title: String? = null
 )
 
-data class TvShow (
+data class TvShow(
     val id: Int? = null,
     val title: String? = null,
     val description: String? = null,
 
     @Json(name = "trailer_url")
-    val trailerURL: Any? = null,
+    val trailerURL: String? = null,
 
     val language: String? = null,
     val translation: String? = null,
@@ -95,30 +100,69 @@ data class TvShow (
     val endYear: String? = null,
 
     @Json(name = "cover_photo")
-    val coverPhoto: Any? = null,
+    val coverPhoto: String? = null,
 
     @Json(name = "poster_photo")
     val posterPhoto: String? = null,
 
     val seasons: List<Season>? = null,
     val tags: List<Tag>? = null,
-    val actors: List<Any?>? = null,
+    val actors: List<Actor>? = null,
 
     @Json(name = "director_info")
-    val directorInfo: Any? = null,
+    val directorInfo: String? = null,
 
     @Json(name = "is_favourite")
     val isFavourite: Boolean? = null,
 
     @Json(name = "imdb_rating")
-    val imdbRating: Any? = null,
+    val imdbRating: String? = null,
 
     @Json(name = "imdb_certificate")
-    val imdbCertificate: Any? = null,
+    val imdbCertificate: String? = null,
 
     @Json(name = "last_watching")
-    val lastWatching: Any? = null,
+    val lastWatching: LastWatching? = null,
 
     @Json(name = "last_watching_season_id")
-    val lastWatchingSeasonID: Any? = null
+    val lastWatchingSeasonID: Int? = null
+)
+
+data class Actor(
+    val id: Int? = null,
+    val name: String? = null,
+    val image: String? = null
+)
+
+data class LastWatching(
+    @Json(name = "current_time")
+    val currentTime: String? = null,
+
+    val duration: String? = null,
+    val title: String? = null,
+    val order: String? = null,
+    val description: String? = null,
+
+    @Json(name = "last_media_id")
+    val lastMediaID: Int? = null,
+
+    @Json(name = "1080_url")
+    val the1080_URL: String? = null,
+
+    @Json(name = "720_url")
+    val the720_URL: String? = null,
+
+    @Json(name = "continue_type")
+    val continueType: String? = null,
+
+    @Json(name = "next_type")
+    val nextType: String? = null,
+
+    @Json(name = "next_episode")
+    val nextEpisode: Info? = null
+)
+
+data class Tag(
+    val id: Int? = null,
+    val title: String? = null
 )
