@@ -357,15 +357,36 @@ class _MyAppState extends State<MyApp> {
   Future<dynamic> getDownloadMovie() async {
     dynamic result = await invokeGetDownloadMovie();
     if (kDebugMode) {
-      printWrapped(
-          "Returned Movie  ${jsonEncode(result)}");
+      printWrapped("Returned Movie  ${jsonEncode(result)}");
     }
   }
 
   Future<dynamic> invokeGetDownloadMovie() async {
     dynamic result;
     try {
-      result = await _dowplayPlugin.getDownloadMovie(movieObject['id'].toString());
+      result =
+          await _dowplayPlugin.getDownloadMovie(movieObject['id'].toString());
+    } on PlatformException {
+      result = false;
+    }
+    return result;
+  }
+
+  Future<dynamic> getDownloadEpisode() async {
+    dynamic result = await invokeGetDownloadEpisode();
+    if (kDebugMode) {
+      printWrapped("Returned Movie  ${jsonEncode(result)}");
+    }
+  }
+
+  Future<dynamic> invokeGetDownloadEpisode() async {
+    dynamic result;
+    try {
+      result = await _dowplayPlugin.getDownloadEpisode(
+        "64864",
+        "3236",
+        "1532",
+      );
     } on PlatformException {
       result = false;
     }
@@ -768,8 +789,6 @@ class _MyAppState extends State<MyApp> {
                   onPressed: getDownloadMovie,
                   child: const Text("Get Download Movie"),
                 ),
-
-                
               ],
             ),
           ),
