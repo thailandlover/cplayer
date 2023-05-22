@@ -110,7 +110,7 @@ data class TvShow(
     val actors: List<Actor>? = null,
 
     @Json(name = "director_info")
-    val directorInfo: String? = null,
+    val directorInfo: DirectorInfo? = null,
 
     @Json(name = "is_favourite")
     val isFavourite: Boolean? = null,
