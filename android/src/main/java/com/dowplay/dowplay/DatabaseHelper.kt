@@ -491,8 +491,12 @@ class DatabaseHelper(innerContext: Context) :
             val mapDataInfo = HashMap<String, Any>()
             /////////////////////////////////////////
             //Log.d("Test:::", episodeData)
-            val jsonObject = JsonParser.parseString(episodeData).asJsonObject
-            mapInfo = gson.fromJson(jsonObject, mapType)
+            try {
+                val jsonObject = JsonParser.parseString(episodeData).asJsonObject
+                mapInfo = gson.fromJson(jsonObject, mapType)
+            }catch (e:Exception){
+                Log.d("Error in episodeData:", ""+e.message)
+            }
             //Log.d("A7a is good:::", gson.toJson(mapInfo))
             /////////////////////////////////////////
             mapDataInfo["profile_id"] = "" + allInfoDataForThisMedia[0]["profile_id"]
