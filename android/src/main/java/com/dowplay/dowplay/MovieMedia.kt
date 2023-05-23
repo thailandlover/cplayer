@@ -5,6 +5,7 @@
 package com.dowplay.dowplay
 
 import com.beust.klaxon.*
+import com.google.gson.annotations.SerializedName
 
 private val klaxon = Klaxon()
 
@@ -53,15 +54,19 @@ data class Info(
     val description: String? = null,
     val order: String? = null,
     @Json(name = "download_url")
+    @SerializedName("download_url")
     val downloadURL: String? = null,
 
     @Json(name = "hd_url")
+    @SerializedName("hd_url")
     val hdURL: String? = null,
 
     @Json(name = "trailer_url")
+    @SerializedName("trailer_url")
     val trailerURL: String? = null,
 
     @Json(name = "media_url")
+    @SerializedName("media_url")
     val mediaURL: String? = null,
 
     val duration: String? = null,
@@ -70,32 +75,40 @@ data class Info(
     val year: String? = null,
 
     @Json(name = "cover_photo")
+    @SerializedName("cover_photo")
     val coverPhoto: String? = null,
 
     @Json(name = "poster_photo")
+    @SerializedName("poster_photo")
     val posterPhoto: String? = null,
 
     val tags: List<Tag>? = null,
     val actors: List<DirectorInfo>? = null,
 
     @Json(name = "director_info")
+    @SerializedName("director_info")
     val directorInfo: DirectorInfo? = null,
 
     @Json(name = "is_favourite")
+    @SerializedName("is_favourite")
     val isFavourite: Boolean? = null,
 
     @Json(name = "imdb_rating")
+    @SerializedName("imdb_rating")
     val imdbRating: String? = null,
 
     @Json(name = "imdb_certificate")
+    @SerializedName("imdb_certificate")
     val imdbCertificate: String? = null,
 
     val watching: Watching? = null,
 
     @Json(name = "created_at")
+    @SerializedName("created_at")
     val createdAt: String? = null,
 
     @Json(name = "release_date")
+    @SerializedName("release_date")
     val releaseDate: String? = null
 )
 

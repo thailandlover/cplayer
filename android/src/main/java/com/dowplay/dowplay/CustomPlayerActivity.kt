@@ -672,9 +672,9 @@ class CustomPlayerActivity() : FlutterActivity() {
             //episodeMedia?.mediaGroup?.episodes?.get(startVideoPosition)?.id.toString()
 
             val gson = Gson()
-            val jsonObjectEpisodeInfo =
-                gson.toJsonTree(episodeMedia?.mediaGroup?.episodes?.get(startVideoPosition)).asJsonObject
-            val episodeJson = gson.toJson(jsonObjectEpisodeInfo)
+            /*val jsonObjectEpisodeInfo =
+                gson.toJsonTree(episodeMedia?.mediaGroup?.episodes?.get(startVideoPosition)).asJsonObject*/
+            val episodeJson = gson.toJson(episodeMedia?.mediaGroup?.episodes?.get(startVideoPosition))
 
             result = DownloaderDowPlay(context, activity, currentLanguage).startDownload(
                 episodeMedia?.mediaGroup?.episodes?.get(startVideoPosition)?.downloadURL.toString(),

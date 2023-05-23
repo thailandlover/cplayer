@@ -214,9 +214,12 @@ public class DowplayPlugin extends FlutterActivity implements FlutterPlugin, Met
             EpisodeMedia episodeMedia = EpisodeMedia.Companion.fromJson(json);
             System.out.println("B7b Gson::: " + episodeMedia);
             //////////////////////
-            JsonElement jsonObjectEpisodeInfo = gson.toJsonTree(episodeMedia.getInfo());
-            JsonObject episodeJson = jsonObjectEpisodeInfo.getAsJsonObject();
-            String episodeJsonString = gson.toJson(episodeJson);
+            //JsonElement jsonObjectEpisodeInfo = gson.toJsonTree(episodeMedia.getInfo());
+            //JsonObject episodeJson = jsonObjectEpisodeInfo.getAsJsonObject();
+            //String episodeJsonStringOld = gson.toJson(episodeJson);
+            String episodeJsonString = gson.toJson(episodeMedia.getInfo());
+            //Log.d("episodeJsonStringOld",episodeJsonStringOld);
+            //Log.d("episodeJsonString",episodeJsonString);
             /////////////////////
             //Log.d("infoEEEE::: ",episodeMedia.getInfo().getDuration());
             new DownloaderDowPlay(context, activity, lang).startDownload(episodeMedia.getInfo().getDownloadURL(), episodeMedia.getMediaGroup().getTvShow().getTitle(), episodeMedia.getMediaType(),
