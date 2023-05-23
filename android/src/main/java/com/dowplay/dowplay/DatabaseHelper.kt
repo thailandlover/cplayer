@@ -11,7 +11,8 @@ import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import com.google.gson.reflect.TypeToken
 
-class DatabaseHelper(innerContext: Context) : SQLiteOpenHelper(innerContext, DATABASE_NAME, null, DATABASE_VERSION) {
+class DatabaseHelper(innerContext: Context) :
+    SQLiteOpenHelper(innerContext, DATABASE_NAME, null, DATABASE_VERSION) {
 
     private var context: Context
 
@@ -96,7 +97,8 @@ class DatabaseHelper(innerContext: Context) : SQLiteOpenHelper(innerContext, DAT
             put(COL_user_id, user_id)
             put(COL_profile_id, profile_id)
         }
-        val insertCount = db.insertWithOnConflict(main_table, null, values,SQLiteDatabase.CONFLICT_REPLACE)
+        val insertCount =
+            db.insertWithOnConflict(main_table, null, values, SQLiteDatabase.CONFLICT_REPLACE)
         db.close()
         dbHelper.close()
         return insertCount
@@ -117,7 +119,8 @@ class DatabaseHelper(innerContext: Context) : SQLiteOpenHelper(innerContext, DAT
             put(COL_name, name)
             put(COL_order, order)
         }
-        val insertCount = db.insertWithOnConflict(seasons_table, null, values,SQLiteDatabase.CONFLICT_REPLACE)
+        val insertCount =
+            db.insertWithOnConflict(seasons_table, null, values, SQLiteDatabase.CONFLICT_REPLACE)
 
         db.close()
         dbHelper.close()
@@ -149,7 +152,8 @@ class DatabaseHelper(innerContext: Context) : SQLiteOpenHelper(innerContext, DAT
             put(COL_name, name)
             put(COL_order, order)
         }
-        val insertCount = db.insertWithOnConflict(episodes_table, null, values,SQLiteDatabase.CONFLICT_REPLACE)
+        val insertCount =
+            db.insertWithOnConflict(episodes_table, null, values, SQLiteDatabase.CONFLICT_REPLACE)
         db.close()
         dbHelper.close()
         return insertCount
@@ -271,10 +275,14 @@ class DatabaseHelper(innerContext: Context) : SQLiteOpenHelper(innerContext, DAT
         return allDownloadData
     }
 
+
     val gson = Gson()
 
     @SuppressLint("Range")
-    fun getAllDownloadDataFromDB(user_id: String, profile_id: String): ArrayList<HashMap<String, Any>> {
+    fun getAllDownloadDataFromDB(
+        user_id: String,
+        profile_id: String
+    ): ArrayList<HashMap<String, Any>> {
 
         val dbHelper = DatabaseHelper(context)
         val db = dbHelper.readableDatabase
@@ -301,49 +309,52 @@ class DatabaseHelper(innerContext: Context) : SQLiteOpenHelper(innerContext, DAT
             val mediaData = cursor.getString(cursor.getColumnIndex(COL_media_data))
             val userId = cursor.getString(cursor.getColumnIndex(COL_user_id))
             val profileId = cursor.getString(cursor.getColumnIndex(COL_profile_id))
-            /*mapData["download_id"] = downloadId
-            mapData["status"] = status
-            mapData["progress"] = progress
-            mapData["video_path"] = videoPath
-            mapData["name"] = name
-            mapData["media_type"] = mediaType
-            mapData["media_id"] = mediaId
-            mapData["media_data"] = mediaData
-            mapData["user_id"] = userId
-            mapData["profile_id"] = profileId*/
-            //Log.d("Hello:::",mediaType)
             ///////////////////////////////////
             //mapData["download_id"] = downloadId
             //mapData["user_id"] = userId
             //mapData["profile_id"] = profileId
-              mapData["status"] = status
-              mapData["mediaRetrivalType"] = if(mediaType =="movie") "MovieInfo" else "SeriseInfo"
-              mapData["progress"] = progress
-              mapData["tempPath"] = videoPath
-              mapData["name"] = name
-              mapData["mediaType"] = mediaType
-              mapData["mediaId"] = mediaId
+            mapData["status"] = status
+            mapData["mediaRetrivalType"] = if (mediaType == "movie") "MovieInfo" else "SeriseInfo"
+            mapData["progress"] = progress
+            mapData["tempPath"] = videoPath
+            mapData["name"] = name
+            mapData["mediaType"] = mediaType
+            mapData["mediaId"] = mediaId
             val jsonObject = JsonParser.parseString(mediaData).asJsonObject
 
-            if (mediaType =="movie") {
-                  //Log.d("SSSS::::",mediaData)
-                  val mapDataInfo = HashMap<String, Any>()
-                  val mediaGroupObject = jsonObject.getAsJsonObject("info")
-                  val mapType = object : TypeToken<Map<String, Any>>() {}.type
-                  val map: Map<String, Any> = gson.fromJson(mediaGroupObject, mapType)
-                  mapDataInfo["info"]=map
-                  mapData["object"] = mapDataInfo
-              }else{
-                  ////////////////////////////////////////////////////////////////////////////////////////////////////
-                  // Parse the JSON string
-                  val mapDataInfo = HashMap<String, Any>()
-                  val mediaGroupObject = jsonObject.getAsJsonObject("media_group")
-                  val mapType = object : TypeToken<Map<String, Any>>() {}.type
-                  val map: Map<String, Any> = gson.fromJson(mediaGroupObject, mapType)
-                //Log.d("SSSS::::",map.toString())
+            if (mediaType == "movie") {
+                val mapDataInfo = HashMap<String, Any>()
+                mapDataInfo["media_id"] = mediaId
+                mapDataInfo["sub_title"] = jsonObject.get("sub_title").asString
+                mapDataInfo["profile_id"] = profileId
+                mapDataInfo["url"] = jsonObject.get("url").asString
+                mapDataInfo["user_id"] = userId
+                mapDataInfo["media_type"] = mediaType
+                mapDataInfo["title"] = name
+                ///////
+                val mediaGroupObject = jsonObject.getAsJsonObject("info")
+                val mapType = object : TypeToken<Map<String, Any>>() {}.type
+                val map: Map<String, Any> = gson.fromJson(mediaGroupObject, mapType)
+                mapDataInfo["info"] = map
+                mapData["object"] = mapDataInfo
+                //Log.d("Movie-SSSS::::",gson.toJson(mapData))
+            } else {
+                ////////////////////////////////////////////////////////////////////////////////////////////////////
+                // Parse the JSON string
+                val mapDataInfo = HashMap<String, Any>()
+                mapDataInfo["episodeId"] = ""
+                mapDataInfo["showId"] = mediaId
+                mapDataInfo["seasonName"] = ""
+                mapDataInfo["showName"] = name
+                mapDataInfo["seasonId"] = ""
+                ///////
+                val mediaGroupObject = jsonObject.getAsJsonObject("media_group")
+                val mapType = object : TypeToken<Map<String, Any>>() {}.type
+                val map: Map<String, Any> = gson.fromJson(mediaGroupObject, mapType)
                 mapDataInfo["info"] = map
                 mapData["group"] = mapDataInfo
-              }
+                //Log.d("Serise-SSSS::::",gson.toJson(mapData))
+            }
             allDownloadData += mapData
         }
 
@@ -357,7 +368,7 @@ class DatabaseHelper(innerContext: Context) : SQLiteOpenHelper(innerContext, DAT
 
     @SuppressLint("Range")
     fun getAllSeasonsDownloadDataFromDB(series_id: String): List<HashMap<String, Any>> {
-        var isFirstTime :Boolean = true
+        var isFirstTime: Boolean = true
 
         val dbHelper = DatabaseHelper(context)
         val db = dbHelper.readableDatabase
@@ -371,7 +382,7 @@ class DatabaseHelper(innerContext: Context) : SQLiteOpenHelper(innerContext, DAT
 
         val allDownloadData = ArrayList<HashMap<String, Any>>()
         var allInfoDataForThisMedia = ArrayList<HashMap<String, Any>>()
-        val mapDataInfo = HashMap<String, Any>()
+        var map = HashMap<String, Any>()
         while (cursor.moveToNext()) {
             val mapData = HashMap<String, Any>()
             val mediaId = cursor.getString(cursor.getColumnIndex(COL_media_id))
@@ -379,28 +390,38 @@ class DatabaseHelper(innerContext: Context) : SQLiteOpenHelper(innerContext, DAT
             val name = cursor.getString(cursor.getColumnIndex(COL_name))
             val order = cursor.getString(cursor.getColumnIndex(COL_order))
 
-            mapData["mediaId"] = seasonId
-            //mapData["season_id"] = seasonId
             mapData["name"] = name
-            //mapData["order"] = order
+            mapData["progress"] = 0
+            mapData["status"] = 0
             mapData["mediaRetrivalType"] = "SeasonInfo"
-            mapData["progress"] = "0"
-            mapData["status"] = "0"
+            mapData["mediaId"] = seasonId
             mapData["mediaType"] = "series"
-            if(isFirstTime){
-                allInfoDataForThisMedia = getDownloadDataFromDbByMediaIdAndMediaType(mediaId,"series")
+            //mapData["season_id"] = seasonId
+            //mapData["order"] = order
+
+            if (isFirstTime) {
+                allInfoDataForThisMedia =
+                    getDownloadDataFromDbByMediaIdAndMediaType(mediaId, "series")
+                val mediaData = "" + allInfoDataForThisMedia[0]["media_data"]
+                val jsonObject = JsonParser.parseString(mediaData).asJsonObject
+                val mediaGroupObject = jsonObject.getAsJsonObject("media_group")
+                val mapType = object : TypeToken<HashMap<String, Any>>() {}.type
+                map = gson.fromJson(mediaGroupObject, mapType)
                 isFirstTime = false
             }
-            val mediaData = ""+allInfoDataForThisMedia[0]["media_data"]
-            val jsonObject = JsonParser.parseString(mediaData).asJsonObject
-            val mediaGroupObject = jsonObject.getAsJsonObject("media_group")
-            val mapType = object : TypeToken<Map<String, Any>>() {}.type
-            val map: Map<String, Any> = gson.fromJson(mediaGroupObject, mapType)
-            mapDataInfo["info"]=map
+            val mapDataInfo = HashMap<String, Any>()
+            mapDataInfo["episodeId"] = ""
+            mapDataInfo["showId"] = "" + allInfoDataForThisMedia[0]["media_id"]
+            mapDataInfo["seasonName"] = name
+            mapDataInfo["showName"] = "" + allInfoDataForThisMedia[0]["name"]
+            mapDataInfo["seasonId"] = seasonId
+            ///////////
+            mapDataInfo["info"] = map
             mapData["group"] = mapDataInfo
             allDownloadData += mapData
         }
-        Log.d("Sqlite Data:", "$allDownloadData")
+        Log.d("Sqlite Data:", "" + allDownloadData)
+        Log.d("Sqlite Data:", gson.toJson(allDownloadData))
 
         cursor.close()
         db.close()
@@ -412,7 +433,7 @@ class DatabaseHelper(innerContext: Context) : SQLiteOpenHelper(innerContext, DAT
         season_id: String,
         tvshow_id: String
     ): List<HashMap<String, Any>> {
-        var isFirstTime :Boolean = true
+        var isFirstTime: Boolean = true
 
         val dbHelper = DatabaseHelper(context)
         val db = dbHelper.readableDatabase
@@ -428,6 +449,9 @@ class DatabaseHelper(innerContext: Context) : SQLiteOpenHelper(innerContext, DAT
 
         val allDownloadData = ArrayList<HashMap<String, Any>>()
         var allInfoDataForThisMedia = ArrayList<HashMap<String, Any>>()
+        ////
+        var mapGroup = HashMap<String, Any>()
+        var mapInfo = HashMap<String, Any>()
         while (cursor.moveToNext()) {
             val mapData = HashMap<String, Any>()
             val downloadId = cursor.getInt(cursor.getColumnIndex(COL_download_id))
@@ -440,41 +464,48 @@ class DatabaseHelper(innerContext: Context) : SQLiteOpenHelper(innerContext, DAT
             val name = cursor.getString(cursor.getColumnIndex(COL_name))
             val order = cursor.getString(cursor.getColumnIndex(COL_order))
 
-//            mapData["download_id"] = downloadId
-              mapData["status"] = status
-              mapData["progress"] = progress
-              mapData["tempPath"] = videoPath
-              mapData["mediaType"] = "series"
-              mapData["mediaId"] = episodeId
-//            mapData["season_id"] = seasonId
-//            mapData["episode_id"] = episodeId
-              mapData["name"] = name
-              mapData["mediaRetrivalType"] = "EpisodeInfo"
-//            mapData["order"] = order
-            if(isFirstTime){
-                allInfoDataForThisMedia = getDownloadDataFromDbByMediaIdAndMediaType(mediaId,"series")
+            mapData["status"] = status
+            mapData["progress"] = progress
+            mapData["tempPath"] = videoPath
+            mapData["mediaType"] = "series"
+            mapData["mediaId"] = episodeId
+            mapData["name"] = name
+            mapData["mediaRetrivalType"] = "EpisodeInfo"
+
+            if (isFirstTime) {
+                allInfoDataForThisMedia =
+                    getDownloadDataFromDbByMediaIdAndMediaType(mediaId, "series")
+                val mediaData = "" + allInfoDataForThisMedia[0]["media_data"]
+                val jsonObject = JsonParser.parseString(mediaData).asJsonObject
+                val mediaGroupObject = jsonObject.getAsJsonObject("media_group")
+                val infoObject = jsonObject.getAsJsonObject("info")
+
+                val mapType = object : TypeToken<HashMap<String, Any>>() {}.type
+                mapGroup = gson.fromJson(mediaGroupObject, mapType)
+                mapInfo = gson.fromJson(infoObject, mapType)
                 isFirstTime = false
             }
             val mapDataGroup = HashMap<String, Any>()
             val mapDataInfo = HashMap<String, Any>()
-            val mediaData = ""+allInfoDataForThisMedia[0]["media_data"]
-            //Log.d("AAASSS:::","****************************************")
-            //Log.d("AAASSS:::",mediaData)
-            //Log.d("AAASSS:::","****************************************")
-            val jsonObject = JsonParser.parseString(mediaData).asJsonObject
-            val mediaGroupObject = jsonObject.getAsJsonObject("media_group")
-            val infoObject = jsonObject.getAsJsonObject("info")
-            val mapType = object : TypeToken<Map<String, Any>>() {}.type
-            val mapGroup: Map<String, Any> = gson.fromJson(mediaGroupObject, mapType)
-            val mapInfo: Map<String, Any> = gson.fromJson(infoObject, mapType)
-            mapDataGroup["info"]=mapGroup
-            mapDataInfo["info"]=mapInfo
-
-            mapData["group"] = mapDataGroup
+            /////////////////////////////////////////
+            mapDataInfo["profile_id"] = "" + allInfoDataForThisMedia[0]["profile_id"]
+            mapDataInfo["media_type"] = "series"
+            mapDataInfo["user_id"] = "" + allInfoDataForThisMedia[0]["user_id"]
+            mapDataInfo["media_group"] = mapGroup
+            mapDataInfo["info"] = mapInfo
             mapData["object"] = mapDataInfo
+            /////////////////////////////////////////
+            mapDataGroup["showId"] = mediaId
+            mapDataGroup["seasonId"] = seasonId
+            mapDataGroup["showName"] = "" + allInfoDataForThisMedia[0]["name"]
+            mapDataGroup["seasonName"] = ""
+            mapDataGroup["episodeId"] = episodeId
+            mapDataGroup["info"] = mapGroup
+            mapData["group"] = mapDataGroup
+            Log.d("Serise-SSSS::::", gson.toJson(mapData))
             allDownloadData += mapData
         }
-
+        Log.d("Serise-SSSS::::", gson.toJson(allDownloadData))
         Log.d("Sqlite Data:", "$allDownloadData")
 
         cursor.close()
@@ -491,12 +522,12 @@ class DatabaseHelper(innerContext: Context) : SQLiteOpenHelper(innerContext, DAT
         val dbHelper = DatabaseHelper(context)
         val db = dbHelper.readableDatabase
 
-        var query = if(mediaType =="movie") {
+        var query = if (mediaType == "movie") {
             "SELECT ${COL_download_id}, " +
                     "${COL_status}, ${COL_progress}, ${COL_video_path}," +
-                    "${COL_name},"+
+                    "${COL_name}," +
                     "$COL_media_id FROM $main_table WHERE $COL_media_id = ?"
-        }else {
+        } else {
             "SELECT ${COL_download_id},${COL_status}," +
                     "${COL_progress},${COL_video_path}," +
                     "${COL_media_id}," +
@@ -524,11 +555,11 @@ class DatabaseHelper(innerContext: Context) : SQLiteOpenHelper(innerContext, DAT
             mapData["mediaId"] = mediaID
             mapData["name"] = name
             mapData["mediaRetrivalType"] = "DownloadInfo"
-            allInfoDataForThisMedia = getDownloadDataFromDbByMediaIdAndMediaType(mediaId,mediaType)
+            allInfoDataForThisMedia = getDownloadDataFromDbByMediaIdAndMediaType(mediaId, mediaType)
 
             val mapDataGroup = HashMap<String, Any>()
             val mapDataInfo = HashMap<String, Any>()
-            val mediaData = ""+allInfoDataForThisMedia[0]["media_data"]
+            val mediaData = "" + allInfoDataForThisMedia[0]["media_data"]
 
             val jsonObject = JsonParser.parseString(mediaData).asJsonObject
             val mediaGroupObject = jsonObject.getAsJsonObject("media_group")
@@ -536,8 +567,8 @@ class DatabaseHelper(innerContext: Context) : SQLiteOpenHelper(innerContext, DAT
             val mapType = object : TypeToken<Map<String, Any>>() {}.type
             val mapGroup: Map<String, Any> = gson.fromJson(mediaGroupObject, mapType)
             val mapInfo: Map<String, Any> = gson.fromJson(infoObject, mapType)
-            mapDataGroup["info"]=mapGroup
-            mapDataInfo["info"]=mapInfo
+            mapDataGroup["info"] = mapGroup
+            mapDataInfo["info"] = mapInfo
 
             mapData["group"] = mapDataGroup
             mapData["object"] = mapDataInfo
@@ -588,9 +619,9 @@ class DatabaseHelper(innerContext: Context) : SQLiteOpenHelper(innerContext, DAT
         val db = dbHelper.readableDatabase
 
         var query = if (media_type == "series") {
-            "SELECT $COL_download_id, $COL_video_path, $COL_status FROM $episodes_table WHERE $COL_episode_id = ?"
+            "SELECT $COL_download_id, $COL_video_path, $COL_status, $COL_progress FROM $episodes_table WHERE $COL_episode_id = ?"
         } else {
-            "SELECT $COL_download_id, $COL_video_path, $COL_status FROM $main_table WHERE $COL_media_id = ?"
+            "SELECT $COL_download_id, $COL_video_path, $COL_status, $COL_progress FROM $main_table WHERE $COL_media_id = ?"
         }
 
         val selectionArgs = arrayOf(media_id)
@@ -600,9 +631,11 @@ class DatabaseHelper(innerContext: Context) : SQLiteOpenHelper(innerContext, DAT
         if (cursor.moveToFirst()) {
             val downloadId = cursor.getInt(cursor.getColumnIndex(COL_download_id))
             val status = cursor.getInt(cursor.getColumnIndex(COL_status))
+            val progress = cursor.getInt(cursor.getColumnIndex(COL_progress))
             val videoPath = cursor.getString(cursor.getColumnIndex(COL_video_path))
             downloadData["download_id"] = downloadId
             downloadData["status"] = status
+            downloadData["progress"] = progress
             downloadData["video_path"] = videoPath
         }
 
@@ -671,6 +704,7 @@ class DatabaseHelper(innerContext: Context) : SQLiteOpenHelper(innerContext, DAT
         cursor.close()
         return count
     }
+
     private fun hasMoreSeasonRow(tv_show_id: String): Int {
         val dbHelper = DatabaseHelper(context)
         val db = dbHelper.readableDatabase
@@ -683,5 +717,99 @@ class DatabaseHelper(innerContext: Context) : SQLiteOpenHelper(innerContext, DAT
         val count = cursor.getInt(0)
         cursor.close()
         return count
+    }
+
+    //////////////////////////////////
+    //download media info
+    @SuppressLint("Range")
+    fun getDownloadDataFromDB(
+        user_id: String,
+        profile_id: String,
+        INmediaId: String,
+        INmediaType: String,
+        seasonId: String,
+        tvShow: String
+    ): ArrayList<HashMap<String, Any>> {
+
+        val dbHelper = DatabaseHelper(context)
+        val db = dbHelper.readableDatabase
+
+        val query = "SELECT ${COL_download_id}, " +
+                "${COL_status}, ${COL_progress}, ${COL_video_path}," +
+                "${COL_name},${COL_media_type}," +
+                "${COL_media_id},${COL_media_data}, " +
+                "${COL_user_id},${COL_profile_id} FROM $main_table WHERE $COL_user_id = ? AND $COL_profile_id = ? AND $COL_media_id = ?"
+        val selectionArgs = if (INmediaType == "movie") {
+            arrayOf(user_id, profile_id, INmediaId)
+        } else {
+            arrayOf(user_id, profile_id, tvShow)
+        }
+        val cursor = db.rawQuery(query, selectionArgs)
+
+        val allDownloadData = ArrayList<HashMap<String, Any>>()
+        if (cursor.moveToFirst()) {
+            val mapData = HashMap<String, Any>()
+            //val downloadId = cursor.getInt(cursor.getColumnIndex(COL_download_id))
+            //val status = cursor.getInt(cursor.getColumnIndex(COL_status))
+            //val progress = cursor.getInt(cursor.getColumnIndex(COL_progress))
+            val videoPath = cursor.getString(cursor.getColumnIndex(COL_video_path))
+            val name = cursor.getString(cursor.getColumnIndex(COL_name))
+            val mediaType = cursor.getString(cursor.getColumnIndex(COL_media_type))
+            val mediaId = cursor.getString(cursor.getColumnIndex(COL_media_id))
+            val mediaData = cursor.getString(cursor.getColumnIndex(COL_media_data))
+            val userId = cursor.getString(cursor.getColumnIndex(COL_user_id))
+            val profileId = cursor.getString(cursor.getColumnIndex(COL_profile_id))
+            ///////////////////////////////////
+
+            val allInfoDataForThisMedia = getDownloadInfoFromDB(INmediaId, INmediaType)
+
+            ///////////////////////////////////
+            mapData["status"] = "" + allInfoDataForThisMedia["status"]
+            mapData["mediaRetrivalType"] = if (mediaType == "movie") "MovieInfo" else "SeriseInfo"
+            mapData["progress"] = "" + allInfoDataForThisMedia["progress"]
+            mapData["tempPath"] = videoPath
+            mapData["name"] = name
+            mapData["mediaType"] = mediaType
+            mapData["mediaId"] = mediaId
+            val jsonObject = JsonParser.parseString(mediaData).asJsonObject
+
+            if (INmediaType == "movie") {
+                val mapDataInfo = HashMap<String, Any>()
+                mapDataInfo["media_id"] = mediaId
+                mapDataInfo["sub_title"] = jsonObject.get("sub_title").asString
+                mapDataInfo["profile_id"] = profileId
+                mapDataInfo["url"] = jsonObject.get("url").asString
+                mapDataInfo["user_id"] = userId
+                mapDataInfo["media_type"] = mediaType
+                mapDataInfo["title"] = name
+                ///////
+                val mediaGroupObject = jsonObject.getAsJsonObject("info")
+                val mapType = object : TypeToken<Map<String, Any>>() {}.type
+                val map: Map<String, Any> = gson.fromJson(mediaGroupObject, mapType)
+                mapDataInfo["info"] = map
+                mapData["object"] = mapDataInfo
+                //Log.d("Movie-SSSS::::",gson.toJson(mapData))
+            } else {
+                ////////////////////////////////////////////////////////////////////////////////////////////////////
+                // Parse the JSON string
+                val mapDataInfo = HashMap<String, Any>()
+                mapDataInfo["episodeId"] = ""
+                mapDataInfo["showId"] = mediaId
+                mapDataInfo["seasonName"] = ""
+                mapDataInfo["showName"] = name
+                mapDataInfo["seasonId"] = ""
+                ///////
+                val mediaGroupObject = jsonObject.getAsJsonObject("media_group")
+                val mapType = object : TypeToken<Map<String, Any>>() {}.type
+                val map: Map<String, Any> = gson.fromJson(mediaGroupObject, mapType)
+                mapDataInfo["info"] = map
+                mapData["group"] = mapDataInfo
+            }
+            allDownloadData += mapData
+        }
+
+        cursor.close()
+        db.close()
+        return allDownloadData
     }
 }

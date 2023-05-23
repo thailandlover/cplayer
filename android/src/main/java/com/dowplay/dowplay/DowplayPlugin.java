@@ -254,14 +254,30 @@ public class DowplayPlugin extends FlutterActivity implements FlutterPlugin, Met
             Gson gson = new Gson();
             String json = gson.toJson(call.arguments);
             HashMap<String, Object> object = gson.fromJson(json, HashMap.class);
-            Log.d(TAG, "onMethodCall???: "+object);
+            Log.d(TAG, "onMethodCall???: " + object);
 
             String mediaType = (String) object.get("mediaType");
             String mediaId = (String) object.get("mediaId");
 
-            Log.d(TAG, "onMethodCall???: "+mediaType+" > "+mediaId);
+            Log.d(TAG, "onMethodCall???: " + mediaType + " > " + mediaId);
             new DownloaderDowPlay(context, activity, lang).cancelDownload(mediaId, mediaType);
             result.success(new DownloaderDowPlay(context, activity, lang).getAllDownloadMedia(userId, profileId));
+//////////////////////////////////////////////////////////////////////////////////////////////////
+        } else if (call.method.equals("get_download_movie")) {
+            Gson gson = new Gson();
+            String json = gson.toJson(call.arguments);
+            HashMap<String, Object> object = gson.fromJson(json, HashMap.class);
+            String mediaId = (String) object.get("media_id");//movie
+            result.success(new DownloaderDowPlay(context, activity, lang).getDownloadMediaInfo(userId, profileId, mediaId, "movie", "", ""));
+//////////////////////////////////////////////////////////////////////////////////////////////////
+        } else if (call.method.equals("get_download_episode")) {
+            Gson gson = new Gson();
+            String json = gson.toJson(call.arguments);
+            HashMap<String, Object> object = gson.fromJson(json, HashMap.class);
+            String mediaId = (String) object.get("media_id");//episod
+            String tvshowId = (String) object.get("tvshow_id");
+            String seasonId = (String) object.get("season_id");
+            result.success(new DownloaderDowPlay(context, activity, lang).getDownloadMediaInfo(userId, profileId, mediaId, "series", seasonId, tvshowId));
 //////////////////////////////////////////////////////////////////////////////////////////////////
         } else {
             result.notImplemented();

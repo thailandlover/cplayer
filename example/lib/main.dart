@@ -383,9 +383,9 @@ class _MyAppState extends State<MyApp> {
     dynamic result;
     try {
       result = await _dowplayPlugin.getDownloadEpisode(
-        "64864",
-        "3236",
-        "1532",
+        "64864", //episond
+        "1532", //tvshow
+        "3236", //season
       );
     } on PlatformException {
       result = false;

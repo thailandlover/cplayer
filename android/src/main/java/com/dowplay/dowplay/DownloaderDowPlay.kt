@@ -387,6 +387,10 @@ class DownloaderDowPlay(initContext: Context, initActivity: Activity, initLang: 
         )
     }
 
+    fun getDownloadMediaInfo(user_id: String, profile_id: String, mediaId:String, mediaType:String, seasonId: String, tvShow: String): List<HashMap<String, Any>> {
+        return DatabaseHelper(context).getDownloadDataFromDB(user_id, profile_id,mediaId, mediaType,seasonId,tvShow)
+    }
+
     fun getAllDownloadMedia(user_id: String, profile_id: String): List<HashMap<String, Any>> {
         return DatabaseHelper(context).getAllDownloadDataFromDB(user_id, profile_id)
     }
