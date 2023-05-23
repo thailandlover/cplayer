@@ -38,6 +38,7 @@ class DatabaseHelper(innerContext: Context) :
         const val COL_media_type: String = "media_type"
         const val COL_media_id: String = "media_id"
         const val COL_media_data: String = "media_data"
+        const val COL_episode_data: String = "episode_data"
         const val COL_user_id: String = "user_id"
         const val COL_profile_id: String = "profile_id"
 
@@ -58,7 +59,7 @@ class DatabaseHelper(innerContext: Context) :
         // ON CONFLICT REPLACE
         db.execSQL("CREATE TABLE $main_table ($COL_download_id NUMBER PRIMARY KEY, $COL_status NUMBER,  $COL_progress NUMBER,$COL_video_path TEXT, $COL_name TEXT, $COL_media_type TEXT, $COL_media_id TEXT UNIQUE, $COL_media_data TEXT, $COL_user_id TEXT, $COL_profile_id TEXT)")
         db.execSQL("CREATE TABLE $seasons_table (id INTEGER PRIMARY KEY AUTOINCREMENT, $COL_media_id TEXT,  $COL_season_id TEXT , $COL_name TEXT, $COL_order TEXT, UNIQUE($COL_media_id, $COL_season_id))")
-        db.execSQL("CREATE TABLE $episodes_table ($COL_download_id NUMBER PRIMARY KEY, $COL_status NUMBER,  $COL_progress NUMBER,$COL_video_path TEXT, $COL_media_id TEXT,  $COL_season_id TEXT,$COL_episode_id TEXT , $COL_name TEXT, $COL_order TEXT, UNIQUE($COL_media_id, $COL_season_id, $COL_episode_id))")
+        db.execSQL("CREATE TABLE $episodes_table ($COL_download_id NUMBER PRIMARY KEY, $COL_status NUMBER,  $COL_progress NUMBER,$COL_video_path TEXT, $COL_media_id TEXT,  $COL_season_id TEXT,$COL_episode_id TEXT ,$COL_episode_data TEXT, $COL_name TEXT, $COL_order TEXT, UNIQUE($COL_media_id, $COL_season_id, $COL_episode_id))")
 
     }
 
@@ -79,8 +80,7 @@ class DatabaseHelper(innerContext: Context) :
         media_id: String,
         media_data: String,
         user_id: String,
-        profile_id: String,
-
+        profile_id: String
         ): Long {
         val dbHelper = DatabaseHelper(context)
         val db = dbHelper.writableDatabase
@@ -137,6 +137,7 @@ class DatabaseHelper(innerContext: Context) :
         episode_id: String,
         name: String,
         order: String,
+        episodeData: String
     ): Long {
         val dbHelper = DatabaseHelper(context)
         val db = dbHelper.writableDatabase
@@ -151,6 +152,7 @@ class DatabaseHelper(innerContext: Context) :
             put(COL_episode_id, episode_id)
             put(COL_name, name)
             put(COL_order, order)
+            put(COL_episode_data, episodeData)
         }
         val insertCount =
             db.insertWithOnConflict(episodes_table, null, values, SQLiteDatabase.CONFLICT_REPLACE)
@@ -441,7 +443,7 @@ class DatabaseHelper(innerContext: Context) :
         val query = "SELECT ${COL_download_id},${COL_status}," +
                 "${COL_progress},${COL_video_path}," +
                 "${COL_media_id}, ${COL_season_id},${COL_episode_id}," +
-                "${COL_name},${COL_order} FROM $episodes_table WHERE $COL_season_id = ? AND $COL_media_id = ? Order by $COL_order ASC"
+                "${COL_name},${COL_order}, $COL_episode_data FROM $episodes_table WHERE $COL_season_id = ? AND $COL_media_id = ? Order by $COL_order ASC"
 
         val selectionArgs = arrayOf(season_id, tvshow_id)
 
@@ -452,6 +454,8 @@ class DatabaseHelper(innerContext: Context) :
         ////
         var mapGroup = HashMap<String, Any>()
         var mapInfo = HashMap<String, Any>()
+        val mapType = object : TypeToken<HashMap<String, Any>>() {}.type
+        ///
         while (cursor.moveToNext()) {
             val mapData = HashMap<String, Any>()
             val downloadId = cursor.getInt(cursor.getColumnIndex(COL_download_id))
@@ -462,6 +466,7 @@ class DatabaseHelper(innerContext: Context) :
             val seasonId = cursor.getString(cursor.getColumnIndex(COL_season_id))
             val episodeId = cursor.getString(cursor.getColumnIndex(COL_episode_id))
             val name = cursor.getString(cursor.getColumnIndex(COL_name))
+            val episodeData = cursor.getString(cursor.getColumnIndex(COL_episode_data))
             val order = cursor.getString(cursor.getColumnIndex(COL_order))
 
             mapData["status"] = status
@@ -478,21 +483,24 @@ class DatabaseHelper(innerContext: Context) :
                 val mediaData = "" + allInfoDataForThisMedia[0]["media_data"]
                 val jsonObject = JsonParser.parseString(mediaData).asJsonObject
                 val mediaGroupObject = jsonObject.getAsJsonObject("media_group")
-                val infoObject = jsonObject.getAsJsonObject("info")
 
-                val mapType = object : TypeToken<HashMap<String, Any>>() {}.type
                 mapGroup = gson.fromJson(mediaGroupObject, mapType)
-                mapInfo = gson.fromJson(infoObject, mapType)
                 isFirstTime = false
             }
             val mapDataGroup = HashMap<String, Any>()
             val mapDataInfo = HashMap<String, Any>()
+            /////////////////////////////////////////
+            //Log.d("Test:::", episodeData)
+            val jsonObject = JsonParser.parseString(episodeData).asJsonObject
+            mapInfo = gson.fromJson(jsonObject, mapType)
+            //Log.d("A7a is good:::", gson.toJson(mapInfo))
             /////////////////////////////////////////
             mapDataInfo["profile_id"] = "" + allInfoDataForThisMedia[0]["profile_id"]
             mapDataInfo["media_type"] = "series"
             mapDataInfo["user_id"] = "" + allInfoDataForThisMedia[0]["user_id"]
             mapDataInfo["media_group"] = mapGroup
             mapDataInfo["info"] = mapInfo
+            //Log.d("mapDataInfo[info]", gson.toJson(mapDataInfo["info"]))
             mapData["object"] = mapDataInfo
             /////////////////////////////////////////
             mapDataGroup["showId"] = mediaId
@@ -501,12 +509,13 @@ class DatabaseHelper(innerContext: Context) :
             mapDataGroup["seasonName"] = ""
             mapDataGroup["episodeId"] = episodeId
             mapDataGroup["info"] = mapGroup
+            //Log.d("mapDataGroup[info]", gson.toJson(mapDataGroup["info"]))
             mapData["group"] = mapDataGroup
-            Log.d("Serise-SSSS::::", gson.toJson(mapData))
+            //Log.d("Serise-SSSS::::", gson.toJson(mapData))
             allDownloadData += mapData
         }
-        Log.d("Serise-SSSS::::", gson.toJson(allDownloadData))
-        Log.d("Sqlite Data:", "$allDownloadData")
+        //Log.d("Serise-SSSS::::", gson.toJson(allDownloadData))
+        //Log.d("Sqlite Data:", "$allDownloadData")
 
         cursor.close()
         db.close()

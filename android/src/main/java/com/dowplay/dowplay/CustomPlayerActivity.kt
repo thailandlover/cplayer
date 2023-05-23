@@ -39,6 +39,8 @@ import com.dowplay.dowplay.databinding.ActivityCustomPlayerBinding
 import com.dowplay.dowplay.databinding.CustomControlViewBinding
 import com.dowplay.dowplay.databinding.SettingBinding
 import com.google.gson.Gson
+import com.google.gson.JsonParser
+import com.google.gson.reflect.TypeToken
 import io.flutter.embedding.android.FlutterActivity
 
 @UnstableApi
@@ -663,10 +665,17 @@ class CustomPlayerActivity() : FlutterActivity() {
                 "",
                 "",
                 "",
+                "",
                 ""
             )
         } else {
             //episodeMedia?.mediaGroup?.episodes?.get(startVideoPosition)?.id.toString()
+
+            val gson = Gson()
+            val jsonObjectEpisodeInfo =
+                gson.toJsonTree(episodeMedia?.mediaGroup?.episodes?.get(startVideoPosition)).asJsonObject
+            val episodeJson = gson.toJson(jsonObjectEpisodeInfo)
+
             result = DownloaderDowPlay(context, activity, currentLanguage).startDownload(
                 episodeMedia?.mediaGroup?.episodes?.get(startVideoPosition)?.downloadURL.toString(),
                 episodeMedia?.mediaGroup?.tvShow?.title ?: "",
@@ -680,7 +689,8 @@ class CustomPlayerActivity() : FlutterActivity() {
                 episodeMedia?.mediaGroup?.season?.seasonNumber ?: "",
                 episodeMedia?.mediaGroup?.episodes?.get(startVideoPosition)?.order.toString(),
                 episodeMedia?.mediaGroup?.season?.title ?: "",
-                episodeMedia?.mediaGroup?.episodes?.get(startVideoPosition)?.title.toString()
+                episodeMedia?.mediaGroup?.episodes?.get(startVideoPosition)?.title.toString(),
+                episodeJson ?: ""
             )
         }
         if (result == 1) {

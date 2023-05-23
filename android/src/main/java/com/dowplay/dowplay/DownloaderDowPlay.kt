@@ -257,7 +257,8 @@ class DownloaderDowPlay(initContext: Context, initActivity: Activity, initLang: 
         seasonOrder: String,
         episodeOrder: String,
         seasonName: String,
-        episodeName: String
+        episodeName: String,
+        episodeJson: String
     ): Int {
         showDownloadStatePermission()
         if (permissionToDownload) {
@@ -315,6 +316,7 @@ class DownloaderDowPlay(initContext: Context, initActivity: Activity, initLang: 
                     putExtra("episode_order", episodeOrder)
                     putExtra("season_name", seasonName)
                     putExtra("episode_name", episodeName)
+                    putExtra("episode_json", episodeJson)
                 }
                 context.startService(intent)
                 return 1
