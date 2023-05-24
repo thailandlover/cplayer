@@ -86,25 +86,16 @@ class CustomPlayerActivity() : FlutterActivity() {
 
         initializeBinding()
     }
-    object VideoPlayerConfig {
-        //Minimum Video you want to buffer while Playing
-        const val MIN_BUFFER_DURATION = 2000
-        //Max Video you want to buffer during PlayBack
-        const val MAX_BUFFER_DURATION = 5000
-        //Min Video you want to buffer before start Playing it
-        const val MIN_PLAYBACK_START_BUFFER = 1500
-        //Min video You want to buffer when user resumes video
-        const val MIN_PLAYBACK_RESUME_BUFFER = 2000
-    }
+
     private fun initializePlayer() {
 
         val loadControl: LoadControl = DefaultLoadControl.Builder()
-            .setAllocator(DefaultAllocator(true, 16))
+            .setAllocator(DefaultAllocator(true, C.DEFAULT_BUFFER_SEGMENT_SIZE))
             .setBufferDurationsMs(
-                VideoPlayerConfig.MIN_BUFFER_DURATION,
-                VideoPlayerConfig.MAX_BUFFER_DURATION,
-                VideoPlayerConfig.MIN_PLAYBACK_START_BUFFER,
-                VideoPlayerConfig.MIN_PLAYBACK_RESUME_BUFFER
+                15000, // Min buffer duration
+                30000, // Max buffer duration
+                5000,  // Buffer for playback
+                5000   // Buffer for rebuffering
             )
             .setTargetBufferBytes(-1)
             .setPrioritizeTimeOverSizeThresholds(true).build()
@@ -696,7 +687,8 @@ class CustomPlayerActivity() : FlutterActivity() {
             val gson = Gson()
             /*val jsonObjectEpisodeInfo =
                 gson.toJsonTree(episodeMedia?.mediaGroup?.episodes?.get(startVideoPosition)).asJsonObject*/
-            val episodeJson = gson.toJson(episodeMedia?.mediaGroup?.episodes?.get(startVideoPosition))
+            val episodeJson =
+                gson.toJson(episodeMedia?.mediaGroup?.episodes?.get(startVideoPosition))
 
             result = DownloaderDowPlay(context, activity, currentLanguage).startDownload(
                 episodeMedia?.mediaGroup?.episodes?.get(startVideoPosition)?.downloadURL.toString(),
