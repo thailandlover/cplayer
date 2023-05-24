@@ -4,8 +4,6 @@ import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.app.PictureInPictureParams
 import android.content.Context
-import android.content.Intent
-import android.content.pm.ActivityInfo
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
@@ -14,7 +12,6 @@ import android.os.Vibrator
 import android.util.Log
 import android.util.Rational
 import android.view.LayoutInflater
-import android.view.MotionEvent
 import android.view.View
 import android.widget.LinearLayout
 import android.widget.RadioButton
@@ -27,11 +24,13 @@ import androidx.media3.common.*
 import androidx.media3.common.util.Assertions
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.common.util.Util
-import androidx.media3.exoplayer.ExoPlaybackException
+import androidx.media3.exoplayer.DefaultLoadControl
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.exoplayer.LoadControl
 import androidx.media3.exoplayer.source.TrackGroupArray
 import androidx.media3.exoplayer.trackselection.DefaultTrackSelector
 import androidx.media3.exoplayer.trackselection.MappingTrackSelector
+import androidx.media3.exoplayer.upstream.DefaultAllocator
 import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.DefaultTrackNameProvider
 import androidx.media3.ui.PlayerView
@@ -39,14 +38,14 @@ import com.dowplay.dowplay.databinding.ActivityCustomPlayerBinding
 import com.dowplay.dowplay.databinding.CustomControlViewBinding
 import com.dowplay.dowplay.databinding.SettingBinding
 import com.google.gson.Gson
-import com.google.gson.JsonParser
-import com.google.gson.reflect.TypeToken
 import io.flutter.embedding.android.FlutterActivity
+
 
 @UnstableApi
 /**
  * A fullscreen activity to play audio or video streams.
  */
+
 class CustomPlayerActivity() : FlutterActivity() {
 
     private val viewBinding by lazy(LazyThreadSafetyMode.NONE) {
@@ -87,8 +86,28 @@ class CustomPlayerActivity() : FlutterActivity() {
 
         initializeBinding()
     }
-
+    object VideoPlayerConfig {
+        //Minimum Video you want to buffer while Playing
+        const val MIN_BUFFER_DURATION = 2000
+        //Max Video you want to buffer during PlayBack
+        const val MAX_BUFFER_DURATION = 5000
+        //Min Video you want to buffer before start Playing it
+        const val MIN_PLAYBACK_START_BUFFER = 1500
+        //Min video You want to buffer when user resumes video
+        const val MIN_PLAYBACK_RESUME_BUFFER = 2000
+    }
     private fun initializePlayer() {
+
+        val loadControl: LoadControl = DefaultLoadControl.Builder()
+            .setAllocator(DefaultAllocator(true, 16))
+            .setBufferDurationsMs(
+                VideoPlayerConfig.MIN_BUFFER_DURATION,
+                VideoPlayerConfig.MAX_BUFFER_DURATION,
+                VideoPlayerConfig.MIN_PLAYBACK_START_BUFFER,
+                VideoPlayerConfig.MIN_PLAYBACK_RESUME_BUFFER
+            )
+            .setTargetBufferBytes(-1)
+            .setPrioritizeTimeOverSizeThresholds(true).build()
 
         trackSelection = DefaultTrackSelector(this).apply {
             setParameters(buildUponParameters().setMaxVideoSizeSd())
@@ -100,7 +119,7 @@ class CustomPlayerActivity() : FlutterActivity() {
             .setVideoScalingMode(2)
             .setAudioAttributes(AudioAttributes.DEFAULT, false)
             .setTrackSelector(trackSelection)
-            //.setLoadControl()
+            .setLoadControl(loadControl)
             .build()
             .also { exoPlayer ->
                 //val mediaItem = MediaItem.fromUri("https://thekee.gcdn.co/video/m-159n/English/Animation&Family/Klaus.2019.1080pAr.mp4")
