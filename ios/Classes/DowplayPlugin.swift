@@ -65,7 +65,7 @@ public class DowplayPlugin: NSObject, FlutterPlugin {
                 let mediaType : MediaManager.MediaType = media_type == "movie" ? .movie : .series
                 let itemsIds: [String:Any] = media_group["items_ids"] as! [String : Any]
                 let episodes: [[String:Any]] = media_group["episodes"] as! [[String:Any]]
-                let playIndex: Int = Int(info["order"] as! String)! - 1;
+                let playingId: Int = info["id"] as! Int
                 var media : [Media] = []
                 let _ : [String:Any] = media_group["tv_show"] as! [String:Any]
                 let season : [String:Any] = media_group["season"] as! [String:Any]
@@ -73,8 +73,8 @@ public class DowplayPlugin: NSObject, FlutterPlugin {
                 
                 let tvShow :[String:Any]  = media_group["tv_show"]  as! [String : Any]
                 let tvShowTitle:Any = tvShow["title"]!
-                
-                for episode in episodes {
+                var playingIndex:Int = 0;
+                for (index, episode) in episodes.enumerated() {
                     let mediaId = String(episode["id"] as! Int);
                     let mediaGroup : MediaGroup = MediaGroup(showId: itemsIds["tv_show_id"] as! String, seasonId: itemsIds["season_id"] as! String, episodeId: mediaId,seasonName: "Season \(seasonNumber)",showName: tvShowTitle as! String ,data: media_group)
                     let watching : [String:Any]? = episode["watching"] as? [String : Any]
@@ -82,12 +82,15 @@ public class DowplayPlugin: NSObject, FlutterPlugin {
                     if(watching != nil) {
                         startAt = Float(watching?["current_time"] as! String)!
                     }
-                    let downloadUrl:String? = episode["download_url"] as? String
+                    if(playingId == episode["id"] as! Int){
+                        playingIndex = index
+                    }
+                    let downloadUrl:String? = episode["download_url"] as? String ?? nil
                     let mediaItem = Media(title: episode["title"] as! String,subTitle: season["title"] as? String, urlToPlay: episode["media_url"] as! String,downloadURL: downloadUrl ,keeId: mediaId,type: mediaType, startAt: startAt,mediaGroup: mediaGroup,info: episode)
                     media.append(mediaItem)
                     
                 }
-                let playerResult : [[String:Any]] = await MediaManager.default.openMediaPlayer(usingMediaList: media,playMediaIndex: playIndex,usingSettings: hostAppSettings, forViewController: flutterViewController)
+                let playerResult : [[String:Any]] = await MediaManager.default.openMediaPlayer(usingMediaList: media,playMediaIndex: playingIndex,usingSettings: hostAppSettings, forViewController: flutterViewController)
                 if(playerResult.isEmpty){
                     result(false)
                 } else {
