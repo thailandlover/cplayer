@@ -16,19 +16,20 @@ enum MediaRetrivalType : String, Codable{
 
 public struct DownloadedMedia : Codable{
     var mediaRetrivalType : MediaRetrivalType = .MovieInfo
-    
+    var signature : String = ""
     var mediaId : String
     var mediaURL : URL?
     var mediaType : MediaManager.MediaType = .movie
     var path : URL{
         if let g = group {
             return FilesManager.shared.cache.appendingPathComponent(mediaType.version_3_value, isDirectory: true)
+                .appendingPathComponent(signature, isDirectory: true)
                 .appendingPathComponent(g.showId, isDirectory: true)
                 .appendingPathComponent(g.seasonId, isDirectory: true)
                 .appendingPathComponent("\(mediaId).mp4")
         }
         
-        return FilesManager.shared.cache.appendingPathComponent(mediaType.rawValue, isDirectory: true).appendingPathComponent("\(mediaId).mp4")
+        return FilesManager.shared.cache.appendingPathComponent(mediaType.rawValue, isDirectory: true).appendingPathComponent(signature, isDirectory: true).appendingPathComponent("\(mediaId).mp4")
     }
     var episodeInfoPathURL : URL?{
         if self.mediaType == .series && self.mediaRetrivalType == .EpisodeInfo {
@@ -118,6 +119,12 @@ public struct DownloadedMedia : Codable{
 //        return mediaType.rawValue + "/" + "\(mediaId)"
 //    }
     
+    @discardableResult
+    mutating func setUser(signature: String)->DownloadedMedia {
+        self.signature = signature
+        return self
+    }
+    
     func store(signature: String) throws{
         try FilesManager.shared.forUser(signature).registerDownloadedMedia(self)
     }
@@ -132,11 +139,13 @@ public struct DownloadedMedia : Codable{
     }
     
     static func getMovieByID(id : String, signature: String)throws->DownloadedMedia?{
-        return try FilesManager.shared.forUser(signature).getDownloadeMovieById(id)
+        var media = try FilesManager.shared.forUser(signature).getDownloadeMovieById(id)
+        return media?.setUser(signature: signature)
     }
     
     static func getEpisodeByID(id : String, season: String, series: String, signature: String)->DownloadedMedia?{
-        return FilesManager.shared.forUser(signature).getDownloadedEpisode(id: id, season: season, series: series)
+        var media = FilesManager.shared.forUser(signature).getDownloadedEpisode(id: id, season: season, series: series)
+        return media?.setUser(signature: signature)
     }
     
         

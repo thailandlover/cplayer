@@ -81,7 +81,7 @@ public class DownloadManager: NSObject/*, ObservableObject */{
     
     func getDownloadTask(withMediaId id: String, forType type: MediaManager.MediaType)->URLSessionTask?{
         if !configed {return nil}
-        let taskId = "\(id)_\(type.rawValue)_\(userSignature)"
+        let taskId = "\(id)_\(type.version_3_value)_\(userSignature)"
         return tasks.first(where: {$0.mediaId == taskId})
     }
     
@@ -91,12 +91,13 @@ public class DownloadManager: NSObject/*, ObservableObject */{
     
     
     public func getDownloadedMovie(_ id: String)-> DownloadedMedia?{
-        if let completed = try? FilesManager.shared.getDownloadeMovieById(id){
-            return completed
+        if var completed = try? FilesManager.shared.getDownloadeMovieById(id){
+            return completed.setUser(signature: userSignature)
         }
         
         if let task = getDownloadTask(withMediaId: id, forType: .movie) as? URLSessionDownloadTask{
-            return extractMedia(usingTask: task)
+            var media = extractMedia(usingTask: task)
+            return media.setUser(signature: userSignature)
         }
         
         return nil
@@ -125,7 +126,7 @@ public class DownloadManager: NSObject/*, ObservableObject */{
     
     public func cancelMedia(withMediaId id: String, forType type: MediaManager.MediaType){
         if !configed {return}
-        let taskId = "\(id)_\(type.rawValue)_\(userSignature)"
+        let taskId = "\(id)_\(type.version_3_value)_\(userSignature)"
         cancelTask(withID: taskId)
     }
     
@@ -144,7 +145,7 @@ public class DownloadManager: NSObject/*, ObservableObject */{
     
     public func pauseDownload(forMediaId id: String, ofType type: MediaManager.MediaType){
         if !configed {return}
-        let taskId = "\(id)_\(type.rawValue)_\(userSignature)"
+        let taskId = "\(id)_\(type.version_3_value)_\(userSignature)"
         pauseDownload(forTaskID: taskId)
     }
     
@@ -156,7 +157,7 @@ public class DownloadManager: NSObject/*, ObservableObject */{
     //MARK: - Resume Download Functions
     public func resumeDownload(forMediaId id: String, ofType type: MediaManager.MediaType){
         if !configed {return}
-        let taskId = "\(id)_\(type.rawValue)_\(userSignature)"
+        let taskId = "\(id)_\(type.version_3_value)_\(userSignature)"
         resumeDownload(forTaskID: taskId)
     }
     
@@ -169,13 +170,13 @@ public class DownloadManager: NSObject/*, ObservableObject */{
     //MARK: - Check Download Status Functions
     ///is downloading regardless the status
     public func isDownloadingMediaWithID(_ id : String, ofType type: MediaManager.MediaType)->Bool{
-        let taskId = "\(id)_\(type.rawValue)_\(userSignature)"
+        let taskId = "\(id)_\(type.version_3_value)_\(userSignature)"
         return tasks.contains(where: {taskId == "\($0.mediaId ?? "")"})
     }
     
     ///is downloading and is suspended
     public func isDownloadingMediaWithIDSuspended(_ id : String, ofType type: MediaManager.MediaType)->Bool{
-        let taskId = "\(id)_\(type.rawValue)_\(userSignature)"
+        let taskId = "\(id)_\(type.version_3_value)_\(userSignature)"
         return tasks.first(where: {taskId == "\($0.mediaId ?? "")"})?.state == .suspended
     }
     

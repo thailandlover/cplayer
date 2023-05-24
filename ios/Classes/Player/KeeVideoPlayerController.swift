@@ -374,7 +374,9 @@ public class KeeVideoPlayerController: UIViewController {
         super.viewWillDisappear(animated)
         self.setPlayingInfoForCurrentMedia()
         AppUtility.lockOrientation(.portrait)
-        self.updateWatchTime()
+        if localPath == nil {
+            self.updateWatchTime()
+        }
         self.player.pause()
         self.player = nil
         self.complete = true
