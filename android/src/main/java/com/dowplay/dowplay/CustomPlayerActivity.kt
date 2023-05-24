@@ -92,13 +92,15 @@ class CustomPlayerActivity() : FlutterActivity() {
 
         trackSelection = DefaultTrackSelector(this).apply {
             setParameters(buildUponParameters().setMaxVideoSizeSd())
+            // Enable hardware acceleration
+            setParameters(buildUponParameters().setRendererDisabled(C.TRACK_TYPE_VIDEO, false))
         }
         player = ExoPlayer.Builder(this)
             .setSkipSilenceEnabled(true)
-            .setTrackSelector(trackSelection)
             .setVideoScalingMode(2)
             .setAudioAttributes(AudioAttributes.DEFAULT, false)
-
+            .setTrackSelector(trackSelection)
+            //.setLoadControl()
             .build()
             .also { exoPlayer ->
                 //val mediaItem = MediaItem.fromUri("https://thekee.gcdn.co/video/m-159n/English/Animation&Family/Klaus.2019.1080pAr.mp4")
@@ -113,6 +115,7 @@ class CustomPlayerActivity() : FlutterActivity() {
                 exoPlayer.prepare()
                 exoPlayer.play()
                 viewBinding.playerView.player = exoPlayer
+                //val bufferSize = 10 * 1024 * 1024 // 10 MB
                 player?.playWhenReady = true
             }
         seekToLastWatching()
