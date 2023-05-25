@@ -27,6 +27,7 @@ public class MediaManager {
         }
         
         let vc = await KeeVideoPlayerController(nibName: "KeeVideoPlayerController", bundle: .packageBundle)
+        await vc.setPresentationStyle(.fullScreen)
         await vc.setSettings(settings)
         await vc.setMediaList(mediaList: list)
         await vc.setPlayingIndex(playMediaIndex)

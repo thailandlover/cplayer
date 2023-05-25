@@ -104,9 +104,17 @@ public class KeeVideoPlayerController: UIViewController {
     @IBOutlet weak private var bottomView : UIView!
     @IBOutlet weak private var topView : UIView!
     
+    func setPresentationStyle(_ style : UIModalPresentationStyle){
+        self.modalPresentationStyle = style
+    }
+    
     public override func viewDidLoad() {
         super.viewDidLoad()
-        
+        if #available(iOS 13.0, *) {
+            self.isModalInPresentation = true
+        } else {
+            self.modalPresentationStyle = .fullScreen
+        }
         AppUtility.lockOrientation(.landscape)
         
         animator = UOAnimator(duration: 1.24, delay: 0.01,animationOptions: .curveEaseOut, damping: 0.85)
