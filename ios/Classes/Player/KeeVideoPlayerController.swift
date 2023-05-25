@@ -106,6 +106,9 @@ public class KeeVideoPlayerController: UIViewController {
     
     public override func viewDidLoad() {
         super.viewDidLoad()
+        
+        AppUtility.lockOrientation(.landscape)
+        
         animator = UOAnimator(duration: 1.24, delay: 0.01,animationOptions: .curveEaseOut, damping: 0.85)
         
         continueWatchingAlert.leadingConstraint?.constant = -(continueWatchingAlert.frame.width + 100)
@@ -177,7 +180,7 @@ public class KeeVideoPlayerController: UIViewController {
             
             
         }
-        AppUtility.lockOrientation(.landscape)
+        
         topView.backgroundColor = vi_infoView.backgroundColor
         bottomView.backgroundColor = vi_controllers.backgroundColor
         do {
@@ -186,6 +189,20 @@ public class KeeVideoPlayerController: UIViewController {
             
         }
     }
+    
+    
+    public override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
+        super.viewWillTransition(to: size, with: coordinator)
+        
+        if UIDevice.current.userInterfaceIdiom == .pad{
+            let sH = self.playerView.bounds.height
+            let sW = self.playerView.bounds.width
+                playerLayer.frame = CGRect(origin: .zero, size: CGSize(width: sH, height: sW))
+        }
+        
+    }
+    
+   
     
     func setPlayingIndex(_ index : Int){
         playingIndex = index
@@ -232,7 +249,7 @@ public class KeeVideoPlayerController: UIViewController {
                     btn_download.tag = 1
                 }
                 lb_downloadPercentage.isHidden = false
-                NotificationCenter.default.addObserver(self, selector: #selector(downloadProgressReceiver(notification:)), name: NSNotification.Name(rawValue: "downloadTask_media_\(id)_\(type.rawValue)_\(settings.userSignature)"), object: nil)
+                NotificationCenter.default.addObserver(self, selector: #selector(downloadProgressReceiver(notification:)), name: NSNotification.Name(rawValue: "downloadTask_media_\(id)_\(type.version_3_value)_\(settings.userSignature)"), object: nil)
             }else{
                 btn_download.tag = 0
                 btn_download.tintColor = .white
@@ -248,7 +265,7 @@ public class KeeVideoPlayerController: UIViewController {
             if let id = media?.keeId, let type = media?.type {
                 if let taskID = downloadTask.mediaId{
                     let ID = "\(taskID)"
-                    if ID == "\(id)_\(type.rawValue)_\(settings.userSignature)" {
+                    if ID == "\(id)_\(type.version_3_value)_\(settings.userSignature)" {
                         DispatchQueue.main.async {
                             self.lb_downloadPercentage.text = String(format: "%02.2f%%", downloadTask.progress.fractionCompleted * 100)
                         }
@@ -695,6 +712,19 @@ public class KeeVideoPlayerController: UIViewController {
 //                    self.showContinueFromWatchingTime()
 //                }
                 
+                
+                let sH = self.playerView.bounds.height
+                let sW = self.playerView.bounds.width
+                
+//                if UIDevice.current.userInterfaceIdiom == .pad{
+                    playerLayer.frame = CGRect(origin: .zero, size: CGSize(width: sW, height: sH))
+//                }else{
+//                    playerLayer.frame = CGRect(origin: .zero, size: CGSize(width: sH, height: sW))
+//                }
+                
+                
+                
+                
                 break
             case .failed:
                 // Player item failed. See error.
@@ -719,6 +749,7 @@ public class KeeVideoPlayerController: UIViewController {
         }
 
     }
+        
     
     func enableAll(){
         seekTimeSlider.isEnabled = true

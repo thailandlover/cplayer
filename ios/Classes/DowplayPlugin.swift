@@ -91,11 +91,8 @@ public class DowplayPlugin: NSObject, FlutterPlugin {
                     
                 }
                 let playerResult : [[String:Any]] = await MediaManager.default.openMediaPlayer(usingMediaList: media,playMediaIndex: playingIndex,usingSettings: hostAppSettings, forViewController: flutterViewController)
-                if(playerResult.isEmpty){
-                    result(false)
-                } else {
-                    result(playerResult)
-                }
+                 result(playerResult)
+
             }
         } else {
             print("iOS could not extract flutter arguments in method: (playEpisode)")
@@ -131,11 +128,7 @@ public class DowplayPlugin: NSObject, FlutterPlugin {
                 media.append(mediaItem)
                 
                 let playerResult : [[String:Any]] = await MediaManager.default.openMediaPlayer(usingMediaList: media,usingSettings: hostAppSettings, forViewController: flutterViewController)
-                if(playerResult.isEmpty){
-                    result(false)
-                } else {
-                    result(playerResult)
-                }
+                result(playerResult)
             }
            
             

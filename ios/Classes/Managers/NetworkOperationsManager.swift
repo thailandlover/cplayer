@@ -17,6 +17,7 @@ class NetworkOperatinosManager {
     }
     
     func updateWatchTime(forMedia media: Media,settings: HostAppSettings, updateTime time: Double, mediaDuration duration: Double){
+        guard duration > 0 && time > 0 else {return}
         if settings.apiVersion == 4 {
             self.version2API(media: media,settings: settings, updateTime: time, mediaDuration: duration)
         }else{
