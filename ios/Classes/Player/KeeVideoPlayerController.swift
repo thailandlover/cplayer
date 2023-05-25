@@ -218,10 +218,6 @@ public class KeeVideoPlayerController: UIViewController {
     }
     
     func validateDownloadButton() throws{
-        if media?.downloadURL == nil {
-            btn_download.isHidden = true
-            return
-        }
         btn_download.isHidden = false
         lb_downloadPercentage.isHidden = true
         if let id = media?.keeId, let type = media?.type{
@@ -257,6 +253,9 @@ public class KeeVideoPlayerController: UIViewController {
         }else{
             btn_download.tag = 0
             btn_download.tintColor = .white
+        }
+        if media?.downloadURL == nil {
+            btn_download.isHidden = true
         }
     }
     
