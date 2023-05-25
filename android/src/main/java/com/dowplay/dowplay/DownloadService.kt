@@ -28,7 +28,7 @@ class DownloadService : Service() {
                 getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
             var downloadId: Int = 0
-            var currentProgressPercent: Int = 0
+            var currentProgressPercent: Double = 0.0
             var isDone: Boolean = false
             var mediaType: String? = null
             if (intent != null) {
@@ -84,7 +84,7 @@ class DownloadService : Service() {
                             DatabaseHelper(this).saveDownloadDataInDB(
                                 downloadId,
                                 DownloadManagerSTATUS.STATUS_RUNNING,
-                                0,
+                                0.0,
                                 fullPath.toString(),
                                 mediaName.toString(),
                                 mediaType.toString(),
@@ -104,7 +104,7 @@ class DownloadService : Service() {
                                 DatabaseHelper(this).saveEpisodeDataInDB(
                                     downloadId,
                                     DownloadManagerSTATUS.STATUS_RUNNING,
-                                    0,
+                                    0.0,
                                     fullPath.toString(),
                                     mediaId.toString(),
                                     seasonId.toString(),
@@ -115,7 +115,7 @@ class DownloadService : Service() {
                                 )
                             }
                             startNotification(downloadId, mediaName.toString())
-                            Log.d("Bom::: ", "Is Insert ID is Insert")
+                            Log.d("Bom::: ", "Is Insert $downloadId is Insert")
                         }
                         Log.d("Bom::: ", "Download ID $downloadId")
 
@@ -151,9 +151,9 @@ class DownloadService : Service() {
                         allDownloadIdsStatus["$downloadId"] = DownloadManagerSTATUS.STATUS_RUNNING
                         val progressPercent = progress.currentBytes * 100 / progress.totalBytes
 
-                        if (progressPercent.toInt() != currentProgressPercent) {
-                            Log.d("Bom::: ", "Download progress: ${progressPercent.toInt()}%")
-                            currentProgressPercent = progressPercent.toInt()
+                        if (progressPercent.toInt() != currentProgressPercent.toInt()) {
+                            //Log.d("Bom::: ", "Download progress: ${progressPercent.toInt()}%")
+                            currentProgressPercent = progressPercent.toDouble()
                             updateStatusDownloadInDB(
                                 downloadId,
                                 mediaType.toString(),
@@ -193,7 +193,7 @@ class DownloadService : Service() {
                                 downloadId,
                                 mediaType.toString(),
                                 DownloadManagerSTATUS.STATUS_SUCCESSFUL,
-                                100
+                                100.0
                             )
                             notificationManager.cancel(downloadId)
                             if (checkMapValuesToEndStartForegroundService(allDownloadIdsStatus)) {
@@ -252,7 +252,7 @@ class DownloadService : Service() {
         downloadId: Int,
         mediaType: String,
         status: Int,
-        currentProgressPercent: Int
+        currentProgressPercent: Double
     ) {
         if (mediaType == "series") {
             val status5: Status =
@@ -261,8 +261,9 @@ class DownloadService : Service() {
             DatabaseHelper(applicationContext).updateSeriesDownloadDataInDB(
                 downloadId,
                 status,
-                currentProgressPercent,
+                (currentProgressPercent/100),
             )
+            Log.d("Bom::: ", "Download progress: ${(currentProgressPercent/100)}%")
         } else {
             val status5: Status =
                 PRDownloader.getStatus(downloadId)
@@ -270,8 +271,10 @@ class DownloadService : Service() {
             DatabaseHelper(applicationContext).updateDownloadDataInDB(
                 downloadId,
                 status,
-                currentProgressPercent,
+                (currentProgressPercent/100),
             )
+            Log.d("Bom::: ", "Download progress: ${(currentProgressPercent/100)}%")
+
         }
     }
 

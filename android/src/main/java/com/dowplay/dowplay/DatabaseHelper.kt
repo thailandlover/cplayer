@@ -57,9 +57,9 @@ class DatabaseHelper(innerContext: Context) :
 
     override fun onCreate(db: SQLiteDatabase) {
         // ON CONFLICT REPLACE
-        db.execSQL("CREATE TABLE $main_table ($COL_download_id NUMBER PRIMARY KEY, $COL_status NUMBER,  $COL_progress NUMBER,$COL_video_path TEXT, $COL_name TEXT, $COL_media_type TEXT, $COL_media_id TEXT UNIQUE, $COL_media_data TEXT, $COL_user_id TEXT, $COL_profile_id TEXT)")
+        db.execSQL("CREATE TABLE $main_table ($COL_download_id NUMBER PRIMARY KEY, $COL_status NUMBER,  $COL_progress REAL,$COL_video_path TEXT, $COL_name TEXT, $COL_media_type TEXT, $COL_media_id TEXT UNIQUE, $COL_media_data TEXT, $COL_user_id TEXT, $COL_profile_id TEXT)")
         db.execSQL("CREATE TABLE $seasons_table (id INTEGER PRIMARY KEY AUTOINCREMENT, $COL_media_id TEXT,  $COL_season_id TEXT , $COL_name TEXT, $COL_order TEXT, UNIQUE($COL_media_id, $COL_season_id))")
-        db.execSQL("CREATE TABLE $episodes_table ($COL_download_id NUMBER PRIMARY KEY, $COL_status NUMBER,  $COL_progress NUMBER,$COL_video_path TEXT, $COL_media_id TEXT,  $COL_season_id TEXT,$COL_episode_id TEXT ,$COL_episode_data TEXT, $COL_name TEXT, $COL_order TEXT, UNIQUE($COL_media_id, $COL_season_id, $COL_episode_id))")
+        db.execSQL("CREATE TABLE $episodes_table ($COL_download_id NUMBER PRIMARY KEY, $COL_status NUMBER,  $COL_progress REAL,$COL_video_path TEXT, $COL_media_id TEXT,  $COL_season_id TEXT,$COL_episode_id TEXT ,$COL_episode_data TEXT, $COL_name TEXT, $COL_order TEXT, UNIQUE($COL_media_id, $COL_season_id, $COL_episode_id))")
 
     }
 
@@ -73,7 +73,7 @@ class DatabaseHelper(innerContext: Context) :
     fun saveDownloadDataInDB(
         download_id: Int,
         status: Int,
-        progress: Int,
+        progress: Double,
         video_path: String,
         name: String,
         media_type: String,
@@ -130,7 +130,7 @@ class DatabaseHelper(innerContext: Context) :
     fun saveEpisodeDataInDB(
         download_id: Int,
         status: Int,
-        progress: Int,
+        progress: Double,
         video_path: String,
         media_id: String,
         season_id: String,
@@ -165,7 +165,7 @@ class DatabaseHelper(innerContext: Context) :
     fun updateDownloadDataInDB(
         download_id: Int,
         status: Int,
-        progress: Int,
+        progress: Double,
         //name: String,
         //media_type: String,
         //media_id: Int,
@@ -202,7 +202,7 @@ class DatabaseHelper(innerContext: Context) :
     fun updateSeriesDownloadDataInDB(
         download_id: Int,
         status: Int,
-        progress: Int,
+        progress: Double,
     ): Int {
         val dbHelper = DatabaseHelper(context)
         val db = dbHelper.writableDatabase
@@ -249,7 +249,7 @@ class DatabaseHelper(innerContext: Context) :
         if (cursor.moveToFirst()) {
             val downloadId = cursor.getInt(cursor.getColumnIndex(COL_download_id))
             val status = cursor.getInt(cursor.getColumnIndex(COL_status))
-            val progress = cursor.getInt(cursor.getColumnIndex(COL_progress))
+            val progress = cursor.getDouble(cursor.getColumnIndex(COL_progress))
             val videoPath = cursor.getString(cursor.getColumnIndex(COL_video_path))
             val name = cursor.getString(cursor.getColumnIndex(COL_name))
             val mediaType = cursor.getString(cursor.getColumnIndex(COL_media_type))
@@ -303,7 +303,7 @@ class DatabaseHelper(innerContext: Context) :
             val mapData = HashMap<String, Any>()
             val downloadId = cursor.getInt(cursor.getColumnIndex(COL_download_id))
             val status = cursor.getInt(cursor.getColumnIndex(COL_status))
-            val progress = cursor.getInt(cursor.getColumnIndex(COL_progress))
+            val progress = cursor.getDouble(cursor.getColumnIndex(COL_progress))
             val videoPath = cursor.getString(cursor.getColumnIndex(COL_video_path))
             val name = cursor.getString(cursor.getColumnIndex(COL_name))
             val mediaType = cursor.getString(cursor.getColumnIndex(COL_media_type))
@@ -460,7 +460,7 @@ class DatabaseHelper(innerContext: Context) :
             val mapData = HashMap<String, Any>()
             val downloadId = cursor.getInt(cursor.getColumnIndex(COL_download_id))
             val status = cursor.getInt(cursor.getColumnIndex(COL_status))
-            val progress = cursor.getInt(cursor.getColumnIndex(COL_progress))
+            val progress = cursor.getDouble(cursor.getColumnIndex(COL_progress))
             val videoPath = cursor.getString(cursor.getColumnIndex(COL_video_path))
             val mediaId = cursor.getString(cursor.getColumnIndex(COL_media_id))
             val seasonId = cursor.getString(cursor.getColumnIndex(COL_season_id))
@@ -556,7 +556,7 @@ class DatabaseHelper(innerContext: Context) :
             val mapData = HashMap<String, Any>()
             val downloadId = cursor.getInt(cursor.getColumnIndex(COL_download_id))
             val status = cursor.getInt(cursor.getColumnIndex(COL_status))
-            val progress = cursor.getInt(cursor.getColumnIndex(COL_progress))
+            val progress = cursor.getDouble(cursor.getColumnIndex(COL_progress))
             val videoPath = cursor.getString(cursor.getColumnIndex(COL_video_path))
             val mediaId = cursor.getString(cursor.getColumnIndex(COL_media_id))
             val name = cursor.getString(cursor.getColumnIndex(COL_name))
@@ -644,7 +644,7 @@ class DatabaseHelper(innerContext: Context) :
         if (cursor.moveToFirst()) {
             val downloadId = cursor.getInt(cursor.getColumnIndex(COL_download_id))
             val status = cursor.getInt(cursor.getColumnIndex(COL_status))
-            val progress = cursor.getInt(cursor.getColumnIndex(COL_progress))
+            val progress = cursor.getDouble(cursor.getColumnIndex(COL_progress))
             val videoPath = cursor.getString(cursor.getColumnIndex(COL_video_path))
             downloadData["download_id"] = downloadId
             downloadData["status"] = status
