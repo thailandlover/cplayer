@@ -209,7 +209,15 @@ public class DownloadManager: NSObject/*, ObservableObject */{
         
         allMedia.append(contentsOf: movieTasks)
         allMedia.append(contentsOf: convrtedSeriseTasks)
-        allMedia.append(contentsOf: FilesManager.shared.getAllDownloadedMedia())
+        
+        var localMediaList = FilesManager.shared.getAllDownloadedMedia()
+        localMediaList = localMediaList.filter({ item in
+            print(item.mediaId)
+            return !(allMedia.contains(where: {$0.mediaId == item.mediaId}))
+        })
+        
+        
+        allMedia.append(contentsOf: localMediaList)
         
         return allMedia
     }
@@ -218,7 +226,14 @@ public class DownloadManager: NSObject/*, ObservableObject */{
         guard configed else {throw DonwloadManagerError.managerIsNotConfiged}
         var allMedia : [DownloadedMedia] = []
         allMedia.append(contentsOf: getDownloadingSeasons(forSerise: seriesID))
-        allMedia.append(contentsOf:FilesManager.shared.getSeasons(forSeriseID: seriesID))
+        
+        var localMediaList = FilesManager.shared.getSeasons(forSeriseID: seriesID)
+        localMediaList = localMediaList.filter({ item in
+            print(item.mediaId)
+            return !(allMedia.contains(where: {$0.mediaId == item.mediaId}))
+        })
+        
+        allMedia.append(contentsOf:localMediaList)
         return allMedia
     }
     
