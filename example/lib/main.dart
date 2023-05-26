@@ -153,7 +153,7 @@ class _MyAppState extends State<MyApp> {
     bool result;
     try {
       result = await _dowplayPlugin.config(
-              {"user_id": "245394", "profile_id": "562674", "lang": "ar"}) ??
+              {"user_id": "245394", "profile_id": "562674", "lang": "ar","access_token":accessToken}) ??
           false;
       if (kDebugMode) {
         print("result : $result");

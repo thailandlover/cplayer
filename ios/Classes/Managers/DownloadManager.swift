@@ -274,7 +274,8 @@ public class DownloadManager: NSObject/*, ObservableObject */{
             return pureType != "movies"
         }).map({task in
             if let t = task as? URLSessionDownloadTask {
-                return extractMedia(usingTask: t)
+                let media = extractMedia(usingTask: t)
+                return media.group?.showId == id ? media : nil
             }
             return nil
         }).compactMap({$0})

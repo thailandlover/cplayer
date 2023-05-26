@@ -364,8 +364,6 @@ extension FilesManager {
         if let _ = list.first(where: {$0.id == season.id}){
                 print("season exists")
         }else{
-            
-            
             list.append(season)
             saveSeasonsListFile(list, atSerise: s)
         }

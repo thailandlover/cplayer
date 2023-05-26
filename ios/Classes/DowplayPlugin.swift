@@ -191,8 +191,9 @@ public class DowplayPlugin: NSObject, FlutterPlugin {
         if let myArgs = args as? [String: Any],
            let user_id : String = myArgs["user_id"] as? String,
            let profile_id : String = myArgs["profile_id"] as? String,
+           let access_token : String = myArgs["access_token"] as? String,
            let lang : String = myArgs["lang"] as? String {
-            let keeUser = KeeUser(userID: user_id, profileID: profile_id)
+            let keeUser = KeeUser(userID: user_id, profileID: profile_id,token: access_token)
             let hostAppSettings = HostAppSettings(KeeUser:keeUser, lang: lang)
             
             DownloadManager.shared.config(useSettings: hostAppSettings)
