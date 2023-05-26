@@ -23,6 +23,11 @@ public class FilesManager {
         return documentsDirectory.appendingPathComponent("DownloadCache")
     }
     
+    @discardableResult
+    func setUser(_ userSignature : String)->FilesManager{
+        self.userSignature = userSignature
+        return self
+    }
     
     func forUser(_ userSignature : String)->FilesManager{
         self.userSignature = userSignature
@@ -281,8 +286,14 @@ extension FilesManager {
     //STEP ONE <Add the series info to series.keeinfo file>
     private func addSeries(_ info : Info){
         var list = (try? getSeriseListFile()) ?? []
-        list.append(info)
-        saveSeriseListFile(list)
+        
+        if let _ = list.first(where: {$0.id == info.id}){
+                print("searise exists")
+        }else{
+            
+            list.append(info)
+            saveSeriseListFile(list)
+        }
     }
     
     //STEP TWO <Create the required folders>
@@ -313,8 +324,15 @@ extension FilesManager {
     //STEP THREE <Save the season info in the {seriseID}/seasons.keeinfo file>
     private func saveSeasonInfo(_ season: Info, forSerise s: String){
         var list = (try? getSeasonsListFile(forSerise: s)) ?? []
-        list.append(season)
-        saveSeasonsListFile(list, atSerise: s)
+        if let _ = list.first(where: {$0.id == season.id}){
+                print("season exists")
+        }else{
+            
+            
+            list.append(season)
+            saveSeasonsListFile(list, atSerise: s)
+        }
+        
     }
     
     //STEP FOUR <Move the downloaded file to the {seriseID}/{seasonID}/{episodeID}.mp4 file>

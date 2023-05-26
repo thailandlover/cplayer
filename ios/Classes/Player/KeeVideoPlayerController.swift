@@ -104,17 +104,16 @@ public class KeeVideoPlayerController: UIViewController {
     @IBOutlet weak private var bottomView : UIView!
     @IBOutlet weak private var topView : UIView!
     
+    
     func setPresentationStyle(_ style : UIModalPresentationStyle){
         self.modalPresentationStyle = style
     }
     
     public override func viewDidLoad() {
         super.viewDidLoad()
-        if #available(iOS 13.0, *) {
-            self.isModalInPresentation = true
-        } else {
-            self.modalPresentationStyle = .fullScreen
-        }
+        
+
+        
         AppUtility.lockOrientation(.landscape)
         
         animator = UOAnimator(duration: 1.24, delay: 0.01,animationOptions: .curveEaseOut, damping: 0.85)
@@ -225,7 +224,7 @@ public class KeeVideoPlayerController: UIViewController {
         
     }
     
-    func validateDownloadButton() throws{
+    func validateDownloadButton() throws{        
         btn_download.isHidden = false
         lb_downloadPercentage.isHidden = true
         if let id = media?.keeId, let type = media?.type{
@@ -249,6 +248,13 @@ public class KeeVideoPlayerController: UIViewController {
                     btn_download.tag = -1
 //                    btn_download.alpha = 0.5
                     btn_download.tintColor = .red
+                    if let progress = DownloadManager.shared.getDownloadProgress(ForMediaId: id, ofMediaType: type) {
+                        
+                        DispatchQueue.main.async {
+                            self.lb_downloadPercentage.text = String(format: "%02.2f%%", progress * 100)
+                        }
+                    }
+                    
                 }else{
                     btn_download.tag = 1
                 }
@@ -262,6 +268,7 @@ public class KeeVideoPlayerController: UIViewController {
             btn_download.tag = 0
             btn_download.tintColor = .white
         }
+        
         if media?.downloadURL == nil {
             btn_download.isHidden = true
         }

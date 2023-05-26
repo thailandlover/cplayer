@@ -30,7 +30,7 @@ class NetworkOperatinosManager {
                 queryItems.append(URLQueryItem(name: "profileId", value: settings.KeeUser.profileID))
                 queryItems.append(URLQueryItem(name: "time", value: "\(time)"))
                 queryItems.append(URLQueryItem(name: "userId", value: settings.KeeUser.userID))
-                queryItems.append(URLQueryItem(name: "type", value: media.type.rawValue))
+                queryItems.append(URLQueryItem(name: "type", value: media.type.version_3_value))
                 
                 var urlComponents = URLComponents(string: link.appending("media/updateCurrentTime"))
                 urlComponents?.queryItems = queryItems

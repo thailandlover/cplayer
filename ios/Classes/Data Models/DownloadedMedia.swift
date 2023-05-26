@@ -29,7 +29,7 @@ public struct DownloadedMedia : Codable{
                 .appendingPathComponent("\(mediaId).mp4")
         }
         
-        return FilesManager.shared.cache.appendingPathComponent(mediaType.rawValue, isDirectory: true).appendingPathComponent(signature, isDirectory: true).appendingPathComponent("\(mediaId).mp4")
+        return FilesManager.shared.cache.appendingPathComponent(mediaType.version_3_value, isDirectory: true).appendingPathComponent(signature, isDirectory: true).appendingPathComponent("\(mediaId).mp4")
     }
     var episodeInfoPathURL : URL?{
         if self.mediaType == .series && self.mediaRetrivalType == .EpisodeInfo {

@@ -35,6 +35,7 @@ public class DownloadManager: NSObject/*, ObservableObject */{
     
     public func config(useSettings : HostAppSettings){
         self.settings = useSettings
+        FilesManager.shared.setUser(userSignature)
         configed = true
     }
 
@@ -53,6 +54,7 @@ public class DownloadManager: NSObject/*, ObservableObject */{
 
         task.taskDescription = mediaName
         task.mediaId = "\(id)_\(type.version_3_value)_\(userSignature)" //mediaID format (3255_movie) or (36970_series)
+        task.countOfBytesClientExpectsToReceive = 5 * (1024 * 1024 * 1024)
         task.resume()
         tasks.append(task)
         
