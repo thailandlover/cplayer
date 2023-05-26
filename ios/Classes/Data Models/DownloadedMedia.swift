@@ -35,6 +35,7 @@ public struct DownloadedMedia : Codable{
         if self.mediaType == .series && self.mediaRetrivalType == .EpisodeInfo {
             if let g = group {
                 return FilesManager.shared.cache.appendingPathComponent(mediaType.version_3_value, isDirectory: true)
+                    .appendingPathComponent(signature, isDirectory: true)
                     .appendingPathComponent(g.showId, isDirectory: true)
                     .appendingPathComponent(g.seasonId, isDirectory: true)
                     .appendingPathComponent("\(mediaId).keeinfo")                

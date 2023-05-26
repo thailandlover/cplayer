@@ -127,12 +127,49 @@ public class FilesManager {
     
     public func deleteEpisode(_ e: DownloadedMedia) {
         // remove the episode file, and info file
-        try? fm.removeItem(at: e.tempPath!)
-        try? fm.removeItem(at: e.path)
-        if let info = e.episodeInfoPathURL{
+        var ee = e
+        ee.setUser(signature: userSignature)
+        try? fm.removeItem(at: ee.tempPath!)
+        try? fm.removeItem(at: ee.path)
+        if let info = ee.episodeInfoPathURL{
             try? fm.removeItem(at: info)
         }
     }
+    
+    public func deleteSeason(_ seasonId : String, tvShowId: String){
+        
+        if var list = try?  getSeasonsListFile(forSerise: tvShowId) {
+            list.removeAll(where: {$0.id == seasonId})
+            saveSeasonsListFile(list, atSerise: tvShowId)
+            
+            
+            let folder = cache
+                .appendingPathComponent(MediaManager.MediaType.series.version_3_value, isDirectory: true)
+                .appendingPathComponent(userSignature, isDirectory: true)
+                .appendingPathComponent(tvShowId, isDirectory: true)
+                .appendingPathComponent(seasonId, isDirectory: true)
+            
+            try? fm.removeItem(at: folder)
+        }
+    }
+    
+    public func deleteTvShow(_ id: String){
+        
+        if var list = try? getSeriseListFile() {
+            list.removeAll(where: {$0.id == id})
+            saveSeriseListFile(list)
+            
+            let folder = cache
+                .appendingPathComponent(MediaManager.MediaType.series.version_3_value, isDirectory: true)
+                .appendingPathComponent(userSignature, isDirectory: true)
+                .appendingPathComponent(id, isDirectory: true)
+            
+            try? fm.removeItem(at: folder)
+        }
+    }
+    
+    
+    
     
     
     public func getDownloadedEpisode(id: String, season: String, series: String)->DownloadedMedia?{
