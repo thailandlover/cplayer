@@ -52,7 +52,8 @@ public class DowplayPlugin extends FlutterActivity implements FlutterPlugin, Met
     String userId = "";
     String profileId = "";
     String lang = "";
-
+    static String accessToken = "";
+    
     @Override
     public void onAttachedToActivity(ActivityPluginBinding binding) {
         activity = binding.getActivity();
@@ -131,6 +132,7 @@ public class DowplayPlugin extends FlutterActivity implements FlutterPlugin, Met
             userId = (String) object.get("user_id");
             profileId = (String) object.get("profile_id");
             lang = (String) object.get("lang");
+            accessToken = (String) object.get("access_token");
 
             result.success(true);
 ///////////////////////////////////////////////////////////////////////////////////////////
@@ -203,8 +205,8 @@ public class DowplayPlugin extends FlutterActivity implements FlutterPlugin, Met
             System.out.println("B7b Gson::: " + movieMedia);
             new DownloaderDowPlay(context, activity, lang).startDownload(movieMedia.getInfo().getDownloadURL(), movieMedia.getTitle(), movieMedia.getMediaType(),
                     movieMedia.getMediaID(), json, movieMedia.getUserID(), movieMedia.getProfileID(), "", "", "", "", "", "", "");
-
-            result.success(new DownloaderDowPlay(context, activity, lang).getAllDownloadMedia(userId, profileId));
+            myResultCallback = result;
+            //result.success(new DownloaderDowPlay(context, activity, lang).getAllDownloadMedia(userId, profileId));
 //////////////////////////////////////////////////////////////////////////////////////////////////
         } else if (call.method.equals("start_download_episode")) {
             Log.d(TAG, "onMethodCall: start_download_episode");
@@ -226,7 +228,8 @@ public class DowplayPlugin extends FlutterActivity implements FlutterPlugin, Met
                     episodeMedia.getMediaGroup().getItemsIDS().getTvShowID(), json, episodeMedia.getUserID(), episodeMedia.getProfileID(),
                     episodeMedia.getMediaGroup().getItemsIDS().getSeasonID(), episodeMedia.getInfo().getId().toString(), episodeMedia.getMediaGroup().getSeason().getSeasonNumber(),
                     episodeMedia.getInfo().getOrder(), episodeMedia.getMediaGroup().getSeason().getTitle(), episodeMedia.getInfo().getTitle(), episodeJsonString);
-            result.success(new DownloaderDowPlay(context, activity, lang).getAllDownloadMedia(userId, profileId));
+            myResultCallback = result;
+            //result.success(new DownloaderDowPlay(context, activity, lang).getAllDownloadMedia(userId, profileId));
 //////////////////////////////////////////////////////////////////////////////////////////////////
         } else if (call.method.equals("pause_download")) {
             Log.d(TAG, "onMethodCall: pause_download");

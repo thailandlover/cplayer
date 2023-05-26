@@ -945,7 +945,7 @@ class CustomPlayerActivity() : FlutterActivity() {
                     //movieMedia?.info?.watching?.duration.toString(),
                     player?.duration?.div(1000).toString(),
                     (player?.currentPosition?.div(1000)).toString(),
-                    movieMedia?.token.toString(),
+                    DowplayPlugin.accessToken,
                     currentLanguage
                 )
             } else if (mediaType == series) {
@@ -958,7 +958,7 @@ class CustomPlayerActivity() : FlutterActivity() {
                     player?.duration?.div(1000).toString(),
                     //episodeMedia?.mediaGroup?.episodes?.get(startVideoPosition)?.watching?.duration.toString(),
                     (player?.currentPosition?.div(1000)).toString(),
-                    episodeMedia?.token.toString(),
+                    DowplayPlugin.accessToken,
                     currentLanguage
                 )
             }

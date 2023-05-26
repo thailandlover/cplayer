@@ -9,11 +9,12 @@ import android.os.Build
 import android.os.IBinder
 import android.util.Log
 import androidx.core.app.NotificationCompat
+import androidx.media3.common.util.UnstableApi
 import com.downloader.*
 import com.google.gson.Gson
 import com.google.gson.JsonParser
 
-class DownloadService : Service() {
+@UnstableApi class DownloadService : Service() {
 
     override fun onBind(intent: Intent): IBinder? {
         return null
@@ -25,7 +26,7 @@ class DownloadService : Service() {
         ///////////////
         Thread {
             val notificationManager =
-                getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                getSystemService(NOTIFICATION_SERVICE) as NotificationManager
 
             var downloadId: Int = 0
             var currentProgressPercent: Double = 0.0
@@ -118,7 +119,7 @@ class DownloadService : Service() {
                             Log.d("Bom::: ", "Is Insert $downloadId is Insert")
                         }
                         Log.d("Bom::: ", "Download ID $downloadId")
-
+                        returnResponsToFlutter(userId.toString(), profileId.toString())
                     }
                     .setOnPauseListener {
                         // Download paused
@@ -221,6 +222,7 @@ class DownloadService : Service() {
                             if (checkMapValuesToEndStartForegroundService(allDownloadIdsStatus)) {
                                 stopService()
                             }
+                            returnResponsToFlutter(userId.toString(), profileId.toString())
                         }
                     })
             }
@@ -301,5 +303,13 @@ class DownloadService : Service() {
         // Stop the foreground service
         stopForeground(true)
         stopSelf()
+    }
+    private fun returnResponsToFlutter(userId: String, profileId: String) {
+        DowplayPlugin.myResultCallback.success(
+            DatabaseHelper(this).getAllDownloadDataFromDB(
+                userId,
+                profileId
+            )
+        )
     }
 }
