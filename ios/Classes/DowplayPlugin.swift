@@ -276,7 +276,7 @@ public class DowplayPlugin: NSObject, FlutterPlugin {
             
             let mediaGroup : MediaGroup = MediaGroup(showId: itemsIds["tv_show_id"] as! String, seasonId: itemsIds["season_id"] as! String, episodeId: mediaId,seasonName: "Season \(seasonNumber)",showName: tvShowTitle as! String ,data: media_group)
             
-            DownloadManager.shared.startDownload(url: url, forMediaId: Int(mediaId )!, type: .series,mediaGroup: mediaGroup, object:myArgs)
+            DownloadManager.shared.startDownload(url: url, forMediaId: Int(mediaId )!,mediaName: info["title"] as! String, type: .series,mediaGroup: mediaGroup, object:myArgs)
             
             let downloadsList : [[String : Any]] = DownloadManager.shared.getAllMediaDecoded()
             
