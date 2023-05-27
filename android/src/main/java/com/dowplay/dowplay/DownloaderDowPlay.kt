@@ -12,6 +12,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.media3.common.util.UnstableApi
 import com.downloader.PRDownloader
 import com.downloader.Status
 import com.dowplay.dowplay.databinding.ExplanationPermissionBinding
@@ -22,7 +23,7 @@ import java.math.BigInteger
 import java.security.SecureRandom
 
 
-class DownloaderDowPlay(initContext: Context, initActivity: Activity, initLang: String) :
+@UnstableApi class DownloaderDowPlay(initContext: Context, initActivity: Activity, initLang: String) :
     ActivityAware {
 
     private var context: Context
@@ -258,7 +259,8 @@ class DownloaderDowPlay(initContext: Context, initActivity: Activity, initLang: 
         episodeOrder: String,
         seasonName: String,
         episodeName: String,
-        episodeJson: String
+        episodeJson: String,
+        canReturnResultToFlutter:Boolean
     ): Int {
         showDownloadStatePermission()
         if (permissionToDownload) {
@@ -317,6 +319,8 @@ class DownloaderDowPlay(initContext: Context, initActivity: Activity, initLang: 
                     putExtra("season_name", seasonName)
                     putExtra("episode_name", episodeName)
                     putExtra("episode_json", episodeJson)
+                    putExtra("can_return_result_to_flutter", canReturnResultToFlutter)
+                    putExtra("lang", lLang)
                 }
                 context.startService(intent)
                 return 1

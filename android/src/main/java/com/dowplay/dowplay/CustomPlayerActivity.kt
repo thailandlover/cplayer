@@ -4,11 +4,15 @@ import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.app.PictureInPictureParams
 import android.content.Context
+import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.Color
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.VibrationEffect
 import android.os.Vibrator
+import android.provider.Settings
 import android.util.Log
 import android.util.Rational
 import android.view.LayoutInflater
@@ -356,7 +360,15 @@ class CustomPlayerActivity() : FlutterActivity() {
         }
         viewBinding.pictureOnPictureButton.setOnClickListener {
             vibratePhone()
-            showVideoAsPictureOnPicture()
+            if (isPiPSupported(activity)) {
+                showVideoAsPictureOnPicture()
+            } else {
+                Toast.makeText(
+                    this,
+                    if (currentLanguage == "en") "Picture-in-Picture mode not supported" else "جهازك لا يدعم خاصية PIP",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
         }
     }
 
@@ -679,7 +691,8 @@ class CustomPlayerActivity() : FlutterActivity() {
                 "",
                 "",
                 "",
-                ""
+                "",
+                false
             )
         } else {
             //episodeMedia?.mediaGroup?.episodes?.get(startVideoPosition)?.id.toString()
@@ -704,7 +717,8 @@ class CustomPlayerActivity() : FlutterActivity() {
                 episodeMedia?.mediaGroup?.episodes?.get(startVideoPosition)?.order.toString(),
                 episodeMedia?.mediaGroup?.season?.title ?: "",
                 episodeMedia?.mediaGroup?.episodes?.get(startVideoPosition)?.title.toString(),
-                episodeJson ?: ""
+                episodeJson ?: "",
+                false
             )
         }
         if (result == 1) {
@@ -729,6 +743,34 @@ class CustomPlayerActivity() : FlutterActivity() {
         }
     }
 
+    ////////////////////////
+    private fun isPiPSupported(context: Context): Boolean {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            context.packageManager.hasSystemFeature(PackageManager.FEATURE_PICTURE_IN_PICTURE)
+        } else {
+            false
+        }
+    }
+
+    // Check if picture-in-picture settings are enabled
+    fun isPiPSettingsEnabled(context: Context): Boolean {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            Settings.canDrawOverlays(context)
+        } else {
+            true
+        }
+    }
+
+    // Open device settings to enable picture-in-picture settings
+    fun openPiPSettings(context: Context) {
+        val packageName = context.packageName
+        val intent =
+            Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:$packageName"))
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        context.startActivity(intent)
+    }
+
+    ////////////////////////
     @RequiresApi(Build.VERSION_CODES.N)
     private fun showVideoAsPictureOnPicture() {
         // if (isInPictureInPictureMode)
@@ -737,20 +779,33 @@ class CustomPlayerActivity() : FlutterActivity() {
             viewBinding.bottomController.visibility = View.GONE
             viewBinding.playerView.hideController()
         }*/
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val aspectRatio = Rational(viewBinding.playerView.width, viewBinding.playerView.height)
-            val params = PictureInPictureParams.Builder()
-                .setAspectRatio(aspectRatio)
-                .build()
-            enterPictureInPictureMode(params)
-        } else {
-            enterPictureInPictureMode()
-        }
-        viewBinding.topController.visibility = View.GONE
-        viewBinding.bottomController.visibility = View.GONE
-        viewBinding.playerView.hideController()
-    }
+        val supportsPiP = isPiPSupported(activity)
+        val isSettingsEnabled = isPiPSettingsEnabled(activity)
 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            if (supportsPiP && isSettingsEnabled) {
+                val aspectRatio =
+                    Rational(viewBinding.playerView.width, viewBinding.playerView.height)
+                val params = PictureInPictureParams.Builder()
+                    .setAspectRatio(aspectRatio)
+                    .build()
+                enterPictureInPictureMode(params)
+            } else if (supportsPiP && !isSettingsEnabled) {
+                // Picture-in-picture settings are disabled, guide the user to enable them manually
+                openPiPSettings(activity)
+            } else {
+                /*Toast.makeText(
+                    this,
+                    if (currentLanguage == "en") "Picture-in-Picture mode not supported" else "جهازك لا يدعم خاصية PIP",
+                    Toast.LENGTH_LONG
+                ).show()*/
+            }
+            viewBinding.topController.visibility = View.GONE
+            viewBinding.bottomController.visibility = View.GONE
+            viewBinding.playerView.hideController()
+        }
+    }
+    //////////////////////////////////////////////////////////////////
 
     private var movieMedia: MovieMedia? = null
     private var episodeMedia: EpisodeMedia? = null
@@ -933,7 +988,9 @@ class CustomPlayerActivity() : FlutterActivity() {
     }
 
     private fun addToWatchingListAPI() {
-        if (player != null && (player?.currentPosition ?: 0) > 0 && (player?.duration ?: 0) > 0) {
+        if (player != null && (player?.currentPosition ?: 0) > 0 && (player?.duration
+                ?: 0) > 0
+        ) {
             if (mediaType == movie) {
                 //movie
                 Log.d("Bom this is time: ", (player?.currentPosition?.div(1000)).toString())

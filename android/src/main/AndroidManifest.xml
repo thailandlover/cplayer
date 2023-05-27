@@ -1,29 +1,42 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.dowplay.dowplay">
-    <uses-permission android:name="android.permission.INTERNET"/>
+
+    <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.VIBRATE" />
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO"/>
-    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES"/>
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
-    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
 
-    <application>
+    <application
+        android:allowBackup="true"
+        android:configChanges="uiMode|orientation|screenSize|screenLayout|smallestScreenSize|screenLayout|density"
+        android:hardwareAccelerated="true"
+        android:largeHeap="true"
+        android:resizeableActivity="true"
+        android:screenOrientation="landscape"
+        android:supportsPictureInPicture="true"
+        android:theme="@style/Theme.CustomPlayerActivity"
+        android:windowSoftInputMode="adjustResize">
         <activity
             android:name=".CustomPlayerActivity"
+            android:allowBackup="true"
+            android:configChanges="uiMode|orientation|screenSize|screenLayout|smallestScreenSize|screenLayout|density"
+            android:exported="false"
+            android:hardwareAccelerated="true"
+            android:largeHeap="true"
+            android:resizeableActivity="true"
             android:screenOrientation="landscape"
             android:supportsPictureInPicture="true"
-            android:resizeableActivity="true"
-            android:allowBackup="true"
             android:theme="@style/Theme.CustomPlayerActivity"
-            android:windowSoftInputMode="adjustResize"
-            android:configChanges="uiMode|orientation|screenSize|screenLayout|smallestScreenSize|screenLayout|density"
-            android:exported="false"/>
-        <service android:name=".DownloadService"
+            android:windowSoftInputMode="adjustResize" />
+        <service
+            android:name=".DownloadService"
             android:enabled="true"
             android:exported="false" />
     </application>

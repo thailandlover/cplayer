@@ -3,24 +3,26 @@ package com.dowplay.dowplay
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.Service
-import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.IBinder
+import android.os.Looper
 import android.util.Log
+import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import androidx.media3.common.util.UnstableApi
 import com.downloader.*
-import com.google.gson.Gson
-import com.google.gson.JsonParser
 
-@UnstableApi class DownloadService : Service() {
+
+@UnstableApi
+class DownloadService : Service() {
 
     override fun onBind(intent: Intent): IBinder? {
         return null
     }
 
     val allDownloadIdsStatus = HashMap<String, Int>()
+    var canReturnResultToFlutter = true
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         //val notificationManager = getSystemService(NotificationManager::class.java)
         ///////////////
@@ -51,6 +53,9 @@ import com.google.gson.JsonParser
                 val episodeName = intent.getStringExtra("episode_name")
                 //if has null value... need to check!!!
                 val episodeJson = intent.getStringExtra("episode_json")
+                canReturnResultToFlutter =
+                    intent.getBooleanExtra("can_return_result_to_flutter", true)
+                val lang = intent.getStringExtra("lang")
 
                 Log.d("Bom Info", url.toString())
                 Log.d("Bom Info", dirPath.toString())
@@ -223,6 +228,8 @@ import com.google.gson.JsonParser
                                 stopService()
                             }
                             returnResponsToFlutter(userId.toString(), profileId.toString())
+                            ////////////////////
+                            errorMsgToast(error, lang.toString())
                         }
                     })
             }
@@ -263,9 +270,9 @@ import com.google.gson.JsonParser
             DatabaseHelper(applicationContext).updateSeriesDownloadDataInDB(
                 downloadId,
                 status,
-                (currentProgressPercent/100),
+                (currentProgressPercent / 100),
             )
-            Log.d("Bom::: ", "Download progress: ${(currentProgressPercent/100)}%")
+            Log.d("Bom::: ", "Download progress: ${(currentProgressPercent / 100)}%")
         } else {
             val status5: Status =
                 PRDownloader.getStatus(downloadId)
@@ -273,9 +280,9 @@ import com.google.gson.JsonParser
             DatabaseHelper(applicationContext).updateDownloadDataInDB(
                 downloadId,
                 status,
-                (currentProgressPercent/100),
+                (currentProgressPercent / 100),
             )
-            Log.d("Bom::: ", "Download progress: ${(currentProgressPercent/100)}%")
+            Log.d("Bom::: ", "Download progress: ${(currentProgressPercent / 100)}%")
 
         }
     }
@@ -304,12 +311,37 @@ import com.google.gson.JsonParser
         stopForeground(true)
         stopSelf()
     }
+
     private fun returnResponsToFlutter(userId: String, profileId: String) {
-        DowplayPlugin.myResultCallback.success(
-            DatabaseHelper(this).getAllDownloadDataFromDB(
-                userId,
-                profileId
+        if (canReturnResultToFlutter) {
+            DowplayPlugin.myResultCallback.success(
+                DatabaseHelper(this).getAllDownloadDataFromDB(
+                    userId,
+                    profileId
+                )
             )
-        )
+        }
+    }
+
+    private fun errorMsgToast(error: Error?, lang: String) {
+        if (error?.isConnectionError == true) {
+            Toast.makeText(
+                applicationContext,
+                if (lang == "en") "Download failed please check internet connection" else "فشلت عملية التحميل يرجى التحقق من اتصال الانترنت",
+                Toast.LENGTH_LONG
+            ).show()
+        } else if (error?.isServerError == true) {
+            Toast.makeText(
+                applicationContext,
+                if (lang == "en") "Download failed cannot connect to the server" else "فشلت عملية التحميل لا يمكن الاتصال بالخادم",
+                Toast.LENGTH_LONG
+            ).show()
+        } else {
+            Toast.makeText(
+                applicationContext,
+                if (lang == "en") "Download failed, try again" else "فشل التحميل قم بالمحاول مرة اخرى",
+                Toast.LENGTH_LONG
+            ).show()
+        }
     }
 }
