@@ -695,7 +695,7 @@ class _MyAppState extends State<MyApp> {
   }
 
   Future<dynamic> invokeCancelDownload(String mediaId, String mediaType,
-      String tvShowId, String seasonId) async {
+      dynamic tvShowId, dynamic seasonId) async {
     dynamic result;
     try {
       result = await _dowplayPlugin.cancelDownload(

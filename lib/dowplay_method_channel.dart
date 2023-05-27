@@ -85,7 +85,7 @@ class MethodChannelDowplay extends DowplayPlatform {
 
   @override
   Future<dynamic> cancelDownload(String mediaId, String mediaType,
-      String tvShowId, String seasonId) async {
+      dynamic tvShowId, dynamic seasonId) async {
     final dynamic result =
         await methodChannel.invokeMethod<dynamic>('cancel_download', {
       "mediaId": mediaId,

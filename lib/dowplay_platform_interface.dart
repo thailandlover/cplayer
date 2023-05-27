@@ -70,7 +70,7 @@ abstract class DowplayPlatform extends PlatformInterface {
   }
 
   Future<dynamic> cancelDownload(
-      String mediaId, String mediaType, String tvShowId, String seasonId) {
+      String mediaId, String mediaType, dynamic tvShowId, dynamic seasonId) {
     throw UnimplementedError('cancel_download() has not been implemented.');
   }
 

@@ -45,7 +45,7 @@ class Dowplay {
   }
 
   Future<dynamic> cancelDownload(
-      String mediaId, String mediaType, String tvShowId, String seasonId) {
+      String mediaId, String mediaType, dynamic tvShowId, dynamic seasonId) {
     return DowplayPlatform.instance
         .cancelDownload(mediaId, mediaType, tvShowId, seasonId);
   }
