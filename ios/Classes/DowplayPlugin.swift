@@ -326,8 +326,10 @@ public class DowplayPlugin: NSObject, FlutterPlugin {
         }
         if let myArgs = args as? [String: Any],
            let media_type : String = myArgs["mediaType"] as? String,
+           let tvshowId : String = myArgs["tvshowId"] as? String,
+           let seasonId : String = myArgs["seasonId"] as? String,
            let media_id : String = myArgs["mediaId"] as? String {
-            DownloadManager.shared.cancelMedia(withMediaId: media_id, forType: media_type == "movie" ? .movie : .series)
+            DownloadManager.shared.cancelMedia(withMediaId: media_id,seasonId: seasonId,showId: tvshowId, forType: media_type == "movie" ? .movie : .series)
             let downloadsList : [[String : Any]] = DownloadManager.shared.getAllMediaDecoded()
             result(downloadsList)
         } else {

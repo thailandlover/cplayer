@@ -126,8 +126,23 @@ public class DownloadManager: NSObject/*, ObservableObject */{
         tasks.removeAll()
     }
     
-    public func cancelMedia(withMediaId id: String, forType type: MediaManager.MediaType){
+    public func cancelMedia(withMediaId id: String,
+                            seasonId : String? = nil,
+                            showId : String? = nil,
+                            forType type: MediaManager.MediaType){
         if !configed {return}
+        do{
+            if type == .movie {
+                try FilesManager.shared.deleteMovieBy(id: id)
+            }else {
+                if let sId = seasonId, let tvId = showId {
+                    FilesManager.shared.deleteEpisodeById(id, season: sId, series: tvId)
+                }                
+            }
+        }catch{
+            
+        }
+        
         let taskId = "\(id)_\(type.version_3_value)_\(userSignature)"
         cancelTask(withID: taskId)
     }
@@ -246,16 +261,22 @@ public class DownloadManager: NSObject/*, ObservableObject */{
     }
     
 
-    public func getAllMediaDecoded()-> [[String:Any]] {
-        return (try? self.getAllMedia().getEncodedDictionary()) ?? []
+    public func getAllMediaDecoded(sortKey : MediaSortKey = .id,
+                                   sortOrder: OrderType = .asce)-> [[String:Any]] {
+        return (try? self.getAllMedia().sortMedia(sortKey, type: sortOrder).getEncodedDictionary()) ?? []
     }
     
-    public func getAllSeasonsDecoded(forSeries id: String)-> [[String:Any]] {
-        return (try? self.getAllMedia(ForSerise: id).getEncodedDictionary()) ?? []
+    public func getAllSeasonsDecoded(forSeries id: String,
+                                     sortKey : MediaSortKey = .id,
+                                     sortOrder: OrderType = .asce)-> [[String:Any]] {
+        return (try? self.getAllMedia(ForSerise: id).sortMedia(sortKey, type: sortOrder).getEncodedDictionary()) ?? []
     }
     
-    public func getAllEpisodesDecoded(forSeason sID: String, atSeriesID id: String)-> [[String:Any]] {
-        return (try? self.getAllEpisodes(forSeason: sID, atSeriesID: id).getEncodedDictionary()) ?? []
+    public func getAllEpisodesDecoded(forSeason sID: String,
+                                      atSeriesID id: String,
+                                      sortKey : MediaSortKey = .id,
+                                      sortOrder: OrderType = .asce)-> [[String:Any]] {
+        return (try? self.getAllEpisodes(forSeason: sID, atSeriesID: id).sortMedia(sortKey, type: sortOrder).getEncodedDictionary()) ?? []
     }
     
     

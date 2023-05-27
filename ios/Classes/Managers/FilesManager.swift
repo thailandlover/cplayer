@@ -122,10 +122,14 @@ public class FilesManager {
     public func deleteEpisodeById(_ id: String, season: String, series: String){
         if let ep = getDownloadedEpisode(id: id, season: season, series: series) {
             deleteEpisode(ep)
+            let numberOfEpisodesLeft = getEpisodes(seasonID: season, atSeriseId: series).count
+            if numberOfEpisodesLeft == 0 {
+                deleteSeason(season, tvShowId: series)
+            }
         }
     }
     
-    public func deleteEpisode(_ e: DownloadedMedia) {
+    func deleteEpisode(_ e: DownloadedMedia) {
         // remove the episode file, and info file
         var ee = e
         ee.setUser(signature: userSignature)
@@ -150,6 +154,11 @@ public class FilesManager {
                 .appendingPathComponent(seasonId, isDirectory: true)
             
             try? fm.removeItem(at: folder)
+        }
+        
+        let numberOfSeasonsLeft = getSeasons(forSeriseID: tvShowId).count
+        if numberOfSeasonsLeft == 0 {
+            deleteTvShow(tvShowId)
         }
     }
     

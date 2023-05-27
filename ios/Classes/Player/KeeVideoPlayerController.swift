@@ -801,7 +801,8 @@ public class KeeVideoPlayerController: UIViewController {
         
          func hideControllerView(){
             if vi_controllers.bottomConstraint?.constant == 0 { // still visible
-                animator.animateTo(forView: vi_controllers, bottomConstant: -(vi_controllers.frame.height + (UIScreen.main.bounds.height - vi_controllers.frame.origin.y)))
+                animator.animateTo(forView: vi_controllers, bottomConstant: -(UIScreen.main.bounds.height))
+//                animator.animateTo(forView: vi_controllers, bottomConstant: -(vi_controllers.frame.height + (UIScreen.main.bounds.height - vi_controllers.frame.origin.y)))
             }
         }
         

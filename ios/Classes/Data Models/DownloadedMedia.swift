@@ -173,3 +173,37 @@ public struct Season {
     var mediaList : [DownloadedMedia] = []
 }
 
+
+public enum MediaSortKey {
+    case name
+    case id
+    case seasonNumber
+    //case episodeNumber
+}
+public  enum OrderType {
+    case asce
+    case desc
+}
+
+extension [DownloadedMedia] {
+    
+    public func sortMedia(_ key: MediaSortKey, type : OrderType = .asce)->[DownloadedMedia]{
+        return self.sorted { i1, i2 in
+            switch(key){
+            case .name:
+                return  type == .asce ? i1.name > i2.name : i1.name < i2.name
+            case .seasonNumber:
+                if i1.mediaRetrivalType == .SeasonInfo {
+                    if let a = i1.group?.seasonName, let b = i2.group?.seasonName{
+                        return  type == .asce ? a > b : a < b
+                    }
+                }
+                break
+            default:
+                return type == .asce ? i1.mediaId > i2.mediaId : i1.mediaId < i2.mediaId
+            }
+            return type == .asce ? i1.mediaId > i2.mediaId : i1.mediaId < i2.mediaId
+        }
+    }    
+}
+
