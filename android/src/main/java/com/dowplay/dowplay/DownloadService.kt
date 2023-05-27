@@ -29,7 +29,7 @@ class DownloadService : Service() {
         Thread {
             val notificationManager =
                 getSystemService(NOTIFICATION_SERVICE) as NotificationManager
-
+            var isFirstTimeToReturnResult = true
             var downloadId: Int = 0
             var currentProgressPercent: Double = 0.0
             var isDone: Boolean = false
@@ -124,7 +124,10 @@ class DownloadService : Service() {
                             Log.d("Bom::: ", "Is Insert $downloadId is Insert")
                         }
                         Log.d("Bom::: ", "Download ID $downloadId")
-                        returnResponsToFlutter(userId.toString(), profileId.toString())
+                        if(isFirstTimeToReturnResult) {
+                            returnResponsToFlutter(userId.toString(), profileId.toString())
+                            isFirstTimeToReturnResult = false
+                        }
                     }
                     .setOnPauseListener {
                         // Download paused
@@ -227,7 +230,10 @@ class DownloadService : Service() {
                             if (checkMapValuesToEndStartForegroundService(allDownloadIdsStatus)) {
                                 stopService()
                             }
-                            returnResponsToFlutter(userId.toString(), profileId.toString())
+                            if(isFirstTimeToReturnResult) {
+                                returnResponsToFlutter(userId.toString(), profileId.toString())
+                                isFirstTimeToReturnResult = false
+                            }
                             ////////////////////
                             errorMsgToast(error, lang.toString())
                         }
