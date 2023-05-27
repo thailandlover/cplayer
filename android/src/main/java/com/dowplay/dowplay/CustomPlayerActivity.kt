@@ -783,17 +783,17 @@ class CustomPlayerActivity() : FlutterActivity() {
         val isSettingsEnabled = isPiPSettingsEnabled(activity)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            if (supportsPiP && isSettingsEnabled) {
+            if (supportsPiP) {
                 val aspectRatio =
                     Rational(viewBinding.playerView.width, viewBinding.playerView.height)
                 val params = PictureInPictureParams.Builder()
                     .setAspectRatio(aspectRatio)
                     .build()
                 enterPictureInPictureMode(params)
-            } else if (supportsPiP && !isSettingsEnabled) {
+            } /*else if (supportsPiP && !isSettingsEnabled) {
                 // Picture-in-picture settings are disabled, guide the user to enable them manually
                 openPiPSettings(activity)
-            } else {
+            } */else {
                 /*Toast.makeText(
                     this,
                     if (currentLanguage == "en") "Picture-in-Picture mode not supported" else "جهازك لا يدعم خاصية PIP",
