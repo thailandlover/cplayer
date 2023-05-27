@@ -203,9 +203,10 @@ public class DowplayPlugin extends FlutterActivity implements FlutterPlugin, Met
             String json = gson.toJson(call.arguments);
             MovieMedia movieMedia = MovieMedia.Companion.fromJson(json);
             System.out.println("B7b Gson::: " + movieMedia);
+            myResultCallback = result;
             new DownloaderDowPlay(context, activity, lang).startDownload(movieMedia.getInfo().getDownloadURL(), movieMedia.getTitle(), movieMedia.getMediaType(),
                     movieMedia.getMediaID(), json, movieMedia.getUserID(), movieMedia.getProfileID(), "", "", "", "", "", "", "",true);
-            myResultCallback = result;
+
             //result.success(new DownloaderDowPlay(context, activity, lang).getAllDownloadMedia(userId, profileId));
 //////////////////////////////////////////////////////////////////////////////////////////////////
         } else if (call.method.equals("start_download_episode")) {
@@ -224,11 +225,11 @@ public class DowplayPlugin extends FlutterActivity implements FlutterPlugin, Met
             //Log.d("episodeJsonString",episodeJsonString);
             /////////////////////
             //Log.d("infoEEEE::: ",episodeMedia.getInfo().getDuration());
+            myResultCallback = result;
             new DownloaderDowPlay(context, activity, lang).startDownload(episodeMedia.getInfo().getDownloadURL(), episodeMedia.getMediaGroup().getTvShow().getTitle(), episodeMedia.getMediaType(),
                     episodeMedia.getMediaGroup().getItemsIDS().getTvShowID(), json, episodeMedia.getUserID(), episodeMedia.getProfileID(),
                     episodeMedia.getMediaGroup().getItemsIDS().getSeasonID(), episodeMedia.getInfo().getId().toString(), episodeMedia.getMediaGroup().getSeason().getSeasonNumber(),
                     episodeMedia.getInfo().getOrder(), episodeMedia.getMediaGroup().getSeason().getTitle(), episodeMedia.getInfo().getTitle(), episodeJsonString,true);
-            myResultCallback = result;
             //result.success(new DownloaderDowPlay(context, activity, lang).getAllDownloadMedia(userId, profileId));
 //////////////////////////////////////////////////////////////////////////////////////////////////
         } else if (call.method.equals("pause_download")) {
