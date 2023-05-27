@@ -12,7 +12,7 @@ class Dowplay {
     return DowplayPlatform.instance.playMovie(media);
   }
 
-  Future<bool?> config(Map<String,dynamic> data) {
+  Future<bool?> config(Map<String, dynamic> data) {
     return DowplayPlatform.instance.config(data);
   }
 
@@ -20,10 +20,11 @@ class Dowplay {
     return DowplayPlatform.instance.getDownloadsList();
   }
 
-  Future<dynamic> getTvShowSeasonsDownloadList(Map<String,dynamic> data) {
+  Future<dynamic> getTvShowSeasonsDownloadList(Map<String, dynamic> data) {
     return DowplayPlatform.instance.getTvShowSeasonsDownloadList(data);
   }
-  Future<dynamic> getSeasonEpisodesDownloadList(Map<String,dynamic> data) {
+
+  Future<dynamic> getSeasonEpisodesDownloadList(Map<String, dynamic> data) {
     return DowplayPlatform.instance.getSeasonEpisodesDownloadList(data);
   }
 
@@ -43,15 +44,19 @@ class Dowplay {
     return DowplayPlatform.instance.resumeDownload(mediaId, mediaType);
   }
 
-  Future<dynamic> cancelDownload(String mediaId, String mediaType) {
-    return DowplayPlatform.instance.cancelDownload(mediaId, mediaType);
+  Future<dynamic> cancelDownload(
+      String mediaId, String mediaType, String tvShowId, String seasonId) {
+    return DowplayPlatform.instance
+        .cancelDownload(mediaId, mediaType, tvShowId, seasonId);
   }
 
   Future<dynamic> getDownloadMovie(String mediaId) {
     return DowplayPlatform.instance.getDownloadMovie(mediaId);
   }
 
-  Future<dynamic> getDownloadEpisode(String mediaId,String tvShowId, String seasonId) {
-    return DowplayPlatform.instance.getDownloadEpisode(mediaId,tvShowId,seasonId);
+  Future<dynamic> getDownloadEpisode(
+      String mediaId, String tvShowId, String seasonId) {
+    return DowplayPlatform.instance
+        .getDownloadEpisode(mediaId, tvShowId, seasonId);
   }
 }

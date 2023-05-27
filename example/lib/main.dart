@@ -152,8 +152,12 @@ class _MyAppState extends State<MyApp> {
   config() async {
     bool result;
     try {
-      result = await _dowplayPlugin.config(
-              {"user_id": "245394", "profile_id": "562674", "lang": "ar","access_token":accessToken}) ??
+      result = await _dowplayPlugin.config({
+            "user_id": "245394",
+            "profile_id": "562674",
+            "lang": "ar",
+            "access_token": accessToken
+          }) ??
           false;
       if (kDebugMode) {
         print("result : $result");
@@ -564,7 +568,7 @@ class _MyAppState extends State<MyApp> {
 
   Future<dynamic> cancelDownload() async {
     dynamic result =
-        await invokeCancelDownload(movieMedia.mediaId, movieMedia.mediaType);
+        await invokeCancelDownload("64864", "series ", "1532", "3236");
     if (kDebugMode) {
       List<dynamic> downloads = List.from(result as Iterable);
       if (mounted) {
@@ -690,10 +694,12 @@ class _MyAppState extends State<MyApp> {
     return result;
   }
 
-  Future<dynamic> invokeCancelDownload(String mediaId, String mediaType) async {
+  Future<dynamic> invokeCancelDownload(String mediaId, String mediaType,
+      String tvShowId, String seasonId) async {
     dynamic result;
     try {
-      result = await _dowplayPlugin.cancelDownload(mediaId, mediaType);
+      result = await _dowplayPlugin.cancelDownload(
+          mediaId, mediaType, tvShowId, seasonId);
     } on PlatformException {
       result = false;
     }

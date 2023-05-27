@@ -33,7 +33,7 @@ abstract class DowplayPlatform extends PlatformInterface {
     throw UnimplementedError('playMovie() has not been implemented.');
   }
 
-  Future<bool?> config(Map<String,dynamic> data) {
+  Future<bool?> config(Map<String, dynamic> data) {
     throw UnimplementedError('config() has not been implemented.');
   }
 
@@ -41,12 +41,14 @@ abstract class DowplayPlatform extends PlatformInterface {
     throw UnimplementedError('get_downloads_list() has not been implemented.');
   }
 
-  Future<dynamic> getTvShowSeasonsDownloadList(Map<String,dynamic> data) {
-    throw UnimplementedError('tvshow_seasons_downloads_list() has not been implemented.');
+  Future<dynamic> getTvShowSeasonsDownloadList(Map<String, dynamic> data) {
+    throw UnimplementedError(
+        'tvshow_seasons_downloads_list() has not been implemented.');
   }
 
-  Future<dynamic> getSeasonEpisodesDownloadList(Map<String,dynamic> data) {
-    throw UnimplementedError('season_episodes_downloads_list() has not been implemented.');
+  Future<dynamic> getSeasonEpisodesDownloadList(Map<String, dynamic> data) {
+    throw UnimplementedError(
+        'season_episodes_downloads_list() has not been implemented.');
   }
 
   Future<dynamic> startDownloadMovie(dynamic item) {
@@ -67,7 +69,8 @@ abstract class DowplayPlatform extends PlatformInterface {
     throw UnimplementedError('resume_download() has not been implemented.');
   }
 
-  Future<dynamic> cancelDownload(String mediaId, String mediaType) {
+  Future<dynamic> cancelDownload(
+      String mediaId, String mediaType, String tvShowId, String seasonId) {
     throw UnimplementedError('cancel_download() has not been implemented.');
   }
 
@@ -75,7 +78,9 @@ abstract class DowplayPlatform extends PlatformInterface {
     throw UnimplementedError('get_download_movie() has not been implemented.');
   }
 
-  Future<dynamic> getDownloadEpisode(String mediaId,String tvShowId,String seasonId) {
-    throw UnimplementedError('get_download_episode() has not been implemented.');
+  Future<dynamic> getDownloadEpisode(
+      String mediaId, String tvShowId, String seasonId) {
+    throw UnimplementedError(
+        'get_download_episode() has not been implemented.');
   }
 }

@@ -13,10 +13,11 @@ class MethodChannelDowplay extends DowplayPlatform {
 
   @override
   Future<dynamic> playEpisode(EpisodeMedia media) async {
-    final dynamic result =
-        await methodChannel.invokeMethod<dynamic>('play_episode', media.toJson());
+    final dynamic result = await methodChannel.invokeMethod<dynamic>(
+        'play_episode', media.toJson());
     return result;
   }
+
   @override
   Future<dynamic> playMovie(MovieMedia media) async {
     final dynamic result =
@@ -25,9 +26,9 @@ class MethodChannelDowplay extends DowplayPlatform {
   }
 
   @override
-  Future<bool?> config(Map<String,dynamic> data) async {
+  Future<bool?> config(Map<String, dynamic> data) async {
     final bool? result =
-        await methodChannel.invokeMethod<bool>('config_downloader',data);
+        await methodChannel.invokeMethod<bool>('config_downloader', data);
     return result;
   }
 
@@ -39,16 +40,18 @@ class MethodChannelDowplay extends DowplayPlatform {
   }
 
   @override
-  Future<dynamic> getTvShowSeasonsDownloadList(Map<String,dynamic> data) async {
-    final dynamic result =
-        await methodChannel.invokeMethod<dynamic>('tvshow_seasons_downloads_list',data);
+  Future<dynamic> getTvShowSeasonsDownloadList(
+      Map<String, dynamic> data) async {
+    final dynamic result = await methodChannel.invokeMethod<dynamic>(
+        'tvshow_seasons_downloads_list', data);
     return result;
   }
 
   @override
-  Future<dynamic> getSeasonEpisodesDownloadList(Map<String,dynamic> data) async {
-    final dynamic result =
-        await methodChannel.invokeMethod<dynamic>('season_episodes_downloads_list',data);
+  Future<dynamic> getSeasonEpisodesDownloadList(
+      Map<String, dynamic> data) async {
+    final dynamic result = await methodChannel.invokeMethod<dynamic>(
+        'season_episodes_downloads_list', data);
     return result;
   }
 
@@ -81,24 +84,31 @@ class MethodChannelDowplay extends DowplayPlatform {
   }
 
   @override
-  Future<dynamic> cancelDownload(String mediaId, String mediaType) async {
-    final dynamic result = await methodChannel.invokeMethod<dynamic>(
-        'cancel_download', {"mediaId": mediaId, "mediaType": mediaType});
+  Future<dynamic> cancelDownload(String mediaId, String mediaType,
+      String tvShowId, String seasonId) async {
+    final dynamic result =
+        await methodChannel.invokeMethod<dynamic>('cancel_download', {
+      "mediaId": mediaId,
+      "mediaType": mediaType,
+      "tvshowId": tvShowId,
+      "seasonId": seasonId
+    });
     return result;
   }
 
   @override
   Future<dynamic> getDownloadMovie(String mediaId) async {
-    final dynamic result = await methodChannel.invokeMethod<dynamic>(
-        'get_download_movie', {"media_id": mediaId});
+    final dynamic result = await methodChannel
+        .invokeMethod<dynamic>('get_download_movie', {"media_id": mediaId});
     return result;
   }
 
   @override
-  Future<dynamic> getDownloadEpisode(String mediaId,String tvShowId,String seasonId) async {
+  Future<dynamic> getDownloadEpisode(
+      String mediaId, String tvShowId, String seasonId) async {
     final dynamic result = await methodChannel.invokeMethod<dynamic>(
-        'get_download_episode', {"media_id": mediaId,"tvshow_id": tvShowId,"season_id":seasonId});
+        'get_download_episode',
+        {"media_id": mediaId, "tvshow_id": tvShowId, "season_id": seasonId});
     return result;
   }
-
 }
