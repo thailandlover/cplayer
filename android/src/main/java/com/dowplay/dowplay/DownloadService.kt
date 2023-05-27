@@ -65,8 +65,8 @@ class DownloadService : Service() {
 
                 val config = PRDownloaderConfig.newBuilder()
                     .setDatabaseEnabled(true)
-                    .setReadTimeout(30_000)
-                    .setConnectTimeout(30_000)
+                    .setReadTimeout(60_000)
+                    .setConnectTimeout(60_000)
                     .build()
                 PRDownloader.initialize(this, config)
 
@@ -124,7 +124,7 @@ class DownloadService : Service() {
                             Log.d("Bom::: ", "Is Insert $downloadId is Insert")
                         }
                         Log.d("Bom::: ", "Download ID $downloadId")
-                        if(isFirstTimeToReturnResult) {
+                        if (isFirstTimeToReturnResult) {
                             returnResponsToFlutter(userId.toString(), profileId.toString())
                             isFirstTimeToReturnResult = false
                         }
@@ -230,7 +230,7 @@ class DownloadService : Service() {
                             if (checkMapValuesToEndStartForegroundService(allDownloadIdsStatus)) {
                                 stopService()
                             }
-                            if(isFirstTimeToReturnResult) {
+                            if (isFirstTimeToReturnResult) {
                                 returnResponsToFlutter(userId.toString(), profileId.toString())
                                 isFirstTimeToReturnResult = false
                             }
@@ -320,12 +320,16 @@ class DownloadService : Service() {
 
     private fun returnResponsToFlutter(userId: String, profileId: String) {
         if (canReturnResultToFlutter) {
-            DowplayPlugin.myResultCallback.success(
-                DatabaseHelper(this).getAllDownloadDataFromDB(
-                    userId,
-                    profileId
+            try {
+                DowplayPlugin.myResultCallback.success(
+                    DatabaseHelper(this).getAllDownloadDataFromDB(
+                        userId,
+                        profileId
+                    )
                 )
-            )
+            } catch (e: Exception) {
+                Log.d("Reply is submitted:", "" + e.message)
+            }
         }
     }
 
