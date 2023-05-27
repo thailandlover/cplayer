@@ -285,8 +285,11 @@ import java.security.SecureRandom
             )
             if ((downloadInfo["status"] == DownloadManagerSTATUS.STATUS_SUCCESSFUL || status == Status.RUNNING) && downloadInfo["status"] != null) {
                 Log.d("startDownload Method", "this video is downloaded...")
-                DowplayPlugin.myResultCallback.success(
-                    DatabaseHelper(context).getAllDownloadDataFromDB(userId, profileId))
+                if(canReturnResultToFlutter) {
+                    DowplayPlugin.myResultCallback.success(
+                        DatabaseHelper(context).getAllDownloadDataFromDB(userId, profileId)
+                    )
+                }
                 return 0
             } else {
                 if ((downloadInfo["status"] == DownloadManagerSTATUS.STATUS_RUNNING && status != Status.RUNNING)
@@ -328,8 +331,11 @@ import java.security.SecureRandom
                 return 1
             }
         } else {
-            DowplayPlugin.myResultCallback.success(
-                DatabaseHelper(context).getAllDownloadDataFromDB(userId, profileId))
+            if(canReturnResultToFlutter) {
+                DowplayPlugin.myResultCallback.success(
+                    DatabaseHelper(context).getAllDownloadDataFromDB(userId, profileId)
+                )
+            }
             return 0
         }
     }
