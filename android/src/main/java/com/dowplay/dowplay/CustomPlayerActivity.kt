@@ -297,10 +297,15 @@ class CustomPlayerActivity() : FlutterActivity() {
             )
 
             var watchedMovieArray: List<HashMap<String, Any>> = listOf(result)
-            DowplayPlugin.myResultCallback.success(watchedMovieArray)
-
+            if(DowplayPlugin.myResultCallback != null) {
+                DowplayPlugin.myResultCallback.success(watchedMovieArray)
+                DowplayPlugin.myResultCallback = null
+            }
         } else {
-            DowplayPlugin.myResultCallback.success(watchedEpisodesArray)
+            if(DowplayPlugin.myResultCallback != null) {
+                DowplayPlugin.myResultCallback.success(watchedEpisodesArray)
+                DowplayPlugin.myResultCallback = null
+            }
         }
     }
 
@@ -312,9 +317,7 @@ class CustomPlayerActivity() : FlutterActivity() {
         viewBinding.backButton.setOnClickListener {
             vibratePhone()
             addToWatchingListAPI()
-            if (!changedToPIPMode) {
-                returnDataAfterClosePlayer()
-            }
+            returnDataAfterClosePlayer()
             finish()
         }
         viewBinding.fullScreenScale.setOnClickListener {
@@ -1026,21 +1029,21 @@ class CustomPlayerActivity() : FlutterActivity() {
             }
         }
     }
-    var changedToPIPMode:Boolean = false;
+
     override fun onPictureInPictureModeChanged(isInPictureInPictureMode: Boolean, newConfig: Configuration) {
         super.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig)
         if (lifecycle.currentState == Lifecycle.State.CREATED) {
             //user clicked on close button of PiP window
             Log.d("PiP-is-close", "PiP is close by click on close button")
-            //returnDataAfterClosePlayer()
+            vibratePhone()
+            addToWatchingListAPI()
+            returnDataAfterClosePlayer()
+            finish()
         }
         else if (lifecycle.currentState == Lifecycle.State.STARTED){
             if (isInPictureInPictureMode) {
                 // user clicked on minimize button
-                if(!changedToPIPMode) {
-                    changedToPIPMode = true
-                    returnDataAfterClosePlayer()
-                }
+                returnDataAfterClosePlayer()
                 Log.d("PiP-is-minimize", "PiP is minimize by click on full screen button")
             } else {
                 // user clicked on maximize button of PiP window
@@ -1054,7 +1057,6 @@ class CustomPlayerActivity() : FlutterActivity() {
         Log.d("current stats screen:", "onStart")
         if (startVideoPosition == 0) {
             initToGetDataFromIntentAndTypeMedia()
-            changedToPIPMode = false
         }
         if (Util.SDK_INT > 23) {
             initializePlayer()

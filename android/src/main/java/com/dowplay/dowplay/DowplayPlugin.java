@@ -85,7 +85,7 @@ public class DowplayPlugin extends FlutterActivity implements FlutterPlugin, Met
 
     private static final int REQUEST_FOR_PLAY_MOVIE = 1998;
     private static final int REQUEST_FOR_PLAY_EPISODE = 1999;
-    static Result myResultCallback;
+    static Result myResultCallback = null;
 /*
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
