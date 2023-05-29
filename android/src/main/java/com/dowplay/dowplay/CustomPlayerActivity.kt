@@ -312,7 +312,9 @@ class CustomPlayerActivity() : FlutterActivity() {
         viewBinding.backButton.setOnClickListener {
             vibratePhone()
             addToWatchingListAPI()
-            returnDataAfterClosePlayer()
+            if (!changedToPIPMode) {
+                returnDataAfterClosePlayer()
+            }
             finish()
         }
         viewBinding.fullScreenScale.setOnClickListener {
@@ -1024,17 +1026,21 @@ class CustomPlayerActivity() : FlutterActivity() {
             }
         }
     }
-
+    var changedToPIPMode:Boolean = false;
     override fun onPictureInPictureModeChanged(isInPictureInPictureMode: Boolean, newConfig: Configuration) {
         super.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig)
         if (lifecycle.currentState == Lifecycle.State.CREATED) {
             //user clicked on close button of PiP window
             Log.d("PiP-is-close", "PiP is close by click on close button")
-            returnDataAfterClosePlayer()
+            //returnDataAfterClosePlayer()
         }
         else if (lifecycle.currentState == Lifecycle.State.STARTED){
             if (isInPictureInPictureMode) {
                 // user clicked on minimize button
+                if(!changedToPIPMode) {
+                    changedToPIPMode = true
+                    returnDataAfterClosePlayer()
+                }
                 Log.d("PiP-is-minimize", "PiP is minimize by click on full screen button")
             } else {
                 // user clicked on maximize button of PiP window
