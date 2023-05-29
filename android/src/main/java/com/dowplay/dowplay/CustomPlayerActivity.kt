@@ -5,6 +5,7 @@ import android.app.AlertDialog
 import android.app.PictureInPictureParams
 import android.content.Context
 import android.content.Intent
+import android.content.pm.ActivityInfo
 import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.graphics.Color
@@ -25,6 +26,7 @@ import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
 import androidx.core.view.*
+import androidx.lifecycle.Lifecycle
 import androidx.media3.common.*
 import androidx.media3.common.util.Assertions
 import androidx.media3.common.util.UnstableApi
@@ -1025,9 +1027,19 @@ class CustomPlayerActivity() : FlutterActivity() {
 
     override fun onPictureInPictureModeChanged(isInPictureInPictureMode: Boolean, newConfig: Configuration) {
         super.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig)
-        if (!isInPictureInPictureMode) {
-            // PiP mode is closed
+        if (lifecycle.currentState == Lifecycle.State.CREATED) {
+            //user clicked on close button of PiP window
+            Log.d("PiP-is-close", "PiP is close by click on close button")
             returnDataAfterClosePlayer()
+        }
+        else if (lifecycle.currentState == Lifecycle.State.STARTED){
+            if (isInPictureInPictureMode) {
+                // user clicked on minimize button
+                Log.d("PiP-is-minimize", "PiP is minimize by click on full screen button")
+            } else {
+                // user clicked on maximize button of PiP window
+                Log.d("PiP-is-maximize", "PiP is maximize by click on full screen button")
+            }
         }
     }
 
