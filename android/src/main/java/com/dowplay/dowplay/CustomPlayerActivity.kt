@@ -1054,6 +1054,7 @@ class CustomPlayerActivity() : FlutterActivity() {
         Log.d("current stats screen:", "onStart")
         if (startVideoPosition == 0) {
             initToGetDataFromIntentAndTypeMedia()
+            changedToPIPMode = false
         }
         if (Util.SDK_INT > 23) {
             initializePlayer()
