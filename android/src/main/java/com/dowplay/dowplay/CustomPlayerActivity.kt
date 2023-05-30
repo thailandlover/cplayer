@@ -174,7 +174,7 @@ class CustomPlayerActivity() : FlutterActivity() {
                         playerHasError = false
                         viewBinding.playPauseButton.setImageResource(R.drawable.pause_icon)
                         isReadyPlayer = true
-                        callAddWatchedEpisodesToTheList()
+                        callAddWatchedMediaDataToTheList()
                     }
                     Player.STATE_BUFFERING -> {
                         // The player is not able to immediately play the media, but is doing work toward being able to do so. This state typically occurs when the player needs to buffer more data before playback can start.
@@ -236,56 +236,58 @@ class CustomPlayerActivity() : FlutterActivity() {
     ////////////////////////////////////////////////////////////////////////
     fun lastMediaWatchingData(
         id: Int,
-        type: String,
+        typeMedia: String,
         duration: Double,
         currentTime: Double
     ): HashMap<String, Any> {
         val result = HashMap<String, Any>()
         result["id"] = id
-        result["type"] = type
+        result["type"] = typeMedia
         result["duration"] = duration
         result["currentTime"] = currentTime
 
         return result
     }
 
-    fun callAddWatchedEpisodesToTheList() {
+    fun callAddWatchedMediaDataToTheList() {
         if (isReadyPlayer) {
-            addWatchedEpisodesToTheList(
+            addWatchedMediaDataToTheList(
                 videoMediaID[startVideoPosition].toIntOrNull() ?: 0,
+                mediaType,
                 player?.duration?.div(1000)?.toDouble() ?: 0.0,
                 (player?.currentPosition?.div(1000))?.toDouble() ?: 0.0,
             )
         }
     }
 
-    private var watchedEpisodesArray: List<HashMap<String, Any>> = listOf()
-    fun addWatchedEpisodesToTheList(
+    private var watchedMediaDataArray: List<HashMap<String, Any>> = listOf()
+    fun addWatchedMediaDataToTheList(
         idL: Int,
+        typeMedia: String,
         durationL: Double,
         currentTimeL: Double
     ) {
-        if (mediaType == series) {
-            val isIdNotFound = watchedEpisodesArray.none { it["id"] == idL }
+       // if (mediaType == series) {
+            val isIdNotFound = watchedMediaDataArray.none { it["id"] == idL }
 
             if (isIdNotFound) {
                 //println("ID $idToCheck not found in the array.")
-                val result = lastMediaWatchingData(idL, series, durationL, currentTimeL)
-                watchedEpisodesArray += result
+                val result = lastMediaWatchingData(idL, typeMedia, durationL, currentTimeL)
+                watchedMediaDataArray += result
             } else {
                 //println("ID $idToCheck found in the array.")
-                for (map in watchedEpisodesArray) {
+                for (map in watchedMediaDataArray) {
                     if (map["id"] == idL) {
                         map["duration"] = durationL
                         map["currentTime"] = currentTimeL
                     }
                 }
             }
-        }
+        //}
     }
 
     fun returnDataAfterClosePlayer() {
-        if (mediaType == movie) {
+        /*if (mediaType == movie) {
             /*"{type: movie, duration: " + player?.duration?.div(1000)
                 .toString() + ", currentTime: " + (player?.currentPosition?.div(1000)).toString() + "}"*/
 
@@ -301,12 +303,12 @@ class CustomPlayerActivity() : FlutterActivity() {
                 DowplayPlugin.myResultCallback.success(watchedMovieArray)
                 DowplayPlugin.myResultCallback = null
             }
-        } else {
+        } else {*/
             if(DowplayPlugin.myResultCallback != null) {
-                DowplayPlugin.myResultCallback.success(watchedEpisodesArray)
+                DowplayPlugin.myResultCallback.success(watchedMediaDataArray)
                 DowplayPlugin.myResultCallback = null
             }
-        }
+       // }
     }
 
     ////////////////////////////////////////////////////////////////////////////////
@@ -992,7 +994,7 @@ class CustomPlayerActivity() : FlutterActivity() {
                 //viewBinding.playerView.hideController()
                 Log.d("Heel-GONE", "Bom")
             }
-            callAddWatchedEpisodesToTheList()
+            callAddWatchedMediaDataToTheList()
         })
     }
 
