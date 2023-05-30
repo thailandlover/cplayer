@@ -318,7 +318,8 @@ class CustomPlayerActivity() : FlutterActivity() {
             vibratePhone()
             addToWatchingListAPI()
             returnDataAfterClosePlayer()
-            finish()
+            finishAndRemoveTask()
+            //finish()
         }
         viewBinding.fullScreenScale.setOnClickListener {
             vibratePhone()
@@ -1038,12 +1039,13 @@ class CustomPlayerActivity() : FlutterActivity() {
             vibratePhone()
             addToWatchingListAPI()
             returnDataAfterClosePlayer()
-            finish()
+            finishAndRemoveTask()
         }
         else if (lifecycle.currentState == Lifecycle.State.STARTED){
             if (isInPictureInPictureMode) {
                 // user clicked on minimize button
-                returnDataAfterClosePlayer()
+                addToWatchingListAPI()
+                //returnDataAfterClosePlayer()
                 Log.d("PiP-is-minimize", "PiP is minimize by click on full screen button")
             } else {
                 // user clicked on maximize button of PiP window
@@ -1116,7 +1118,6 @@ class CustomPlayerActivity() : FlutterActivity() {
 
     private var playWhenReady = true
     private var playbackPosition = 0L
-
     private fun releasePlayer() {
         player?.let { exoPlayer ->
             playbackPosition = exoPlayer.currentPosition

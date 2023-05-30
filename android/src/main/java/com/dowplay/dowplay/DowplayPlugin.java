@@ -133,7 +133,6 @@ public class DowplayPlugin extends FlutterActivity implements FlutterPlugin, Met
             profileId = (String) object.get("profile_id");
             lang = (String) object.get("lang");
             accessToken = (String) object.get("access_token");
-
             result.success(true);
 ///////////////////////////////////////////////////////////////////////////////////////////
         } else if (call.method.equals("play_movie")) {
