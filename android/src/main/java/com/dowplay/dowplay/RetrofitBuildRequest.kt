@@ -16,8 +16,8 @@ class RetrofitBuildRequest {
                       authorization: String,
                       acceptLanguage: String){
 
-        Log.d("Send Post Data Watch","profileId $profileId mediaId $mediaId mediaType $mediaType duration $duration time $time" +
-                "url $url acceptLanguage $acceptLanguage authorization $authorization")
+        /*Log.d("Send Post Data Watch","profileId $profileId mediaId $mediaId mediaType $mediaType duration $duration time $time" +
+                "url $url acceptLanguage $acceptLanguage authorization $authorization")*/
         val fullApiUrl = "$url/"
 
         val contentType = "application/x-www-form-urlencoded"

@@ -8,7 +8,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:7.2.2'
+        classpath 'com.android.tools.build:gradle:7.3.1'
     }
 }
 
@@ -19,7 +19,6 @@ rootProject.allprojects {
         jcenter()
     }
 }
-
 apply plugin: 'com.android.library'
 apply plugin: 'org.jetbrains.kotlin.android'
 
@@ -39,7 +38,7 @@ android {
         minSdkVersion 21
     }
 }
-def mediaVersion = "1.0.1"
+def mediaVersion = "1.0.2"
 repositories {
     maven { url "https://jitpack.io" }
     google()
@@ -47,14 +46,14 @@ repositories {
 
 dependencies {
     implementation 'androidx.appcompat:appcompat:1.6.1'
-    implementation 'com.google.android.material:material:1.8.0'
+    implementation 'com.google.android.material:material:1.9.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     //For player
     implementation "androidx.media3:media3-exoplayer:$mediaVersion"
     implementation "androidx.media3:media3-ui:$mediaVersion"
     implementation "androidx.media3:media3-exoplayer-dash:$mediaVersion"
     ///For Model
-    implementation 'com.beust:klaxon:5.5'
+    //implementation 'com.beust:klaxon:5.5'
     implementation 'com.google.code.gson:gson:2.10.1'
     //For API send post data
     implementation 'com.squareup.retrofit2:retrofit:2.9.0'

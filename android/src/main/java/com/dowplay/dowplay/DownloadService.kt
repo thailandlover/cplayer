@@ -57,11 +57,11 @@ class DownloadService : Service() {
                     intent.getBooleanExtra("can_return_result_to_flutter", true)
                 val lang = intent.getStringExtra("lang")
 
-                Log.d("Bom Info", url.toString())
-                Log.d("Bom Info", dirPath.toString())
-                Log.d("Bom Info", fileName.toString())
-                Log.d("Bom Info", fullPath.toString())
-                Log.d("Bom Info", mediaType.toString())
+                //Log.d("Bom Info", url.toString())
+                //Log.d("Bom Info", dirPath.toString())
+                //Log.d("Bom Info", fileName.toString())
+                //Log.d("Bom Info", fullPath.toString())
+                //Log.d("Bom Info", mediaType.toString())
 
                 val config = PRDownloaderConfig.newBuilder()
                     .setDatabaseEnabled(true)

@@ -270,7 +270,7 @@ class DatabaseHelper(innerContext: Context) :
             allDownloadData.add(mapData)
         }
 
-        Log.d("Sqlite Data:", "$mapData")
+        //Log.d("Sqlite Data:", "$mapData")
 
         cursor.close()
         db.close()
@@ -422,8 +422,8 @@ class DatabaseHelper(innerContext: Context) :
             mapData["group"] = mapDataInfo
             allDownloadData += mapData
         }
-        Log.d("Sqlite Data:", "" + allDownloadData)
-        Log.d("Sqlite Data:", gson.toJson(allDownloadData))
+        //Log.d("Sqlite Data:", "" + allDownloadData)
+        //Log.d("Sqlite Data:", gson.toJson(allDownloadData))
 
         cursor.close()
         db.close()
@@ -588,7 +588,7 @@ class DatabaseHelper(innerContext: Context) :
             allDownloadData += mapData
         }
 
-        Log.d("Sqlite Data:", "$allDownloadData")
+        //Log.d("Sqlite Data:", "$allDownloadData")
 
         cursor.close()
         db.close()
@@ -615,7 +615,7 @@ class DatabaseHelper(innerContext: Context) :
         }
 
 
-        Log.d("Sqlite Data count:", "$rowCount")
+        //Log.d("Sqlite Data count:", "$rowCount")
 
         cursor.close()
         db.close()
@@ -652,7 +652,7 @@ class DatabaseHelper(innerContext: Context) :
             downloadData["video_path"] = videoPath
         }
 
-        Log.d("Sqlite Data:", "$downloadData")
+        //Log.d("Sqlite Data:", "$downloadData")
 
         cursor.close()
         db.close()
