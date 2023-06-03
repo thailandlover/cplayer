@@ -12,19 +12,8 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
-
-    <application
-        android:allowBackup="true"
-        android:configChanges="uiMode|orientation|screenSize|screenLayout|smallestScreenSize|screenLayout|density"
-        android:hardwareAccelerated="true"
-        android:largeHeap="true"
-        android:resizeableActivity="true"
-        android:screenOrientation="landscape"
-        android:supportsPictureInPicture="true"
-        android:theme="@style/Theme.CustomPlayerActivity"
-        android:windowSoftInputMode="adjustResize">
-        <activity
-            android:name=".CustomPlayerActivity"
+    <!--
+    android:name=".CustomPlayerActivity"
             android:allowBackup="true"
             android:configChanges="uiMode|orientation|screenSize|screenLayout|smallestScreenSize|screenLayout|density"
             android:exported="false"
@@ -34,7 +23,27 @@
             android:screenOrientation="landscape"
             android:supportsPictureInPicture="true"
             android:theme="@style/Theme.CustomPlayerActivity"
-            android:windowSoftInputMode="adjustResize" />
+            android:windowSoftInputMode="adjustResize"
+    -->
+
+    <application
+        android:configChanges="uiMode|orientation|screenSize|screenLayout|smallestScreenSize|screenLayout|density"
+        android:hardwareAccelerated="true"
+        android:resizeableActivity="true"
+        android:screenOrientation="landscape"
+        android:supportsPictureInPicture="true"
+        android:theme="@style/Theme.CustomPlayerActivity"
+        android:windowSoftInputMode="adjustResize">
+        <activity
+            android:name=".CustomPlayerActivity"
+            android:configChanges="uiMode|orientation|screenSize|screenLayout|smallestScreenSize|screenLayout|density"
+            android:exported="false"
+            android:hardwareAccelerated="true"
+            android:resizeableActivity="true"
+            android:screenOrientation="landscape"
+            android:supportsPictureInPicture="true"
+            android:theme="@style/Theme.CustomPlayerActivity"
+            android:windowSoftInputMode="adjustResize"/>
         <service
             android:name=".DownloadService"
             android:enabled="true"

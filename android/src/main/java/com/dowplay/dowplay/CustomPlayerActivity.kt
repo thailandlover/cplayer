@@ -95,7 +95,7 @@ class CustomPlayerActivity() : FlutterActivity() {
 
     private fun initializePlayer() {
 
-        val loadControl: LoadControl = DefaultLoadControl.Builder()
+        /*val loadControl: LoadControl = DefaultLoadControl.Builder()
             .setAllocator(DefaultAllocator(true, C.DEFAULT_BUFFER_SEGMENT_SIZE))
             .setBufferDurationsMs(
                 15000, // Min buffer duration
@@ -104,19 +104,18 @@ class CustomPlayerActivity() : FlutterActivity() {
                 5000   // Buffer for rebuffering
             )
             .setTargetBufferBytes(-1)
-            .setPrioritizeTimeOverSizeThresholds(true).build()
+            .setPrioritizeTimeOverSizeThresholds(true).build()*/
 
         trackSelection = DefaultTrackSelector(this).apply {
             setParameters(buildUponParameters().setMaxVideoSizeSd())
             // Enable hardware acceleration
-            setParameters(buildUponParameters().setRendererDisabled(C.TRACK_TYPE_VIDEO, false))
+            //setParameters(buildUponParameters().setRendererDisabled(C.TRACK_TYPE_VIDEO, false))
         }
         player = ExoPlayer.Builder(this)
-            .setSkipSilenceEnabled(true)
             .setVideoScalingMode(2)
             .setAudioAttributes(AudioAttributes.DEFAULT, false)
             .setTrackSelector(trackSelection)
-            .setLoadControl(loadControl)
+            //.setLoadControl(loadControl)
             .build()
             .also { exoPlayer ->
                 //val mediaItem = MediaItem.fromUri("https://thekee.gcdn.co/video/m-159n/English/Animation&Family/Klaus.2019.1080pAr.mp4")

@@ -68,7 +68,7 @@
         android:id="@+id/topController"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#42000000"
+        android:background="#66000000"
         android:orientation="horizontal"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
