@@ -77,7 +77,6 @@ class CustomPlayerActivity() : FlutterActivity() {
     //var currentVideoIndex = 0
 
     lateinit var trackSelection: DefaultTrackSelector
-    private lateinit var wakeLock: PowerManager.WakeLock
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -85,14 +84,6 @@ class CustomPlayerActivity() : FlutterActivity() {
 
         Log.d("current stats screen:", "onCreate")
         setContentView(viewBinding.root)
-
-        // Acquire a wake lock to keep the device awake
-        val powerManager = getSystemService(Context.POWER_SERVICE) as PowerManager
-        wakeLock = powerManager.newWakeLock(
-            PowerManager.PARTIAL_WAKE_LOCK,
-            "downplay:ExoPlayerWakeLock"
-        )
-        wakeLock.acquire()
 
         initializeBinding()
     }
@@ -131,8 +122,13 @@ class CustomPlayerActivity() : FlutterActivity() {
                 /////////////////////
                 exoPlayer.setMediaItems(mediaItem)
                 exoPlayer.seekToDefaultPosition(startVideoPosition)
+
+                // Set the wake mode to keep the player awake
+                //exoPlayer.setWakeMode(C.WAKE_MODE_LOCAL);
+
                 exoPlayer.prepare()
                 exoPlayer.play()
+                viewBinding.playerView.keepScreenOn = true
                 viewBinding.playerView.player = exoPlayer
                 //val bufferSize = 10 * 1024 * 1024 // 10 MB
                 player?.playWhenReady = true
@@ -1093,7 +1089,7 @@ class CustomPlayerActivity() : FlutterActivity() {
     public override fun onStart() {
         super.onStart()
         //Log.d("current stats screen:", "onStart")
-        if (exoplayerIsNotRun/*startVideoPosition == 0*/) {
+        if (exoplayerIsNotRun) {
             initToGetDataFromIntentAndTypeMedia()
         }
         if (Util.SDK_INT > 23) {
@@ -1138,10 +1134,6 @@ class CustomPlayerActivity() : FlutterActivity() {
         super.onDestroy()
         //Log.d("current stats screen:", "onDestroy")
         addToWatchingListAPI()
-        // Release the wake lock when the activity is destroyed or ExoPlayer stops
-        if (wakeLock.isHeld) {
-            wakeLock.release()
-        }
         //finish()
         /*if (Util.SDK_INT > 23) {
             releasePlayer()
