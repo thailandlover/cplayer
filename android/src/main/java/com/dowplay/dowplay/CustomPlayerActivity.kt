@@ -395,16 +395,16 @@ class CustomPlayerActivity() : FlutterActivity() {
         }
     }
 
-    var enable: Boolean = false
+    var enableFullScreen: Boolean = true
     private fun fullScreenScale() {
-        if (enable) {
+        if (enableFullScreen) {
             viewBinding.playerView.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FILL
             player?.videoScalingMode = C.VIDEO_SCALING_MODE_SCALE_TO_FIT
-            enable = false
+            enableFullScreen = false
         } else {
             viewBinding.playerView.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
             player?.videoScalingMode = C.VIDEO_SCALING_MODE_SCALE_TO_FIT
-            enable = true
+            enableFullScreen = true
         }
     }
 
