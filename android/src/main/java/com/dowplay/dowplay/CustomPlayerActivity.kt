@@ -177,6 +177,7 @@ class CustomPlayerActivity() : FlutterActivity() {
                         viewBinding.playPauseButton.setImageResource(R.drawable.pause_icon)
                         isReadyPlayer = true
                         callAddWatchedMediaDataToTheList()
+                        exoplayerIsNotRun = false
                     }
                     Player.STATE_BUFFERING -> {
                         // The player is not able to immediately play the media, but is doing work toward being able to do so. This state typically occurs when the player needs to buffer more data before playback can start.
@@ -1092,7 +1093,7 @@ class CustomPlayerActivity() : FlutterActivity() {
     public override fun onStart() {
         super.onStart()
         //Log.d("current stats screen:", "onStart")
-        if (startVideoPosition == 0) {
+        if (exoplayerIsNotRun/*startVideoPosition == 0*/) {
             initToGetDataFromIntentAndTypeMedia()
         }
         if (Util.SDK_INT > 23) {
@@ -1156,6 +1157,7 @@ class CustomPlayerActivity() : FlutterActivity() {
 
     private var playWhenReady = true
     private var playbackPosition = 0L
+    private var exoplayerIsNotRun = true
     private fun releasePlayer() {
         player?.let { exoPlayer ->
             playbackPosition = exoPlayer.currentPosition
