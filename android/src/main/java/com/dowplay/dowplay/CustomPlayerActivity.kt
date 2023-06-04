@@ -9,10 +9,8 @@ import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.graphics.Color
 import android.net.Uri
-import android.os.Build
-import android.os.Bundle
-import android.os.VibrationEffect
-import android.os.Vibrator
+import android.os.*
+import android.os.PowerManager.WakeLock
 import android.provider.Settings
 import android.util.Log
 import android.util.Rational
@@ -30,13 +28,10 @@ import androidx.media3.common.*
 import androidx.media3.common.util.Assertions
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.common.util.Util
-import androidx.media3.exoplayer.DefaultLoadControl
 import androidx.media3.exoplayer.ExoPlayer
-import androidx.media3.exoplayer.LoadControl
 import androidx.media3.exoplayer.source.TrackGroupArray
 import androidx.media3.exoplayer.trackselection.DefaultTrackSelector
 import androidx.media3.exoplayer.trackselection.MappingTrackSelector
-import androidx.media3.exoplayer.upstream.DefaultAllocator
 import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.DefaultTrackNameProvider
 import androidx.media3.ui.PlayerView
@@ -82,6 +77,7 @@ class CustomPlayerActivity() : FlutterActivity() {
     //var currentVideoIndex = 0
 
     lateinit var trackSelection: DefaultTrackSelector
+    private lateinit var wakeLock: PowerManager.WakeLock
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -89,6 +85,14 @@ class CustomPlayerActivity() : FlutterActivity() {
 
         Log.d("current stats screen:", "onCreate")
         setContentView(viewBinding.root)
+
+        // Acquire a wake lock to keep the device awake
+        val powerManager = getSystemService(Context.POWER_SERVICE) as PowerManager
+        wakeLock = powerManager.newWakeLock(
+            PowerManager.PARTIAL_WAKE_LOCK,
+            "downplay:ExoPlayerWakeLock"
+        )
+        wakeLock.acquire()
 
         initializeBinding()
     }
@@ -1133,6 +1137,10 @@ class CustomPlayerActivity() : FlutterActivity() {
         super.onDestroy()
         //Log.d("current stats screen:", "onDestroy")
         addToWatchingListAPI()
+        // Release the wake lock when the activity is destroyed or ExoPlayer stops
+        if (wakeLock.isHeld) {
+            wakeLock.release()
+        }
         //finish()
         /*if (Util.SDK_INT > 23) {
             releasePlayer()
