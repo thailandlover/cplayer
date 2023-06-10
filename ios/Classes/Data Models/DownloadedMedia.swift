@@ -67,6 +67,7 @@ public struct DownloadedMedia : Codable{
     
     //Use only if the media is not downloaded yet (in progress)
     var status : URLSessionTask.State = .completed
+    var retrivalStatus : Int?
     var progress : Double = 1
     
     enum CodingKeys: CodingKey {
@@ -79,6 +80,7 @@ public struct DownloadedMedia : Codable{
         case data
         case progress
         case mediaRetrivalType
+        case retrivalStatus
     }
     
     init(mediaId: String, mediaURL: URL? = nil, mediaType: MediaManager.MediaType = .movie, name: String, tempPath: URL?) {
@@ -114,6 +116,27 @@ public struct DownloadedMedia : Codable{
             self.mediaType = .movie
         }
     }
+    
+    func reCallRequest()->String?{
+        if let url = mediaURL {
+            if let task = DownloadManager.shared.startDownload(url: url,
+                                                 forMediaId: Int(mediaId) ?? 0,
+                                                 mediaName: name,
+                                                 type: mediaType,
+                                                 mediaGroup: group,
+                                                               object: object,
+            shouldStart: !(retrivalStatus == 1)){
+                
+                DownloadManager.shared.updateTasks()
+                
+//                if retrivalStatus == 1 {
+//                    task.suspend()
+//                }
+                return task.mediaId
+            }
+        }
+        return nil
+    }
    
     
 //    var mediaDownloadName : String {
@@ -124,6 +147,12 @@ public struct DownloadedMedia : Codable{
     mutating func setUser(signature: String)->DownloadedMedia {
         self.signature = signature
         return self
+    }
+    
+    mutating func saveDownloadStatus(taskId: String, signature: String, url: URL?){
+        self.retrivalStatus = status.rawValue
+        self.mediaURL = url
+        FilesManager.shared.saveTempData(id: taskId, data: self, user: signature)
     }
     
     func store(signature: String) throws{

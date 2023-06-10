@@ -20,7 +20,7 @@ struct PlayingInfo : Codable{
 public class KeeVideoPlayerController: UIViewController {
     public var settings : HostAppSettings = .default
     public static var orientationLock = UIInterfaceOrientationMask.portrait
-    public var controllersStayTime : Double = 2.5
+    public var controllersStayTime : Double = 5
     var routerPickerView :  AVRoutePickerView!
     private var queuePlayer : AVQueuePlayer?
     private var playerLayer : AVPlayerLayer!
@@ -795,7 +795,7 @@ public class KeeVideoPlayerController: UIViewController {
     private func hideViews(){
          func hideInfoView(){
             if vi_infoView.topConstraint?.constant == 0 { // still visible
-                animator.animateTo(forView: vi_infoView, topConstant: -(vi_infoView.frame.height + 4))
+                animator.animateTo(forView: vi_infoView, topConstant: -(vi_infoView.frame.height + 8))
             }
         }
         

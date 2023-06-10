@@ -52,6 +52,9 @@ public class FilesManager {
         }
     }
     
+    
+    
+    
     private func createCachingDirectory()throws{
         let dir = documentsDirectory.appendingPathComponent("DownloadCache").path
         if !checkFolderExistance(dir: dir){
@@ -240,6 +243,40 @@ public class FilesManager {
             }
         }
         return false
+    }
+    
+    func saveTempData(id: String, data: DownloadedMedia, user: String){
+        let dirPath = cache.appendingPathComponent(user)
+        let fullPath = dirPath.appendingPathComponent(id + ".keetmp")
+        if checkFolderExistance(dir: dirPath.absoluteString) == false {
+            try? fm.createDirectory(at: dirPath, withIntermediateDirectories: true)
+        }
+        print(fullPath)
+        if let data = try? JSONEncoder().encode(data) {
+            try? data.write(to: fullPath)
+            print("Done")
+        }
+    }
+    
+    func clearTempDataFor(id: String, user: String){
+        let dirPath = cache.appendingPathComponent(user)
+        let fullPath = dirPath.appendingPathComponent(id + ".keetmp")
+        try? fm.removeItem(at: fullPath)
+    }
+    
+    public func getTempData(user: String)->[DownloadedMedia]{
+        var list : [DownloadedMedia] = []
+        let dirPath = cache.appendingPathComponent(user)
+        let contentsList = try? fm.contentsOfDirectory(at: dirPath, includingPropertiesForKeys: nil)
+        for file in contentsList ?? [] {
+            if let data = try? Data(contentsOf: file){
+                if var media = try? JSONDecoder().decode(DownloadedMedia.self, from: data) {
+                    media.status = media.retrivalStatus == 0 ? .running : .suspended
+                    list.append(media)
+                }
+            }
+        }
+        return list
     }
     
     

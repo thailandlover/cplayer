@@ -6,20 +6,30 @@
 //
 
 import UIKit
-
+import AVKit
 
 
 public class MediaManager {
     
     static var `default` = MediaManager()
     private var currentPlayer : KeeVideoPlayerController?
-    
+    private var once = false
     
     private init(){}
 
     //MARK: -Media Player Functions.
     
     public func openMediaPlayer(usingMediaList list : [Media],playMediaIndex: Int = 0, usingSettings settings: HostAppSettings,  forViewController mvc: UIViewController) async ->[[String:Any]]{
+        
+        if !once {
+            once = true
+            let session = AVAudioSession.sharedInstance()
+            do {
+                try session.setCategory(.playback, mode: .moviePlayback)
+            } catch let err {
+                print(err.localizedDescription)
+            }
+        }
         
         if playMediaIndex < 0 || playMediaIndex >= list.count {
             let name = NSExceptionName("Playing index is not in the media list range")

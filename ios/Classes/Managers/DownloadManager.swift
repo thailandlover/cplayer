@@ -37,17 +37,25 @@ public class DownloadManager: NSObject/*, ObservableObject */{
         self.settings = useSettings
         FilesManager.shared.setUser(userSignature)
         configed = true
+        let tmpList = FilesManager.shared.getTempData(user: userSignature)
+        for media in tmpList {
+            if let tasId = media.reCallRequest() {
+                FilesManager.shared.clearTempDataFor(id: tasId, user: userSignature)
+            }
+        }
     }
 
+    @discardableResult
     public func startDownload(url: URL,
                               forMediaId id :Int,
                               mediaName: String = "",
                               type: MediaManager.MediaType,
                               mediaGroup: MediaGroup?,
-                              object: [String:Any]? = nil)  {
-        if !configed {return}
+                              object: [String:Any]? = nil,
+                              shouldStart : Bool = true)->URLSessionDownloadTask?  {
+        if !configed {return nil}
         if tasks.contains(where: {$0.currentRequest?.url == url}) {
-            return 
+            return nil
         }
         
         let task = urlSession.downloadTask(with: url)
@@ -55,23 +63,36 @@ public class DownloadManager: NSObject/*, ObservableObject */{
         task.taskDescription = mediaName
         task.mediaId = "\(id)_\(type.version_3_value)_\(userSignature)" //mediaID format (3255_movie) or (36970_series)
         task.countOfBytesClientExpectsToReceive = 5 * (1024 * 1024 * 1024)
-        task.resume()
+        if shouldStart{
+            task.resume()
+        }
         tasks.append(task)
         
         if let object = object, let data = try? JSONSerialization.data(withJSONObject: object, options: .prettyPrinted){
             UserDefaults.standard.set(data, forKey: "\(id)_\(type.version_3_value)_\(userSignature)")
         }
         mediaGroup?.register()
-        
+        return task
     }
 
     func updateTasks() {
         urlSession.getAllTasks { tasks in
             DispatchQueue.main.async {
-                self.tasks = tasks
+                self.tasks = tasks.filter({$0.state != .completed})
                 self.didLoadPreListedTasks?()
             }
         }
+    }
+    
+    public func saveDownloadStatus(){
+        tasks.forEach({ task in
+            if let downloadTask = task as? URLSessionDownloadTask{
+                var media = self.extractMedia(usingTask: downloadTask)
+                media.saveDownloadStatus(taskId: task.mediaId!, signature: userSignature, url: task.originalRequest?.url)
+                task.cancel()
+            }
+        })
+        
     }
     
     //MARK: - Getting Download Task Progress
@@ -406,6 +427,7 @@ extension DownloadManager: URLSessionDelegate, URLSessionDownloadDelegate {
         
         do{
             try obj.store(signature: userSignature)
+            
         }catch{
             print("Error:\(error)")
         }
