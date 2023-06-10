@@ -35,41 +35,64 @@ public class DownloadManager: NSObject/*, ObservableObject */{
     
     public func config(useSettings : HostAppSettings){
         self.settings = useSettings
+        FilesManager.shared.setUser(userSignature)
         configed = true
+        let tmpList = FilesManager.shared.getTempData(user: userSignature)
+        for media in tmpList {
+            if let tasId = media.reCallRequest() {
+                FilesManager.shared.clearTempDataFor(id: tasId, user: userSignature)
+            }
+        }
     }
 
+    @discardableResult
     public func startDownload(url: URL,
                               forMediaId id :Int,
                               mediaName: String = "",
                               type: MediaManager.MediaType,
                               mediaGroup: MediaGroup?,
-                              object: [String:Any]? = nil)  {
-        if !configed {return}
+                              object: [String:Any]? = nil,
+                              shouldStart : Bool = true)->URLSessionDownloadTask?  {
+        if !configed {return nil}
         if tasks.contains(where: {$0.currentRequest?.url == url}) {
-            return 
+            return nil
         }
         
         let task = urlSession.downloadTask(with: url)
 
         task.taskDescription = mediaName
         task.mediaId = "\(id)_\(type.version_3_value)_\(userSignature)" //mediaID format (3255_movie) or (36970_series)
-        task.resume()
+        task.countOfBytesClientExpectsToReceive = 5 * (1024 * 1024 * 1024)
+        if shouldStart{
+            task.resume()
+        }
         tasks.append(task)
         
         if let object = object, let data = try? JSONSerialization.data(withJSONObject: object, options: .prettyPrinted){
             UserDefaults.standard.set(data, forKey: "\(id)_\(type.version_3_value)_\(userSignature)")
         }
         mediaGroup?.register()
-        
+        return task
     }
 
     func updateTasks() {
         urlSession.getAllTasks { tasks in
             DispatchQueue.main.async {
-                self.tasks = tasks
+                self.tasks = tasks.filter({$0.state != .completed})
                 self.didLoadPreListedTasks?()
             }
         }
+    }
+    
+    public func saveDownloadStatus(){
+        tasks.forEach({ task in
+            if let downloadTask = task as? URLSessionDownloadTask{
+                var media = self.extractMedia(usingTask: downloadTask)
+                media.saveDownloadStatus(taskId: task.mediaId!, signature: userSignature, url: task.originalRequest?.url)
+                task.cancel()
+            }
+        })
+        
     }
     
     //MARK: - Getting Download Task Progress
@@ -81,7 +104,7 @@ public class DownloadManager: NSObject/*, ObservableObject */{
     
     func getDownloadTask(withMediaId id: String, forType type: MediaManager.MediaType)->URLSessionTask?{
         if !configed {return nil}
-        let taskId = "\(id)_\(type.rawValue)_\(userSignature)"
+        let taskId = "\(id)_\(type.version_3_value)_\(userSignature)"
         return tasks.first(where: {$0.mediaId == taskId})
     }
     
@@ -90,6 +113,33 @@ public class DownloadManager: NSObject/*, ObservableObject */{
     }
     
     
+    public func getDownloadedMovie(_ id: String)-> DownloadedMedia?{
+        if var completed = try? FilesManager.shared.getDownloadeMovieById(id){
+            return completed.setUser(signature: userSignature)
+        }
+        
+        if let task = getDownloadTask(withMediaId: id, forType: .movie) as? URLSessionDownloadTask{
+            var media = extractMedia(usingTask: task)
+            return media.setUser(signature: userSignature)
+        }
+        
+        return nil
+        
+    }
+    
+    public func getDownloadedEpisode(_ id: String, seasonId: String, tvShowId: String)-> DownloadedMedia?{
+        if let completed = FilesManager.shared.getDownloadedEpisode(id: id, season: seasonId, series: tvShowId){
+            return completed
+        }
+        
+        if let task = getDownloadTask(withMediaId: id, forType: .series) as? URLSessionDownloadTask{
+            return extractMedia(usingTask: task)
+        }
+        
+        return nil
+        
+    }
+        
     //MARK: - Cancel Download Functions
     public func cancelAll(){
         if !configed {return}
@@ -97,9 +147,24 @@ public class DownloadManager: NSObject/*, ObservableObject */{
         tasks.removeAll()
     }
     
-    public func cancelMedia(withMediaId id: String, forType type: MediaManager.MediaType){
+    public func cancelMedia(withMediaId id: String,
+                            seasonId : String? = nil,
+                            showId : String? = nil,
+                            forType type: MediaManager.MediaType){
         if !configed {return}
-        let taskId = "\(id)_\(type.rawValue)_\(userSignature)"
+        do{
+            if type == .movie {
+                try FilesManager.shared.deleteMovieBy(id: id)
+            }else {
+                if let sId = seasonId, let tvId = showId {
+                    FilesManager.shared.deleteEpisodeById(id, season: sId, series: tvId)
+                }                
+            }
+        }catch{
+            
+        }
+        
+        let taskId = "\(id)_\(type.version_3_value)_\(userSignature)"
         cancelTask(withID: taskId)
     }
     
@@ -118,7 +183,7 @@ public class DownloadManager: NSObject/*, ObservableObject */{
     
     public func pauseDownload(forMediaId id: String, ofType type: MediaManager.MediaType){
         if !configed {return}
-        let taskId = "\(id)_\(type.rawValue)_\(userSignature)"
+        let taskId = "\(id)_\(type.version_3_value)_\(userSignature)"
         pauseDownload(forTaskID: taskId)
     }
     
@@ -130,7 +195,7 @@ public class DownloadManager: NSObject/*, ObservableObject */{
     //MARK: - Resume Download Functions
     public func resumeDownload(forMediaId id: String, ofType type: MediaManager.MediaType){
         if !configed {return}
-        let taskId = "\(id)_\(type.rawValue)_\(userSignature)"
+        let taskId = "\(id)_\(type.version_3_value)_\(userSignature)"
         resumeDownload(forTaskID: taskId)
     }
     
@@ -143,13 +208,13 @@ public class DownloadManager: NSObject/*, ObservableObject */{
     //MARK: - Check Download Status Functions
     ///is downloading regardless the status
     public func isDownloadingMediaWithID(_ id : String, ofType type: MediaManager.MediaType)->Bool{
-        let taskId = "\(id)_\(type.rawValue)_\(userSignature)"
+        let taskId = "\(id)_\(type.version_3_value)_\(userSignature)"
         return tasks.contains(where: {taskId == "\($0.mediaId ?? "")"})
     }
     
     ///is downloading and is suspended
     public func isDownloadingMediaWithIDSuspended(_ id : String, ofType type: MediaManager.MediaType)->Bool{
-        let taskId = "\(id)_\(type.rawValue)_\(userSignature)"
+        let taskId = "\(id)_\(type.version_3_value)_\(userSignature)"
         return tasks.first(where: {taskId == "\($0.mediaId ?? "")"})?.state == .suspended
     }
     
@@ -180,17 +245,34 @@ public class DownloadManager: NSObject/*, ObservableObject */{
         
         allMedia.append(contentsOf: movieTasks)
         allMedia.append(contentsOf: convrtedSeriseTasks)
-        allMedia.append(contentsOf: FilesManager.shared.getAllDownloadedMedia())
+        
+        var localMediaList = FilesManager.shared.getAllDownloadedMedia()
+        localMediaList = localMediaList.filter({ item in
+            print(item.mediaId)
+            return !(allMedia.contains(where: {$0.mediaId == item.mediaId}))
+        })
+        
+        
+        allMedia.append(contentsOf: localMediaList)
         
         return allMedia
     }
+    
     public func getAllMedia(ForSerise seriesID: String) throws -> [DownloadedMedia]{
         guard configed else {throw DonwloadManagerError.managerIsNotConfiged}
         var allMedia : [DownloadedMedia] = []
         allMedia.append(contentsOf: getDownloadingSeasons(forSerise: seriesID))
-        allMedia.append(contentsOf:FilesManager.shared.getSeasons(forSeriseID: seriesID))
+        
+        var localMediaList = FilesManager.shared.getSeasons(forSeriseID: seriesID)
+        localMediaList = localMediaList.filter({ item in
+            print(item.mediaId)
+            return !(allMedia.contains(where: {$0.mediaId == item.mediaId}))
+        })
+        
+        allMedia.append(contentsOf:localMediaList)
         return allMedia
     }
+    
     public func getAllEpisodes(forSeason sID: String, atSeriesID id: String)throws -> [DownloadedMedia] {
         guard configed else {throw DonwloadManagerError.managerIsNotConfiged}
         var allMedia : [DownloadedMedia] = []
@@ -199,17 +281,23 @@ public class DownloadManager: NSObject/*, ObservableObject */{
         return allMedia
     }
     
-    
-    public func getAllMediaDecoded()-> [[String:Any]] {
-        return (try? self.getAllMedia().getEncodedDictionary()) ?? []
+
+    public func getAllMediaDecoded(sortKey : MediaSortKey = .id,
+                                   sortOrder: OrderType = .asce)-> [[String:Any]] {
+        return (try? self.getAllMedia().sortMedia(sortKey, type: sortOrder).getEncodedDictionary()) ?? []
     }
     
-    public func getAllSeasonsDecoded(forSeries id: String)-> [[String:Any]] {
-        return (try? self.getAllMedia(ForSerise: id).getEncodedDictionary()) ?? []
+    public func getAllSeasonsDecoded(forSeries id: String,
+                                     sortKey : MediaSortKey = .id,
+                                     sortOrder: OrderType = .asce)-> [[String:Any]] {
+        return (try? self.getAllMedia(ForSerise: id).sortMedia(sortKey, type: sortOrder).getEncodedDictionary()) ?? []
     }
     
-    public func getAllEpisodesDecoded(forSeason sID: String, atSeriesID id: String)-> [[String:Any]] {
-        return (try? self.getAllEpisodes(forSeason: sID, atSeriesID: id).getEncodedDictionary()) ?? []
+    public func getAllEpisodesDecoded(forSeason sID: String,
+                                      atSeriesID id: String,
+                                      sortKey : MediaSortKey = .id,
+                                      sortOrder: OrderType = .asce)-> [[String:Any]] {
+        return (try? self.getAllEpisodes(forSeason: sID, atSeriesID: id).sortMedia(sortKey, type: sortOrder).getEncodedDictionary()) ?? []
     }
     
     
@@ -243,7 +331,8 @@ public class DownloadManager: NSObject/*, ObservableObject */{
             return pureType != "movies"
         }).map({task in
             if let t = task as? URLSessionDownloadTask {
-                return extractMedia(usingTask: t)
+                let media = extractMedia(usingTask: t)
+                return media.group?.showId == id ? media : nil
             }
             return nil
         }).compactMap({$0})
@@ -338,6 +427,7 @@ extension DownloadManager: URLSessionDelegate, URLSessionDownloadDelegate {
         
         do{
             try obj.store(signature: userSignature)
+            
         }catch{
             print("Error:\(error)")
         }
@@ -363,6 +453,10 @@ extension DownloadManager: URLSessionDelegate, URLSessionDownloadDelegate {
             print("Finish")
         }
     }
+    
+    
+    
+    
 }
 
 

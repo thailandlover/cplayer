@@ -19,8 +19,6 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.media3.common.util.UnstableApi;
 
-import com.beust.klaxon.Klaxon;
-
 import io.flutter.embedding.android.FlutterActivity;
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
 import io.flutter.embedding.engine.plugins.activity.ActivityAware;
@@ -31,8 +29,11 @@ import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
 import io.flutter.plugin.common.MethodChannel.Result;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 @UnstableApi
@@ -49,7 +50,8 @@ public class DowplayPlugin extends FlutterActivity implements FlutterPlugin, Met
     String userId = "";
     String profileId = "";
     String lang = "";
-
+    static String accessToken = "";
+    
     @Override
     public void onAttachedToActivity(ActivityPluginBinding binding) {
         activity = binding.getActivity();
@@ -81,7 +83,7 @@ public class DowplayPlugin extends FlutterActivity implements FlutterPlugin, Met
 
     private static final int REQUEST_FOR_PLAY_MOVIE = 1998;
     private static final int REQUEST_FOR_PLAY_EPISODE = 1999;
-    static Result myResultCallback;
+    static Result myResultCallback = null;
 /*
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -119,9 +121,16 @@ public class DowplayPlugin extends FlutterActivity implements FlutterPlugin, Met
             Log.d(TAG, "onMethodCall: config_downloader");
             Log.d(TAG, "onMethodCall: " + call.arguments.toString());
             ///{user_id=245394, profile_id=562674, lang=ar}
-            userId = call.arguments.toString().replaceAll(".*user_id=(\\d+).*", "$1");
-            profileId = call.arguments.toString().replaceAll(".*profile_id=(\\d+).*", "$1");
-            lang = call.arguments.toString().replaceAll(".*lang=(.+).*", "$1");
+            //userId = call.arguments.toString().replaceAll(".*user_id=(\\d+).*", "$1");
+            //profileId = call.arguments.toString().replaceAll(".*profile_id=(\\d+).*", "$1");
+            //lang = call.arguments.toString().replaceAll(".*lang=(.+).*", "$1");
+            Gson gson = new Gson();
+            String json = gson.toJson(call.arguments);
+            HashMap<String, Object> object = gson.fromJson(json, HashMap.class);
+            userId = (String) object.get("user_id");
+            profileId = (String) object.get("profile_id");
+            lang = (String) object.get("lang");
+            accessToken = (String) object.get("access_token");
             result.success(true);
 ///////////////////////////////////////////////////////////////////////////////////////////
         } else if (call.method.equals("play_movie")) {
@@ -161,7 +170,12 @@ public class DowplayPlugin extends FlutterActivity implements FlutterPlugin, Met
             Log.d(TAG, "onMethodCall: tvshow_seasons_downloads_list");
             Log.d(TAG, "onMethodCall: " + call.arguments.toString());
             //{tvshow_id=1532}
-            String tvshowId = call.arguments.toString().replaceAll(".*tvshow_id=(\\d+).*", "$1");
+            //String tvshowId = call.arguments.toString().replaceAll(".*tvshow_id=(\\d+).*", "$1");
+            Gson gson = new Gson();
+            String json = gson.toJson(call.arguments);
+            HashMap<String, Object> object = gson.fromJson(json, HashMap.class);
+            String tvshowId = (String) object.get("tvshow_id");
+
             Log.d(TAG, "onMethodCall: > " + tvshowId);
             result.success(new DownloaderDowPlay(context, activity, lang).getAllSeasons(tvshowId));
 //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -169,8 +183,13 @@ public class DowplayPlugin extends FlutterActivity implements FlutterPlugin, Met
             Log.d(TAG, "onMethodCall: season_episodes_downloads_list");
             Log.d(TAG, "onMethodCall: " + call.arguments.toString());
             //String input = "{season_id=3236, tvshow_id=1532}";
-            String seasonId = call.arguments.toString().replaceAll(".*season_id=(\\d+).*", "$1");
-            String tvshowId = call.arguments.toString().replaceAll(".*tvshow_id=(\\d+).*", "$1");
+            //String seasonId = call.arguments.toString().replaceAll(".*season_id=(\\d+).*", "$1");
+            //String tvshowId = call.arguments.toString().replaceAll(".*tvshow_id=(\\d+).*", "$1");
+            Gson gson = new Gson();
+            String json = gson.toJson(call.arguments);
+            HashMap<String, Object> object = gson.fromJson(json, HashMap.class);
+            String seasonId = (String) object.get("season_id");
+            String tvshowId = (String) object.get("tvshow_id");
             Log.d(TAG, "onMethodCall: " + seasonId + " > " + tvshowId);
             result.success(new DownloaderDowPlay(context, activity, lang).getAllEpisodes(seasonId, tvshowId));
 //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -179,52 +198,99 @@ public class DowplayPlugin extends FlutterActivity implements FlutterPlugin, Met
             Log.d(TAG, "onMethodCall: " + call.arguments.toString());
             Gson gson = new Gson();
             String json = gson.toJson(call.arguments);
-            MovieMedia movieMedia = MovieMedia.Companion.fromJson(json);
-            System.out.println("B7b Gson::: " + movieMedia);
-            new DownloaderDowPlay(context, activity, lang).startDownload(movieMedia.getInfo().getDownloadURL(), movieMedia.getTitle(), movieMedia.getMediaType(),
-                    movieMedia.getMediaID(), call.arguments.toString(), movieMedia.getUserID(), movieMedia.getProfileID(), "", "", "", "", "", "");
+            //MovieMedia movieMedia = MovieMedia.Companion.fromJson(json);
+            MovieMedia movieMedia = gson.fromJson(json, MovieMedia.class);
+            //System.out.println("B7b Gson::: " + movieMedia);
+            myResultCallback = result;
+            new DownloaderDowPlay(context, activity, lang).startDownload(movieMedia.getInfo().getDownloadUrl(), movieMedia.getTitle(), movieMedia.getMediaType(),
+                    movieMedia.getMediaId(), json, movieMedia.getUserId(), movieMedia.getProfileId(), "", "", "", "", "", "", "",true);
 
-            result.success(new DownloaderDowPlay(context, activity, lang).getAllDownloadMedia(userId, profileId));
+            //result.success(new DownloaderDowPlay(context, activity, lang).getAllDownloadMedia(userId, profileId));
 //////////////////////////////////////////////////////////////////////////////////////////////////
         } else if (call.method.equals("start_download_episode")) {
-            Log.d(TAG, "onMethodCall: start_download_episode");
-            Log.d(TAG, "onMethodCall: " + call.arguments.toString());
+            //Log.d(TAG, "onMethodCall: start_download_episode");
+            //Log.d(TAG, "onMethodCall: " + call.arguments.toString());
             Gson gson = new Gson();
             String json = gson.toJson(call.arguments);
-            EpisodeMedia episodeMedia = EpisodeMedia.Companion.fromJson(json);
-            System.out.println("B7b Gson::: " + episodeMedia);
-            new DownloaderDowPlay(context, activity, lang).startDownload(episodeMedia.getInfo().getDownloadURL(), episodeMedia.getMediaGroup().getTvShow().getTitle(), episodeMedia.getMediaType(),
-                    episodeMedia.getMediaGroup().getItemsIDS().getTvShowID(), call.arguments.toString(), episodeMedia.getUserID(), episodeMedia.getProfileID(),
-                    episodeMedia.getMediaGroup().getItemsIDS().getSeasonID(), episodeMedia.getInfo().getId().toString(), episodeMedia.getMediaGroup().getSeason().getSeasonNumber(),
-                    episodeMedia.getInfo().getOrder(), episodeMedia.getMediaGroup().getSeason().getTitle(), episodeMedia.getInfo().getTitle());
-            result.success(new DownloaderDowPlay(context, activity, lang).getAllDownloadMedia(userId, profileId));
+            //EpisodeMedia episodeMedia = EpisodeMedia.Companion.fromJson(json);
+            EpisodeMedia episodeMedia = gson.fromJson(json, EpisodeMedia.class);
+            //System.out.println("B7b Gson::: " + episodeMedia);
+            //////////////////////
+            //JsonElement jsonObjectEpisodeInfo = gson.toJsonTree(episodeMedia.getInfo());
+            //JsonObject episodeJson = jsonObjectEpisodeInfo.getAsJsonObject();
+            //String episodeJsonStringOld = gson.toJson(episodeJson);
+            String episodeJsonString = gson.toJson(episodeMedia.getInfo());
+            //Log.d("episodeJsonStringOld",episodeJsonStringOld);
+            //Log.d("episodeJsonString",episodeJsonString);
+            /////////////////////
+            //Log.d("infoEEEE::: ",episodeMedia.getInfo().getDuration());
+            myResultCallback = result;
+            new DownloaderDowPlay(context, activity, lang).startDownload(episodeMedia.getInfo().getDownloadUrl(), episodeMedia.getMediaGroup().getTvShow().getTitle(), episodeMedia.getMediaType(),
+                    episodeMedia.getMediaGroup().getItemsIds().getTvShowId(), json, episodeMedia.getUserId(), episodeMedia.getProfileId(),
+                    episodeMedia.getMediaGroup().getItemsIds().getSeasonId(), episodeMedia.getInfo().getId().toString(), episodeMedia.getMediaGroup().getSeason().getSeasonNumber(),
+                    episodeMedia.getInfo().getOrder(), episodeMedia.getMediaGroup().getSeason().getTitle(), episodeMedia.getInfo().getTitle(), episodeJsonString,true);
+            //result.success(new DownloaderDowPlay(context, activity, lang).getAllDownloadMedia(userId, profileId));
 //////////////////////////////////////////////////////////////////////////////////////////////////
         } else if (call.method.equals("pause_download")) {
-            Log.d(TAG, "onMethodCall: pause_download");
-            Log.d(TAG, "onMethodCall: " + call.arguments.toString());
+            //Log.d(TAG, "onMethodCall: pause_download");
+            //Log.d(TAG, "onMethodCall: " + call.arguments.toString());
             //{mediaType=movie, mediaId=377530}
-            String mediaType = call.arguments.toString().replaceAll(".*mediaType=(\\d+).*", "$1");
-            String mediaId = call.arguments.toString().replaceAll(".*mediaId=(\\d+).*", "$1");
+
+            Gson gson = new Gson();
+            String json = gson.toJson(call.arguments);
+            HashMap<String, Object> object = gson.fromJson(json, HashMap.class);
+            String mediaType = (String) object.get("mediaType");
+            String mediaId = (String) object.get("mediaId");
+
             new DownloaderDowPlay(context, activity, lang).pauseDownload(mediaId, mediaType);
             result.success(new DownloaderDowPlay(context, activity, lang).getAllDownloadMedia(userId, profileId));
 //////////////////////////////////////////////////////////////////////////////////////////////////
         } else if (call.method.equals("resume_download")) {
-            Log.d(TAG, "onMethodCall: resume_download");
-            Log.d(TAG, "onMethodCall: " + call.arguments.toString());
+            //Log.d(TAG, "onMethodCall: resume_download");
+            //Log.d(TAG, "onMethodCall: " + call.arguments.toString());
             //{mediaType=movie, mediaId=377530}
-            String mediaType = call.arguments.toString().replaceAll(".*mediaType=(\\d+).*", "$1");
-            String mediaId = call.arguments.toString().replaceAll(".*mediaId=(\\d+).*", "$1");
+
+            Gson gson = new Gson();
+            String json = gson.toJson(call.arguments);
+            HashMap<String, Object> object = gson.fromJson(json, HashMap.class);
+            String mediaType = (String) object.get("mediaType");
+            String mediaId = (String) object.get("mediaId");
+
             new DownloaderDowPlay(context, activity, lang).resumeDownload(mediaId, mediaType);
             result.success(new DownloaderDowPlay(context, activity, lang).getAllDownloadMedia(userId, profileId));
 //////////////////////////////////////////////////////////////////////////////////////////////////
         } else if (call.method.equals("cancel_download")) {
-            Log.d(TAG, "onMethodCall: cancel_download");
-            Log.d(TAG, "onMethodCall: " + call.arguments.toString());
+            //Log.d(TAG, "onMethodCall: cancel_download");
+            //Log.d(TAG, "onMethodCall: " + call.arguments.toString());
             //{mediaType=movie, mediaId=377530}
-            String mediaType = call.arguments.toString().replaceAll(".*mediaType=(\\d+).*", "$1");
-            String mediaId = call.arguments.toString().replaceAll(".*mediaId=(\\d+).*", "$1");
+
+            Gson gson = new Gson();
+            String json = gson.toJson(call.arguments);
+            HashMap<String, Object> object = gson.fromJson(json, HashMap.class);
+            //Log.d(TAG, "onMethodCall???: " + object);
+
+            String mediaType = (String) object.get("mediaType");
+            String mediaId = (String) object.get("mediaId");
+
+            //Log.d(TAG, "onMethodCall???: " + mediaType + " > " + mediaId);
             new DownloaderDowPlay(context, activity, lang).cancelDownload(mediaId, mediaType);
             result.success(new DownloaderDowPlay(context, activity, lang).getAllDownloadMedia(userId, profileId));
+//////////////////////////////////////////////////////////////////////////////////////////////////
+        } else if (call.method.equals("get_download_movie")) {
+            Gson gson = new Gson();
+            String json = gson.toJson(call.arguments);
+            HashMap<String, Object> object = gson.fromJson(json, HashMap.class);
+            String mediaId = (String) object.get("media_id");//movie
+            result.success(new DownloaderDowPlay(context, activity, lang).getDownloadMediaInfo(userId, profileId, mediaId, "movie", "", ""));
+//////////////////////////////////////////////////////////////////////////////////////////////////
+        } else if (call.method.equals("get_download_episode")) {
+            Gson gson = new Gson();
+            String json = gson.toJson(call.arguments);
+            HashMap<String, Object> object = gson.fromJson(json, HashMap.class);
+            String mediaId = (String) object.get("media_id");//episod
+            String tvshowId = (String) object.get("tvshow_id");
+            String seasonId = (String) object.get("season_id");
+            result.success(new DownloaderDowPlay(context, activity, lang).getDownloadMediaInfo(userId, profileId, mediaId, "series", seasonId, tvshowId));
 //////////////////////////////////////////////////////////////////////////////////////////////////
         } else {
             result.notImplemented();

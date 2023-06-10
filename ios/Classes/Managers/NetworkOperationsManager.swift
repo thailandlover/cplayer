@@ -17,6 +17,7 @@ class NetworkOperatinosManager {
     }
     
     func updateWatchTime(forMedia media: Media,settings: HostAppSettings, updateTime time: Double, mediaDuration duration: Double){
+        guard duration > 0 && time > 0 else {return}
         if settings.apiVersion == 4 {
             self.version2API(media: media,settings: settings, updateTime: time, mediaDuration: duration)
         }else{
@@ -29,7 +30,7 @@ class NetworkOperatinosManager {
                 queryItems.append(URLQueryItem(name: "profileId", value: settings.KeeUser.profileID))
                 queryItems.append(URLQueryItem(name: "time", value: "\(time)"))
                 queryItems.append(URLQueryItem(name: "userId", value: settings.KeeUser.userID))
-                queryItems.append(URLQueryItem(name: "type", value: media.type.rawValue))
+                queryItems.append(URLQueryItem(name: "type", value: media.type.version_3_value))
                 
                 var urlComponents = URLComponents(string: link.appending("media/updateCurrentTime"))
                 urlComponents?.queryItems = queryItems

@@ -20,6 +20,10 @@ public class DowplayPlugin: NSObject, FlutterPlugin {
             break;
         case "config_downloader":
             configDownloader(call: call, result: result);
+        case "get_download_movie":
+            getDownloadMovie(call: call, result: result)
+        case "get_download_episode":
+            getDownloadEpisode(call: call, result: result)
         case "get_downloads_list":
             getDownloadsList(call: call, result: result)
         case "start_download_movie":
@@ -61,7 +65,7 @@ public class DowplayPlugin: NSObject, FlutterPlugin {
                 let mediaType : MediaManager.MediaType = media_type == "movie" ? .movie : .series
                 let itemsIds: [String:Any] = media_group["items_ids"] as! [String : Any]
                 let episodes: [[String:Any]] = media_group["episodes"] as! [[String:Any]]
-                let playIndex: Int = Int(info["order"] as! String)! - 1;
+                let playingId: Int = info["id"] as! Int
                 var media : [Media] = []
                 let _ : [String:Any] = media_group["tv_show"] as! [String:Any]
                 let season : [String:Any] = media_group["season"] as! [String:Any]
@@ -69,8 +73,8 @@ public class DowplayPlugin: NSObject, FlutterPlugin {
                 
                 let tvShow :[String:Any]  = media_group["tv_show"]  as! [String : Any]
                 let tvShowTitle:Any = tvShow["title"]!
-                
-                for episode in episodes {
+                var playingIndex:Int = 0;
+                for (index, episode) in episodes.enumerated() {
                     let mediaId = String(episode["id"] as! Int);
                     let mediaGroup : MediaGroup = MediaGroup(showId: itemsIds["tv_show_id"] as! String, seasonId: itemsIds["season_id"] as! String, episodeId: mediaId,seasonName: "Season \(seasonNumber)",showName: tvShowTitle as! String ,data: media_group)
                     let watching : [String:Any]? = episode["watching"] as? [String : Any]
@@ -78,16 +82,17 @@ public class DowplayPlugin: NSObject, FlutterPlugin {
                     if(watching != nil) {
                         startAt = Float(watching?["current_time"] as! String)!
                     }
-                    let mediaItem = Media(title: episode["title"] as! String,subTitle: season["title"] as? String, urlToPlay: episode["media_url"] as! String,keeId: mediaId,type: mediaType, startAt: startAt,mediaGroup: mediaGroup,info: episode)
+                    if(playingId == episode["id"] as! Int){
+                        playingIndex = index
+                    }
+                    let downloadUrl:String? = episode["download_url"] as? String ?? nil
+                    let mediaItem = Media(title: episode["title"] as! String,subTitle: season["title"] as? String, urlToPlay: episode["media_url"] as! String,downloadURL: downloadUrl ,keeId: mediaId,type: mediaType, startAt: startAt,mediaGroup: mediaGroup,info: episode)
                     media.append(mediaItem)
                     
                 }
-                let playerResult : [[String:Any]] = await MediaManager.default.openMediaPlayer(usingMediaList: media,playMediaIndex: playIndex,usingSettings: hostAppSettings, forViewController: flutterViewController)
-                if(playerResult.isEmpty){
-                    result(false)
-                } else {
-                    result(playerResult)
-                }
+                let playerResult : [[String:Any]] = await MediaManager.default.openMediaPlayer(usingMediaList: media,playMediaIndex: playingIndex,usingSettings: hostAppSettings, forViewController: flutterViewController)
+                 result(playerResult)
+
             }
         } else {
             print("iOS could not extract flutter arguments in method: (playEpisode)")
@@ -119,15 +124,11 @@ public class DowplayPlugin: NSObject, FlutterPlugin {
                 
                 var media : [Media] = []
                 
-                let mediaItem = Media(title: title,subTitle: sub_title, urlToPlay: url,keeId: media_id,type: mediaType, startAt: start_at,info: info)
+                    let mediaItem = Media(title: title,subTitle: sub_title, urlToPlay: url,downloadURL:info["download_url"] as! String,keeId: media_id,type: mediaType, startAt: start_at,info: myArgs)
                 media.append(mediaItem)
                 
                 let playerResult : [[String:Any]] = await MediaManager.default.openMediaPlayer(usingMediaList: media,usingSettings: hostAppSettings, forViewController: flutterViewController)
-                if(playerResult.isEmpty){
-                    result(false)
-                } else {
-                    result(playerResult)
-                }
+                result(playerResult)
             }
            
             
@@ -142,6 +143,47 @@ public class DowplayPlugin: NSObject, FlutterPlugin {
         result(downloadsList)
     }
     
+    func getDownloadMovie(call: FlutterMethodCall,result: @escaping FlutterResult){
+        guard let args = call.arguments else {
+            return
+        }
+        if let myArgs = args as? [String: Any],
+           let media_id : String = myArgs["media_id"] as? String {
+            let results: DownloadedMedia? = DownloadManager.shared.getDownloadedMovie(media_id)
+            
+            if(results != nil){
+                result([results?.getObjectAsJSONDictionary()])
+            } else {
+                result([])
+            }
+        } else {
+            print("iOS could not extract flutter arguments in method: (getDownloadMovie)")
+            result(false)
+        }
+    }
+    
+    func getDownloadEpisode(call: FlutterMethodCall,result: @escaping FlutterResult){
+        guard let args = call.arguments else {
+            return
+        }
+        if let myArgs = args as? [String: Any],
+           let media_id : String = myArgs["media_id"] as? String,
+           let tvshow_id : String = myArgs["tvshow_id"] as? String,
+           let season_id : String = myArgs["season_id"] as? String{
+            let results: DownloadedMedia? = DownloadManager.shared.getDownloadedEpisode(media_id, seasonId: season_id, tvShowId: tvshow_id)
+            if(results != nil){
+                result([results?.getObjectAsJSONDictionary()])
+            } else {
+                result([])
+            }
+        } else {
+            print("iOS could not extract flutter arguments in method: (getDownloadEpisode)")
+            result(false)
+        }
+    }
+    
+    
+    
     func configDownloader(call: FlutterMethodCall,result: @escaping FlutterResult){
         guard let args = call.arguments else {
             return
@@ -149,8 +191,9 @@ public class DowplayPlugin: NSObject, FlutterPlugin {
         if let myArgs = args as? [String: Any],
            let user_id : String = myArgs["user_id"] as? String,
            let profile_id : String = myArgs["profile_id"] as? String,
+           let access_token : String = myArgs["access_token"] as? String,
            let lang : String = myArgs["lang"] as? String {
-            let keeUser = KeeUser(userID: user_id, profileID: profile_id)
+            let keeUser = KeeUser(userID: user_id, profileID: profile_id,token: access_token)
             let hostAppSettings = HostAppSettings(KeeUser:keeUser, lang: lang)
             
             DownloadManager.shared.config(useSettings: hostAppSettings)
@@ -233,7 +276,7 @@ public class DowplayPlugin: NSObject, FlutterPlugin {
             
             let mediaGroup : MediaGroup = MediaGroup(showId: itemsIds["tv_show_id"] as! String, seasonId: itemsIds["season_id"] as! String, episodeId: mediaId,seasonName: "Season \(seasonNumber)",showName: tvShowTitle as! String ,data: media_group)
             
-            DownloadManager.shared.startDownload(url: url, forMediaId: Int(mediaId )!, type: .series,mediaGroup: mediaGroup, object:myArgs)
+            DownloadManager.shared.startDownload(url: url, forMediaId: Int(mediaId )!,mediaName: info["title"] as! String, type: .series,mediaGroup: mediaGroup, object:myArgs)
             
             let downloadsList : [[String : Any]] = DownloadManager.shared.getAllMediaDecoded()
             
@@ -283,8 +326,15 @@ public class DowplayPlugin: NSObject, FlutterPlugin {
         }
         if let myArgs = args as? [String: Any],
            let media_type : String = myArgs["mediaType"] as? String,
+           let tvshowId : String = myArgs["tvshowId"] as? String,
+           let seasonId : String = myArgs["seasonId"] as? String,
            let media_id : String = myArgs["mediaId"] as? String {
-            DownloadManager.shared.cancelMedia(withMediaId: media_id, forType: media_type == "movie" ? .movie : .series)
+            if(media_type == "movie"){
+                DownloadManager.shared.cancelMedia(withMediaId: media_id, forType: .movie)
+            } else {
+                DownloadManager.shared.cancelMedia(withMediaId: media_id,seasonId: seasonId,showId: tvshowId, forType: .series)
+            }
+            
             let downloadsList : [[String : Any]] = DownloadManager.shared.getAllMediaDecoded()
             result(downloadsList)
         } else {

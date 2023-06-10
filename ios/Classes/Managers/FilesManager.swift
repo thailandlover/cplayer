@@ -23,6 +23,11 @@ public class FilesManager {
         return documentsDirectory.appendingPathComponent("DownloadCache")
     }
     
+    @discardableResult
+    func setUser(_ userSignature : String)->FilesManager{
+        self.userSignature = userSignature
+        return self
+    }
     
     func forUser(_ userSignature : String)->FilesManager{
         self.userSignature = userSignature
@@ -46,6 +51,9 @@ public class FilesManager {
             
         }
     }
+    
+    
+    
     
     private func createCachingDirectory()throws{
         let dir = documentsDirectory.appendingPathComponent("DownloadCache").path
@@ -117,17 +125,63 @@ public class FilesManager {
     public func deleteEpisodeById(_ id: String, season: String, series: String){
         if let ep = getDownloadedEpisode(id: id, season: season, series: series) {
             deleteEpisode(ep)
+            let numberOfEpisodesLeft = getEpisodes(seasonID: season, atSeriseId: series).count
+            if numberOfEpisodesLeft == 0 {
+                deleteSeason(season, tvShowId: series)
+            }
         }
     }
     
-    public func deleteEpisode(_ e: DownloadedMedia) {
+    func deleteEpisode(_ e: DownloadedMedia) {
         // remove the episode file, and info file
-        try? fm.removeItem(at: e.tempPath!)
-        try? fm.removeItem(at: e.path)
-        if let info = e.episodeInfoPathURL{
+        var ee = e
+        ee.setUser(signature: userSignature)
+        try? fm.removeItem(at: ee.tempPath!)
+        try? fm.removeItem(at: ee.path)
+        if let info = ee.episodeInfoPathURL{
             try? fm.removeItem(at: info)
         }
     }
+    
+    public func deleteSeason(_ seasonId : String, tvShowId: String){
+        
+        if var list = try?  getSeasonsListFile(forSerise: tvShowId) {
+            list.removeAll(where: {$0.id == seasonId})
+            saveSeasonsListFile(list, atSerise: tvShowId)
+            
+            
+            let folder = cache
+                .appendingPathComponent(MediaManager.MediaType.series.version_3_value, isDirectory: true)
+                .appendingPathComponent(userSignature, isDirectory: true)
+                .appendingPathComponent(tvShowId, isDirectory: true)
+                .appendingPathComponent(seasonId, isDirectory: true)
+            
+            try? fm.removeItem(at: folder)
+        }
+        
+        let numberOfSeasonsLeft = getSeasons(forSeriseID: tvShowId).count
+        if numberOfSeasonsLeft == 0 {
+            deleteTvShow(tvShowId)
+        }
+    }
+    
+    public func deleteTvShow(_ id: String){
+        
+        if var list = try? getSeriseListFile() {
+            list.removeAll(where: {$0.id == id})
+            saveSeriseListFile(list)
+            
+            let folder = cache
+                .appendingPathComponent(MediaManager.MediaType.series.version_3_value, isDirectory: true)
+                .appendingPathComponent(userSignature, isDirectory: true)
+                .appendingPathComponent(id, isDirectory: true)
+            
+            try? fm.removeItem(at: folder)
+        }
+    }
+    
+    
+    
     
     
     public func getDownloadedEpisode(id: String, season: String, series: String)->DownloadedMedia?{
@@ -189,6 +243,40 @@ public class FilesManager {
             }
         }
         return false
+    }
+    
+    func saveTempData(id: String, data: DownloadedMedia, user: String){
+        let dirPath = cache.appendingPathComponent(user)
+        let fullPath = dirPath.appendingPathComponent(id + ".keetmp")
+        if checkFolderExistance(dir: dirPath.absoluteString) == false {
+            try? fm.createDirectory(at: dirPath, withIntermediateDirectories: true)
+        }
+        print(fullPath)
+        if let data = try? JSONEncoder().encode(data) {
+            try? data.write(to: fullPath)
+            print("Done")
+        }
+    }
+    
+    func clearTempDataFor(id: String, user: String){
+        let dirPath = cache.appendingPathComponent(user)
+        let fullPath = dirPath.appendingPathComponent(id + ".keetmp")
+        try? fm.removeItem(at: fullPath)
+    }
+    
+    public func getTempData(user: String)->[DownloadedMedia]{
+        var list : [DownloadedMedia] = []
+        let dirPath = cache.appendingPathComponent(user)
+        let contentsList = try? fm.contentsOfDirectory(at: dirPath, includingPropertiesForKeys: nil)
+        for file in contentsList ?? [] {
+            if let data = try? Data(contentsOf: file){
+                if var media = try? JSONDecoder().decode(DownloadedMedia.self, from: data) {
+                    media.status = media.retrivalStatus == 0 ? .running : .suspended
+                    list.append(media)
+                }
+            }
+        }
+        return list
     }
     
     
@@ -281,8 +369,14 @@ extension FilesManager {
     //STEP ONE <Add the series info to series.keeinfo file>
     private func addSeries(_ info : Info){
         var list = (try? getSeriseListFile()) ?? []
-        list.append(info)
-        saveSeriseListFile(list)
+        
+        if let _ = list.first(where: {$0.id == info.id}){
+                print("searise exists")
+        }else{
+            
+            list.append(info)
+            saveSeriseListFile(list)
+        }
     }
     
     //STEP TWO <Create the required folders>
@@ -313,8 +407,13 @@ extension FilesManager {
     //STEP THREE <Save the season info in the {seriseID}/seasons.keeinfo file>
     private func saveSeasonInfo(_ season: Info, forSerise s: String){
         var list = (try? getSeasonsListFile(forSerise: s)) ?? []
-        list.append(season)
-        saveSeasonsListFile(list, atSerise: s)
+        if let _ = list.first(where: {$0.id == season.id}){
+                print("season exists")
+        }else{
+            list.append(season)
+            saveSeasonsListFile(list, atSerise: s)
+        }
+        
     }
     
     //STEP FOUR <Move the downloaded file to the {seriseID}/{seasonID}/{episodeID}.mp4 file>

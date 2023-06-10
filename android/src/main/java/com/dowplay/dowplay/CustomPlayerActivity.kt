@@ -5,12 +5,13 @@ import android.app.AlertDialog
 import android.app.PictureInPictureParams
 import android.content.Context
 import android.content.Intent
-import android.content.pm.ActivityInfo
+import android.content.pm.PackageManager
+import android.content.res.Configuration
 import android.graphics.Color
-import android.os.Build
-import android.os.Bundle
-import android.os.VibrationEffect
-import android.os.Vibrator
+import android.net.Uri
+import android.os.*
+import android.os.PowerManager.WakeLock
+import android.provider.Settings
 import android.util.Log
 import android.util.Rational
 import android.view.LayoutInflater
@@ -22,10 +23,8 @@ import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
 import androidx.core.view.*
-import androidx.media3.common.AudioAttributes
-import androidx.media3.common.C
-import androidx.media3.common.MediaItem
-import androidx.media3.common.Player
+import androidx.lifecycle.Lifecycle
+import androidx.media3.common.*
 import androidx.media3.common.util.Assertions
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.common.util.Util
@@ -42,10 +41,12 @@ import com.dowplay.dowplay.databinding.SettingBinding
 import com.google.gson.Gson
 import io.flutter.embedding.android.FlutterActivity
 
+
 @UnstableApi
 /**
  * A fullscreen activity to play audio or video streams.
  */
+
 class CustomPlayerActivity() : FlutterActivity() {
 
     private val viewBinding by lazy(LazyThreadSafetyMode.NONE) {
@@ -80,7 +81,6 @@ class CustomPlayerActivity() : FlutterActivity() {
     ///////////////////////////////////////////////////////////////////////////////////////////////
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
 
         Log.d("current stats screen:", "onCreate")
         setContentView(viewBinding.root)
@@ -89,28 +89,48 @@ class CustomPlayerActivity() : FlutterActivity() {
     }
 
     private fun initializePlayer() {
+
+        /*val loadControl: LoadControl = DefaultLoadControl.Builder()
+            .setAllocator(DefaultAllocator(true, C.DEFAULT_BUFFER_SEGMENT_SIZE))
+            .setBufferDurationsMs(
+                15000, // Min buffer duration
+                30000, // Max buffer duration
+                5000,  // Buffer for playback
+                5000   // Buffer for rebuffering
+            )
+            .setTargetBufferBytes(-1)
+            .setPrioritizeTimeOverSizeThresholds(true).build()*/
+
         trackSelection = DefaultTrackSelector(this).apply {
             setParameters(buildUponParameters().setMaxVideoSizeSd())
+            // Enable hardware acceleration
+            //setParameters(buildUponParameters().setRendererDisabled(C.TRACK_TYPE_VIDEO, false))
         }
         player = ExoPlayer.Builder(this)
-            .setSkipSilenceEnabled(true)
-            .setTrackSelector(trackSelection)
             .setVideoScalingMode(2)
             .setAudioAttributes(AudioAttributes.DEFAULT, false)
-
+            .setTrackSelector(trackSelection)
+            //.setLoadControl(loadControl)
             .build()
             .also { exoPlayer ->
                 //val mediaItem = MediaItem.fromUri("https://thekee.gcdn.co/video/m-159n/English/Animation&Family/Klaus.2019.1080pAr.mp4")
                 //val mediaItem = MediaItem.fromUri("/data/user/0/com.dowplay.dowplay_example/files/downplay/qvapqtuqtd0fgokeenfelnqli.mp4")
+                //val mediaItemTest = MediaItem.fromUri("https://thekee.gcdn.co")
                 //////////////////////
 
                 val mediaItem = videoUris.map { MediaItem.fromUri(it) }
                 /////////////////////
                 exoPlayer.setMediaItems(mediaItem)
                 exoPlayer.seekToDefaultPosition(startVideoPosition)
+
+                // Set the wake mode to keep the player awake
+                //exoPlayer.setWakeMode(C.WAKE_MODE_LOCAL);
+
                 exoPlayer.prepare()
                 exoPlayer.play()
+                viewBinding.playerView.keepScreenOn = true
                 viewBinding.playerView.player = exoPlayer
+                //val bufferSize = 10 * 1024 * 1024 // 10 MB
                 player?.playWhenReady = true
             }
         seekToLastWatching()
@@ -137,6 +157,7 @@ class CustomPlayerActivity() : FlutterActivity() {
         }
     }
 
+    var playerHasError = false
     private fun playerEvent() {
         player?.addListener(object : Player.Listener {
             override fun onPlaybackStateChanged(@Player.State state: Int) {
@@ -146,13 +167,22 @@ class CustomPlayerActivity() : FlutterActivity() {
                 when (state) {
                     Player.STATE_READY -> {
                         // The player is able to immediately play from its current position. The player will be playing if getPlayWhenReady() is true, and paused otherwise.
-                        viewBinding.progressBarVideo.visibility = View.GONE
+                        viewBinding.progressLoadingVideo.visibility = View.GONE
+                        viewBinding.errorContent.visibility = View.GONE
+                        playerHasError = false
                         viewBinding.playPauseButton.setImageResource(R.drawable.pause_icon)
                         isReadyPlayer = true
+                        callAddWatchedMediaDataToTheList()
+                        exoplayerIsNotRun = false
                     }
                     Player.STATE_BUFFERING -> {
                         // The player is not able to immediately play the media, but is doing work toward being able to do so. This state typically occurs when the player needs to buffer more data before playback can start.
-                        viewBinding.progressBarVideo.visibility = View.VISIBLE
+                        if (playerHasError) {
+                            viewBinding.progressLoadingVideo.visibility = View.GONE
+                            viewBinding.errorContent.visibility = View.VISIBLE
+                        } else {
+                            viewBinding.progressLoadingVideo.visibility = View.VISIBLE
+                        }
                         viewBinding.playPauseButton.setImageResource(R.drawable.play_icon)
                     }
                     Player.STATE_IDLE -> {
@@ -171,76 +201,127 @@ class CustomPlayerActivity() : FlutterActivity() {
                     }
                 }
             }
+
+            override fun onPlayerError(error: PlaybackException) {
+                // Handle the player error here
+                playerHasError = true
+                viewBinding.errorContent.visibility = View.VISIBLE
+                viewBinding.progressLoadingVideo.visibility = View.GONE
+                if (error.errorCode == PlaybackException.ERROR_CODE_IO_FILE_NOT_FOUND) {
+                    player?.stop()
+                    player = null
+                    viewBinding.errorText.text =
+                        if (currentLanguage == "en") "Something is wrong" else "هناك خطأ ما"
+                } else if (error.errorCode == PlaybackException.ERROR_CODE_IO_NETWORK_CONNECTION_FAILED
+                    || error.errorCode == PlaybackException.ERROR_CODE_IO_NETWORK_CONNECTION_TIMEOUT
+                ) {
+                    viewBinding.errorText.text =
+                        if (currentLanguage == "en") "Check your internet connection" else "قم بفحص اتصال الانترنت"
+                } else if (error.errorCode == PlaybackException.ERROR_CODE_IO_BAD_HTTP_STATUS
+                ) {
+                    player?.stop()
+                    player = null
+                    viewBinding.errorText.text =
+                        if (currentLanguage == "en") "URL error" else "خطأ في عنوان URL"
+                }
+                Log.d("Player Error", "${error.errorCode}")
+                Log.d("Player Error", "${error.errorCodeName}")
+                Log.d("Player Error", "${error.message}")
+                Log.d("Player Error", "Url Media not valid or has other error....")
+            }
         })
     }
 
-    private var watchedEpisodesArray = arrayOf<ResultPlayer>()
-    fun addWatchedEpisodesToTheList(
-        idL: String,
-        durationL: String,
-        currentTimeL: String
-    ) {
-        if (mediaType == series) {
-            val isIdNotFound = watchedEpisodesArray.none { it.id == idL }
+    ////////////////////////////////////////////////////////////////////////
+    fun lastMediaWatchingData(
+        id: Int,
+        typeMedia: String,
+        duration: Double,
+        currentTime: Double
+    ): HashMap<String, Any> {
+        val result = HashMap<String, Any>()
+        result["id"] = id
+        result["type"] = typeMedia
+        result["duration"] = duration
+        result["currentTime"] = currentTime
 
-            if (isIdNotFound) {
-                //println("ID $idToCheck not found in the array.")
-                val result = ResultPlayer(idL, series, durationL, currentTimeL)
-                watchedEpisodesArray += result
-            } else {
-                //println("ID $idToCheck found in the array.")
-                val updatedwatchedEpisodesArray =
-                    watchedEpisodesArray.map {
-                        if (it.id == idL) it.copy(
-                            duration = durationL,
-                            currentTime = currentTimeL
-                        ) else it
-                    }
-                        .toTypedArray()
-                watchedEpisodesArray = updatedwatchedEpisodesArray
+        return result
+    }
+
+    fun callAddWatchedMediaDataToTheList() {
+        if (isReadyPlayer) {
+            addWatchedMediaDataToTheList(
+                videoMediaID[startVideoPosition].toIntOrNull() ?: 0,
+                mediaType,
+                player?.duration?.div(1000)?.toDouble() ?: 0.0,
+                (player?.currentPosition?.div(1000))?.toDouble() ?: 0.0,
+            )
+        }
+    }
+
+    private var watchedMediaDataArray: List<HashMap<String, Any>> = listOf()
+    fun addWatchedMediaDataToTheList(
+        idL: Int,
+        typeMedia: String,
+        durationL: Double,
+        currentTimeL: Double
+    ) {
+        // if (mediaType == series) {
+        val isIdNotFound = watchedMediaDataArray.none { it["id"] == idL }
+
+        if (isIdNotFound) {
+            //println("ID $idToCheck not found in the array.")
+            val result = lastMediaWatchingData(idL, typeMedia, durationL, currentTimeL)
+            watchedMediaDataArray += result
+        } else {
+            //println("ID $idToCheck found in the array.")
+            for (map in watchedMediaDataArray) {
+                if (map["id"] == idL) {
+                    map["duration"] = durationL
+                    map["currentTime"] = currentTimeL
+                }
             }
         }
+        //}
     }
 
     fun returnDataAfterClosePlayer() {
-        //val resultIntent = Intent()
-        if (mediaType == movie) {
+        /*if (mediaType == movie) {
             /*"{type: movie, duration: " + player?.duration?.div(1000)
                 .toString() + ", currentTime: " + (player?.currentPosition?.div(1000)).toString() + "}"*/
-            val result = ResultPlayer(
-                movieMedia?.mediaID ?: "",
+
+            val result = lastMediaWatchingData(
+                movieMedia?.mediaID?.toInt() ?: 0,
                 movie,
-                player?.duration?.div(1000).toString(),
-                (player?.currentPosition?.div(1000)).toString()
+                player?.duration?.div(1000)?.toDouble() ?: 0.0,
+                (player?.currentPosition?.div(1000))?.toDouble() ?: 0.0
             )
-            var watchedMovieArray = arrayOf<ResultPlayer>()
-            watchedMovieArray += result
 
-            val gson = Gson()
-            val json = gson.toJson(watchedMovieArray)
-            DowplayPlugin.myResultCallback.success(json)
-
-            //resultIntent.putExtra("player_result", json)
-            //print("Bom result: "+json)
-        } else {
-            val gson = Gson()
-            val json = gson.toJson(watchedEpisodesArray)
-            DowplayPlugin.myResultCallback.success(json)
-            //resultIntent.putExtra("player_result", json)
+            var watchedMovieArray: List<HashMap<String, Any>> = listOf(result)
+            if(DowplayPlugin.myResultCallback != null) {
+                DowplayPlugin.myResultCallback.success(watchedMovieArray)
+                DowplayPlugin.myResultCallback = null
+            }
+        } else {*/
+        if (DowplayPlugin.myResultCallback != null) {
+            Log.d("Player Result::: ",watchedMediaDataArray.toString())
+            DowplayPlugin.myResultCallback.success(watchedMediaDataArray)
+            DowplayPlugin.myResultCallback = null
         }
-        //print("Bom result: "+resultIntent)
-        //setResult(RESULT_OK, resultIntent)
+        // }
     }
 
+    ////////////////////////////////////////////////////////////////////////////////
     @SuppressLint("NewApi")
     private fun initializeBinding() {
 
         /////////////////////////////////////////
         viewBinding.backButton.setOnClickListener {
             vibratePhone()
-            addToWatchingList()
+            addToWatchingListAPI()
             returnDataAfterClosePlayer()
-            finish()
+            finishAndRemoveTask()
+            //finish()
         }
         viewBinding.fullScreenScale.setOnClickListener {
             vibratePhone()
@@ -290,7 +371,15 @@ class CustomPlayerActivity() : FlutterActivity() {
         }
         viewBinding.pictureOnPictureButton.setOnClickListener {
             vibratePhone()
-            showVideoAsPictureOnPicture()
+            if (isPiPSupported(activity)) {
+                showVideoAsPictureOnPicture()
+            } else {
+                Toast.makeText(
+                    this,
+                    if (currentLanguage == "en") "Picture-in-Picture mode not supported" else "جهازك لا يدعم خاصية PIP",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
         }
     }
 
@@ -303,16 +392,16 @@ class CustomPlayerActivity() : FlutterActivity() {
         }
     }
 
-    var enable: Boolean = false
+    var enableFullScreen: Boolean = true
     private fun fullScreenScale() {
-        if (enable) {
+        if (enableFullScreen) {
             viewBinding.playerView.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FILL
             player?.videoScalingMode = C.VIDEO_SCALING_MODE_SCALE_TO_FIT
-            enable = false
+            enableFullScreen = false
         } else {
             viewBinding.playerView.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
             player?.videoScalingMode = C.VIDEO_SCALING_MODE_SCALE_TO_FIT
-            enable = true
+            enableFullScreen = true
         }
     }
 
@@ -343,10 +432,11 @@ class CustomPlayerActivity() : FlutterActivity() {
 
     private fun previous() {
         if (startVideoPosition > 0) {
-            addToWatchingList()
+            addToWatchingListAPI()
             startVideoPosition = (startVideoPosition - 1 + videoUris.size) % videoUris.size
             setGreenColorForDownloadButtonIfIsDownloaded(mediaType)
-            player?.seekToPreviousMediaItem()
+            //player?.seekToPreviousMediaItem()
+            player?.seekToDefaultPosition(startVideoPosition)
             viewBinding.videoSubTitle.text = videoSubTitle[startVideoPosition]
             playbackPosition = 0L
             seekToLastWatching()
@@ -361,10 +451,11 @@ class CustomPlayerActivity() : FlutterActivity() {
 
     private fun next() {
         if (videoUris.size - 1 > startVideoPosition) {
-            addToWatchingList()
+            addToWatchingListAPI()
             startVideoPosition = (startVideoPosition + 1) % videoUris.size
             setGreenColorForDownloadButtonIfIsDownloaded(mediaType)
-            player?.seekToNextMediaItem()
+            //player?.seekToNextMediaItem()
+            player?.seekToDefaultPosition(startVideoPosition)
             viewBinding.videoSubTitle.text = videoSubTitle[startVideoPosition]
             playbackPosition = 0L
             seekToLastWatching()
@@ -598,36 +689,47 @@ class CustomPlayerActivity() : FlutterActivity() {
         var result = 0
         if (mediaType == movie) {
             result = DownloaderDowPlay(context, activity, currentLanguage).startDownload(
-                movieMedia?.info?.downloadURL.toString(),
+                movieMedia?.info?.downloadUrl.toString(),
                 movieMedia?.title.toString(),
                 movieMedia?.mediaType.toString(),
-                movieMedia?.mediaID.toString(),
+                movieMedia?.mediaId.toString(),
                 jsonPlayMovieData ?: "",
-                movieMedia?.userID.toString(),
-                movieMedia?.profileID.toString(),
+                movieMedia?.userId.toString(),
+                movieMedia?.profileId.toString(),
                 "",
                 "",
                 "",
                 "",
                 "",
-                ""
+                "",
+                "",
+                false
             )
         } else {
             //episodeMedia?.mediaGroup?.episodes?.get(startVideoPosition)?.id.toString()
+
+            val gson = Gson()
+            /*val jsonObjectEpisodeInfo =
+                gson.toJsonTree(episodeMedia?.mediaGroup?.episodes?.get(startVideoPosition)).asJsonObject*/
+            val episodeJson =
+                gson.toJson(episodeMedia?.mediaGroup?.episodes?.get(startVideoPosition))
+
             result = DownloaderDowPlay(context, activity, currentLanguage).startDownload(
-                episodeMedia?.mediaGroup?.episodes?.get(startVideoPosition)?.downloadURL.toString(),
-                episodeMedia?.mediaGroup!!.tvShow!!.title!!,
-                episodeMedia!!.mediaType!!,
-                episodeMedia!!.mediaGroup!!.itemsIDS!!.tvShowID!!,
+                episodeMedia?.mediaGroup?.episodes?.get(startVideoPosition)?.downloadUrl.toString(),
+                episodeMedia?.mediaGroup?.tvShow?.title ?: "",
+                episodeMedia?.mediaType ?: "",
+                episodeMedia?.mediaGroup?.itemsIds?.tvShowId ?: "",
                 jsonPlayEpisodeData ?: "",
-                episodeMedia!!.userID!!,
-                episodeMedia!!.profileID!!,
-                episodeMedia!!.mediaGroup!!.itemsIDS!!.seasonID!!,
+                episodeMedia?.userId ?: "",
+                episodeMedia?.profileId ?: "",
+                episodeMedia?.mediaGroup?.itemsIds?.seasonId ?: "",
                 episodeMedia?.mediaGroup?.episodes?.get(startVideoPosition)?.id.toString(),
-                episodeMedia!!.mediaGroup!!.season!!.seasonNumber!!,
+                episodeMedia?.mediaGroup?.season?.seasonNumber ?: "",
                 episodeMedia?.mediaGroup?.episodes?.get(startVideoPosition)?.order.toString(),
-                episodeMedia!!.mediaGroup!!.season!!.title!!,
-                episodeMedia?.mediaGroup?.episodes?.get(startVideoPosition)?.title.toString()
+                episodeMedia?.mediaGroup?.season?.title ?: "",
+                episodeMedia?.mediaGroup?.episodes?.get(startVideoPosition)?.title.toString(),
+                episodeJson ?: "",
+                false
             )
         }
         if (result == 1) {
@@ -637,11 +739,49 @@ class CustomPlayerActivity() : FlutterActivity() {
                     R.color.blue_download
                 )
             );
+            Toast.makeText(
+                this,
+                if (currentLanguage == "en") "Start downloading..." else "جاري التحميل...",
+                Toast.LENGTH_LONG
+            ).show()
         } else {
+            Toast.makeText(
+                this,
+                if (currentLanguage == "en") "Video was downloaded" else "تم تحميل الفيديو",
+                Toast.LENGTH_LONG
+            ).show()
             //viewBinding.downloadButton.setColorFilter(Color.parseColor("#ffffff"));
         }
     }
 
+    ////////////////////////
+    private fun isPiPSupported(context: Context): Boolean {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            context.packageManager.hasSystemFeature(PackageManager.FEATURE_PICTURE_IN_PICTURE)
+        } else {
+            false
+        }
+    }
+
+    // Check if picture-in-picture settings are enabled
+    fun isPiPSettingsEnabled(context: Context): Boolean {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            Settings.canDrawOverlays(context)
+        } else {
+            true
+        }
+    }
+
+    // Open device settings to enable picture-in-picture settings
+    fun openPiPSettings(context: Context) {
+        val packageName = context.packageName
+        val intent =
+            Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:$packageName"))
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        context.startActivity(intent)
+    }
+
+    ////////////////////////
     @RequiresApi(Build.VERSION_CODES.N)
     private fun showVideoAsPictureOnPicture() {
         // if (isInPictureInPictureMode)
@@ -650,22 +790,43 @@ class CustomPlayerActivity() : FlutterActivity() {
             viewBinding.bottomController.visibility = View.GONE
             viewBinding.playerView.hideController()
         }*/
+        val supportsPiP = isPiPSupported(activity)
+        val isSettingsEnabled = isPiPSettingsEnabled(activity)
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val aspectRatio = Rational(viewBinding.playerView.width, viewBinding.playerView.height)
-            val params = PictureInPictureParams.Builder()
-                .setAspectRatio(aspectRatio)
-                .build()
-            enterPictureInPictureMode(params)
-        } else {
-            enterPictureInPictureMode()
+            if (supportsPiP) {
+                val aspectRatio =
+                    Rational(viewBinding.playerView.width, viewBinding.playerView.height)
+                val params = PictureInPictureParams.Builder()
+                    .setAspectRatio(aspectRatio)
+                    .build()
+                enterPictureInPictureMode(params)
+            } /*else if (supportsPiP && !isSettingsEnabled) {
+                // Picture-in-picture settings are disabled, guide the user to enable them manually
+                openPiPSettings(activity)
+            } */ else {
+                /*Toast.makeText(
+                    this,
+                    if (currentLanguage == "en") "Picture-in-Picture mode not supported" else "جهازك لا يدعم خاصية PIP",
+                    Toast.LENGTH_LONG
+                ).show()*/
+            }
+            viewBinding.topController.visibility = View.GONE
+            viewBinding.bottomController.visibility = View.GONE
+            viewBinding.playerView.hideController()
         }
-        viewBinding.topController.visibility = View.GONE
-        viewBinding.bottomController.visibility = View.GONE
-        viewBinding.playerView.hideController()
     }
 
+    //////////////////////////////////////////////////////////////////
+    /*fun getValueFromJson(json: String, key: String): Any? {
+        val gson = Gson()
+        val mapType: Type = object : com.google.gson.reflect.TypeToken<Map<String, Any>>() {}.type
+        val map: Map<String, Any> = gson.fromJson(json, mapType)
+        return map[key]
+    }*/
 
     private var movieMedia: MovieMedia? = null
+    //private var m: MovieMedia? = null
     private var episodeMedia: EpisodeMedia? = null
     private var mediaType: String = ""
     private var startVideoPosition: Int = 0
@@ -680,38 +841,57 @@ class CustomPlayerActivity() : FlutterActivity() {
         jsonPlayEpisodeData = intent.getStringExtra("PlayEpisodeData")
         if (jsonPlayMovieData != null) {
 
-            movieMedia = MovieMedia.fromJson(jsonPlayMovieData.toString())
+            //Log.d("B7b::: String Json", jsonPlayMovieData.toString())
+            ////////////////////////////////////////////
+            /*val gson = Gson()
+            val jsonString = """{"id": 1, "name": "John","info":{"gpa": "5.567"}}"""
+            var person = gson.fromJson(jsonString, Person::class.java)*/
+            ///////////////////////////////////////////
+            movieMedia = Gson().fromJson(jsonPlayMovieData, MovieMedia::class.java)
+            /*m = gson.fromJson(jsonPlayMovieData,MovieMedia::class.java)
+            Log.d("B7b::: movieM title:", "${m?.title}")
+            Log.d("B7b::: movieM mt:", "${m?.mediaType}")
+            Log.d("B7b::: movieM mt:", "${m?.info?.mediaUrl}")
+            //Log.d("B7b::: movieM murl:", "${movieMedia?.info?.mediaURL}")*/
+
+            //val klaxon2 = Klaxon().parse<MovieMedia>(jsonPlayMovieData!!)
+            //Log.d("B7b::: Klaxon title:", "${klaxon2?.title}")
+
+            //movieMedia = MovieMedia.fromJson(jsonPlayMovieData!!)
+            ////////////////////////////////////////////
 
             mediaType = movieMedia?.mediaType ?: movie
             currentLanguage = movieMedia?.lang ?: "en"
             setPlayerLanguage(currentLanguage, null)
 
-            videoMediaID = arrayOf(movieMedia?.mediaID.toString())!!
-            videoUris = arrayOf(movieMedia?.url.toString())!!
-            videoTitle = arrayOf(movieMedia?.title.toString())!!
+            videoMediaID = arrayOf(movieMedia?.mediaId.toString())
+            videoUris = arrayOf(movieMedia?.url.toString())
+            videoTitle = arrayOf(movieMedia?.title.toString())
             viewBinding.videoTitle.text = videoTitle[0]
             videoSubTitle += ("")
             ////////////////////////
             setGreenColorForDownloadButtonIfIsDownloaded(mediaType)
         } else if (jsonPlayEpisodeData != null) {
-            episodeMedia = EpisodeMedia.fromJson(jsonPlayEpisodeData.toString())
-
+            //episodeMedia = EpisodeMedia.fromJson(jsonPlayEpisodeData.toString())
+            episodeMedia = Gson().fromJson(jsonPlayEpisodeData, EpisodeMedia::class.java)
+            //Log.d("B7b::: String Json", jsonPlayEpisodeData.toString())
             mediaType = episodeMedia?.mediaType ?: series
             currentLanguage = episodeMedia?.lang ?: "en"
             setPlayerLanguage(currentLanguage, null)
+            //Log.d("B7b::: mediaType:", "${mediaType}")
+
 
             viewBinding.videoTitle.text = episodeMedia?.mediaGroup?.tvShow?.title.toString()
 
             for ((index, item) in episodeMedia?.mediaGroup?.episodes?.withIndex()!!) {
                 println("Item $index is $item")
-                videoMediaID += arrayOf(item.id.toString())
-                videoUris += (item.mediaURL.toString())
-                videoSubTitle += (item.title.toString())
+                videoMediaID += arrayOf(item?.id.toString())
+                videoUris += (item?.mediaUrl.toString())
+                videoSubTitle += (item?.title.toString())
                 //Log.d("Path URL MEDIA:",item.mediaURL.toString())
             }
-            ///////
             val index =
-                episodeMedia?.mediaGroup?.episodes?.indexOfFirst { info -> info.id == episodeMedia?.info?.id }
+                episodeMedia?.mediaGroup?.episodes?.indexOfFirst { info -> info?.id == episodeMedia?.info?.id }
             startVideoPosition = index ?: 0
             if (0 > startVideoPosition) {
                 startVideoPosition = 0
@@ -734,6 +914,25 @@ class CustomPlayerActivity() : FlutterActivity() {
                 Toast.LENGTH_LONG
             ).show()
         }
+
+        ///////
+        ////////////////////////////////////////////////////////////////////////////////////////////
+        //hide download icon if download url is empty...
+        if (mediaType == movie) {
+            viewBinding.downloadButton.visibility =
+                if (movieMedia?.info?.downloadUrl.toString().trim()
+                        .isEmpty() || movieMedia?.info?.downloadUrl == null
+                ) View.GONE else View.VISIBLE;
+        } else {
+            viewBinding.downloadButton.visibility =
+                if (episodeMedia?.mediaGroup?.episodes?.get(startVideoPosition)?.downloadUrl.toString()
+                        .trim()
+                        .isEmpty()
+                    || episodeMedia?.mediaGroup?.episodes?.get(startVideoPosition)?.downloadUrl == null
+                ) View.GONE else View.VISIBLE;
+        }
+        ////////////////////////////////////////////////////////////////////////////////////////////
+        ///////
     }
 
     private fun setGreenColorForDownloadButtonIfIsDownloaded(mediaType: String) {
@@ -746,7 +945,7 @@ class CustomPlayerActivity() : FlutterActivity() {
             //videoUris[startVideoPosition] = downloadInfo["video_path"].toString()
         } else {
             downloadInfo = DatabaseHelper(context).getDownloadInfoFromDB(
-                movieMedia?.mediaID.toString(),
+                movieMedia?.mediaId.toString(),
                 mediaType
             )
         }
@@ -755,13 +954,18 @@ class CustomPlayerActivity() : FlutterActivity() {
         if (downloadInfo["status"] == DownloadManagerSTATUS.STATUS_SUCCESSFUL && downloadInfo["status"] != null) {
             if (downloadInfo["video_path"].toString() != "" && downloadInfo["video_path"] != null) {
                 videoUris[startVideoPosition] = downloadInfo["video_path"].toString()
+                viewBinding.downloadButton.setColorFilter(
+                    ContextCompat.getColor(
+                        context,
+                        R.color.green_download
+                    )
+                );
+                ///////
+                //refresh player for new urls links
+                val mediaItem = videoUris.map { MediaItem.fromUri(it) }
+                player?.setMediaItems(mediaItem)
+                ///////
             }
-            viewBinding.downloadButton.setColorFilter(
-                ContextCompat.getColor(
-                    context,
-                    R.color.green_download
-                )
-            );
         } else if (downloadInfo["status"] == DownloadManagerSTATUS.STATUS_RUNNING && downloadInfo["status"] != null) {
             viewBinding.downloadButton.setColorFilter(
                 ContextCompat.getColor(
@@ -782,7 +986,7 @@ class CustomPlayerActivity() : FlutterActivity() {
     }
 
 
-    @SuppressLint("InlinedApi")
+    @SuppressLint("InlinedApi", "ClickableViewAccessibility")
     private fun hideSystemUi() {
 
         WindowCompat.setDecorFitsSystemWindows(window, false)
@@ -807,7 +1011,7 @@ class CustomPlayerActivity() : FlutterActivity() {
                 //exoContentTimeBar.setBackgroundColor(0X42000000)
                 //viewBinding.downloadButton.setColorFilter( ContextCompat.getColor(context, R.color.green_download));
                 //viewBinding.playerView.showController()
-                Log.d("Heel-VISIBLE", "Bom")
+                //Log.d("Heel-VISIBLE", "Bom")
             } else {
                 viewBinding.topController.visibility = View.GONE
                 viewBinding.bottomController.visibility = View.GONE
@@ -816,56 +1020,78 @@ class CustomPlayerActivity() : FlutterActivity() {
                 exoContentTimeBar.visibility = View.GONE
                 //exoContentTimeBar.setBackgroundColor(Color.TRANSPARENT)
                 //viewBinding.playerView.hideController()
-                Log.d("Heel-GONE", "Bom")
+                //Log.d("Heel-GONE", "Bom")
             }
-            if(isReadyPlayer) {
-                addWatchedEpisodesToTheList(
-                    videoMediaID[startVideoPosition], player?.duration?.div(1000).toString(),
-                    (player?.currentPosition?.div(1000)).toString()
-                )
-            }
+            callAddWatchedMediaDataToTheList()
         })
-
     }
 
-    private fun addToWatchingList() {
-        if (player != null && (player?.currentPosition ?: 0) > 0 && (player?.duration ?: 0) > 0) {
+    private fun addToWatchingListAPI() {
+        if (player != null && (player?.currentPosition ?: 0) > 0 && (player?.duration
+                ?: 0) > 0
+        ) {
             if (mediaType == movie) {
                 //movie
-                Log.d("Bom this is time: ", (player?.currentPosition?.div(1000)).toString())
+                //Log.d("Bom this is time: ", (player?.currentPosition?.div(1000)).toString())
                 RetrofitBuildRequest().createRequestForAddWatching(
-                    movieMedia?.apiBaseURL.toString(),
-                    movieMedia?.profileID.toString(),
+                    movieMedia?.apiBaseUrl.toString(),
+                    movieMedia?.profileId.toString(),
                     movie,
-                    movieMedia?.mediaID.toString(),
+                    movieMedia?.mediaId.toString(),
                     //movieMedia?.info?.watching?.duration.toString(),
                     player?.duration?.div(1000).toString(),
                     (player?.currentPosition?.div(1000)).toString(),
-                    movieMedia?.token.toString(),
+                    DowplayPlugin.accessToken,
                     currentLanguage
                 )
             } else if (mediaType == series) {
                 //episode
                 RetrofitBuildRequest().createRequestForAddWatching(
-                    episodeMedia?.apiBaseURL.toString(),
-                    episodeMedia?.profileID.toString(),
+                    episodeMedia?.apiBaseUrl.toString(),
+                    episodeMedia?.profileId.toString(),
                     "episode",
                     episodeMedia?.mediaGroup?.episodes?.get(startVideoPosition)?.id.toString(),
                     player?.duration?.div(1000).toString(),
                     //episodeMedia?.mediaGroup?.episodes?.get(startVideoPosition)?.watching?.duration.toString(),
                     (player?.currentPosition?.div(1000)).toString(),
-                    episodeMedia?.token.toString(),
+                    DowplayPlugin.accessToken,
                     currentLanguage
                 )
             }
         }
     }
 
+    override fun onPictureInPictureModeChanged(
+        isInPictureInPictureMode: Boolean,
+        newConfig: Configuration
+    ) {
+        super.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig)
+        if (lifecycle.currentState == Lifecycle.State.CREATED) {
+            //user clicked on close button of PiP window
+            //Log.d("PiP-is-close", "PiP is close by click on close button")
+            vibratePhone()
+            addToWatchingListAPI()
+            returnDataAfterClosePlayer()
+            finishAndRemoveTask()
+        } else if (lifecycle.currentState == Lifecycle.State.STARTED) {
+            if (isInPictureInPictureMode) {
+                // user clicked on minimize button
+                addToWatchingListAPI()
+                //returnDataAfterClosePlayer()
+                //Log.d("PiP-is-minimize", "PiP is minimize by click on full screen button")
+            } else {
+                // user clicked on maximize button of PiP window
+                //Log.d("PiP-is-maximize", "PiP is maximize by click on full screen button")
+            }
+        }
+    }
+
     public override fun onStart() {
         super.onStart()
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-        Log.d("current stats screen:", "onStart")
-        initToGetDataFromIntentAndTypeMedia()
+        //Log.d("current stats screen:", "onStart")
+        if (exoplayerIsNotRun) {
+            initToGetDataFromIntentAndTypeMedia()
+        }
         if (Util.SDK_INT > 23) {
             initializePlayer()
         }
@@ -873,9 +1099,8 @@ class CustomPlayerActivity() : FlutterActivity() {
 
     public override fun onResume() {
         super.onResume()
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-        Log.d("current playbackPosi", "> $playbackPosition")
-        Log.d("current stats screen:", "onResume")
+        //Log.d("current playbackPosi", "> $playbackPosition")
+        //Log.d("current stats screen:", "onResume")
         hideSystemUi()
         if ((Util.SDK_INT <= 23)) {
             initializePlayer()
@@ -887,7 +1112,7 @@ class CustomPlayerActivity() : FlutterActivity() {
         super.onPause()
         //addToWatchingList()
         //player?.currentPosition
-        Log.d("current stats screen:", "onPause")
+        //Log.d("current stats screen:", "onPause")
         showVideoAsPictureOnPicture()
         if (Util.SDK_INT <= 23) {
             releasePlayer()
@@ -897,9 +1122,9 @@ class CustomPlayerActivity() : FlutterActivity() {
     @RequiresApi(Build.VERSION_CODES.N)
     public override fun onStop() {
         super.onStop()
-        Log.d("current stats screen:", "onStop")
+        //Log.d("current stats screen:", "onStop")
         //showVideoAsPictureOnPicture()
-        addToWatchingList()
+        addToWatchingListAPI()
         if (Util.SDK_INT > 23) {
             releasePlayer()
         }
@@ -907,8 +1132,8 @@ class CustomPlayerActivity() : FlutterActivity() {
 
     public override fun onDestroy() {
         super.onDestroy()
-        Log.d("current stats screen:", "onDestroy")
-        addToWatchingList()
+        //Log.d("current stats screen:", "onDestroy")
+        addToWatchingListAPI()
         //finish()
         /*if (Util.SDK_INT > 23) {
             releasePlayer()
@@ -919,13 +1144,12 @@ class CustomPlayerActivity() : FlutterActivity() {
         releasePlayer()
         moveTaskToBack(true)
         Log.d("current stats screen:", "onBackPressed")
-
     }
 
 
     private var playWhenReady = true
     private var playbackPosition = 0L
-
+    private var exoplayerIsNotRun = true
     private fun releasePlayer() {
         player?.let { exoPlayer ->
             playbackPosition = exoPlayer.currentPosition

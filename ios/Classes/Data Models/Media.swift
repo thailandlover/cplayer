@@ -11,6 +11,7 @@ public struct Media {
     var title : String
     var subTitle : String?
     var urlToPlay : String
+    var downloadURL : String?
     @available(*, deprecated, renamed: "startAt")
     var currentWatchTime : Double?
     var keeId : String?

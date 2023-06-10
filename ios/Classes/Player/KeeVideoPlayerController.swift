@@ -1,3 +1,10 @@
+//
+//  KeeVideoPlayerController.swift
+//  KeeCustomPlayer
+//
+//  Created by Ahmed Qazzaz on 11/11/2022.
+//
+
 import UIKit
 import AVKit
 import MediaPlayer
@@ -13,7 +20,7 @@ struct PlayingInfo : Codable{
 public class KeeVideoPlayerController: UIViewController {
     public var settings : HostAppSettings = .default
     public static var orientationLock = UIInterfaceOrientationMask.portrait
-    public var controllersStayTime : Double = 2.5
+    public var controllersStayTime : Double = 5
     var routerPickerView :  AVRoutePickerView!
     private var queuePlayer : AVQueuePlayer?
     private var playerLayer : AVPlayerLayer!
@@ -97,8 +104,18 @@ public class KeeVideoPlayerController: UIViewController {
     @IBOutlet weak private var bottomView : UIView!
     @IBOutlet weak private var topView : UIView!
     
+    
+    func setPresentationStyle(_ style : UIModalPresentationStyle){
+        self.modalPresentationStyle = style
+    }
+    
     public override func viewDidLoad() {
         super.viewDidLoad()
+        
+
+        
+        AppUtility.lockOrientation(.landscape)
+        
         animator = UOAnimator(duration: 1.24, delay: 0.01,animationOptions: .curveEaseOut, damping: 0.85)
         
         continueWatchingAlert.leadingConstraint?.constant = -(continueWatchingAlert.frame.width + 100)
@@ -170,7 +187,7 @@ public class KeeVideoPlayerController: UIViewController {
             
             
         }
-        AppUtility.lockOrientation(.landscape)
+        
         topView.backgroundColor = vi_infoView.backgroundColor
         bottomView.backgroundColor = vi_controllers.backgroundColor
         do {
@@ -179,6 +196,20 @@ public class KeeVideoPlayerController: UIViewController {
             
         }
     }
+    
+    
+    public override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
+        super.viewWillTransition(to: size, with: coordinator)
+        
+        if UIDevice.current.userInterfaceIdiom == .pad{
+            let sH = self.playerView.bounds.height
+            let sW = self.playerView.bounds.width
+                playerLayer.frame = CGRect(origin: .zero, size: CGSize(width: sH, height: sW))
+        }
+        
+    }
+    
+   
     
     func setPlayingIndex(_ index : Int){
         playingIndex = index
@@ -193,7 +224,8 @@ public class KeeVideoPlayerController: UIViewController {
         
     }
     
-    func validateDownloadButton() throws{
+    func validateDownloadButton() throws{        
+        btn_download.isHidden = false
         lb_downloadPercentage.isHidden = true
         if let id = media?.keeId, let type = media?.type{
             var isDownloaded = false
@@ -216,11 +248,18 @@ public class KeeVideoPlayerController: UIViewController {
                     btn_download.tag = -1
 //                    btn_download.alpha = 0.5
                     btn_download.tintColor = .red
+                    if let progress = DownloadManager.shared.getDownloadProgress(ForMediaId: id, ofMediaType: type) {
+                        
+                        DispatchQueue.main.async {
+                            self.lb_downloadPercentage.text = String(format: "%02.2f%%", progress * 100)
+                        }
+                    }
+                    
                 }else{
                     btn_download.tag = 1
                 }
                 lb_downloadPercentage.isHidden = false
-                NotificationCenter.default.addObserver(self, selector: #selector(downloadProgressReceiver(notification:)), name: NSNotification.Name(rawValue: "downloadTask_media_\(id)_\(type.rawValue)_\(settings.userSignature)"), object: nil)
+                NotificationCenter.default.addObserver(self, selector: #selector(downloadProgressReceiver(notification:)), name: NSNotification.Name(rawValue: "downloadTask_media_\(id)_\(type.version_3_value)_\(settings.userSignature)"), object: nil)
             }else{
                 btn_download.tag = 0
                 btn_download.tintColor = .white
@@ -229,6 +268,10 @@ public class KeeVideoPlayerController: UIViewController {
             btn_download.tag = 0
             btn_download.tintColor = .white
         }
+        
+        if media?.downloadURL == nil {
+            btn_download.isHidden = true
+        }
     }
     
     @objc func downloadProgressReceiver( notification : Notification) {
@@ -236,7 +279,7 @@ public class KeeVideoPlayerController: UIViewController {
             if let id = media?.keeId, let type = media?.type {
                 if let taskID = downloadTask.mediaId{
                     let ID = "\(taskID)"
-                    if ID == "\(id)_\(type.rawValue)_\(settings.userSignature)" {
+                    if ID == "\(id)_\(type.version_3_value)_\(settings.userSignature)" {
                         DispatchQueue.main.async {
                             self.lb_downloadPercentage.text = String(format: "%02.2f%%", downloadTask.progress.fractionCompleted * 100)
                         }
@@ -362,7 +405,9 @@ public class KeeVideoPlayerController: UIViewController {
         super.viewWillDisappear(animated)
         self.setPlayingInfoForCurrentMedia()
         AppUtility.lockOrientation(.portrait)
-        self.updateWatchTime()
+        if localPath == nil {
+            self.updateWatchTime()
+        }
         self.player.pause()
         self.player = nil
         self.complete = true
@@ -594,7 +639,7 @@ public class KeeVideoPlayerController: UIViewController {
     @IBAction func downloadAction(_ sender : UIButton) {
         if btn_download.tag == 0 {
             //        DownloadManager.shared.download(link: media?.urlToPlay ?? "")
-            if let url = URL(string: media?.urlToPlay ?? "") {
+            if let url = URL(string: media?.downloadURL ?? "") {
                 DownloadManager.shared.startDownload(url: url,
                                                      forMediaId: Int(media?.keeId ?? "") ?? -1 ,
                                                      mediaName: media?.title ?? "Untitled",
@@ -681,6 +726,19 @@ public class KeeVideoPlayerController: UIViewController {
 //                    self.showContinueFromWatchingTime()
 //                }
                 
+                
+                let sH = self.playerView.bounds.height
+                let sW = self.playerView.bounds.width
+                
+//                if UIDevice.current.userInterfaceIdiom == .pad{
+                    playerLayer.frame = CGRect(origin: .zero, size: CGSize(width: sW, height: sH))
+//                }else{
+//                    playerLayer.frame = CGRect(origin: .zero, size: CGSize(width: sH, height: sW))
+//                }
+                
+                
+                
+                
                 break
             case .failed:
                 // Player item failed. See error.
@@ -705,6 +763,7 @@ public class KeeVideoPlayerController: UIViewController {
         }
 
     }
+        
     
     func enableAll(){
         seekTimeSlider.isEnabled = true
@@ -736,13 +795,14 @@ public class KeeVideoPlayerController: UIViewController {
     private func hideViews(){
          func hideInfoView(){
             if vi_infoView.topConstraint?.constant == 0 { // still visible
-                animator.animateTo(forView: vi_infoView, topConstant: -(vi_infoView.frame.height + 4))
+                animator.animateTo(forView: vi_infoView, topConstant: -(vi_infoView.frame.height + 8))
             }
         }
         
          func hideControllerView(){
             if vi_controllers.bottomConstraint?.constant == 0 { // still visible
-                animator.animateTo(forView: vi_controllers, bottomConstant: -(vi_controllers.frame.height + (UIScreen.main.bounds.height - vi_controllers.frame.origin.y)))
+                animator.animateTo(forView: vi_controllers, bottomConstant: -(UIScreen.main.bounds.height))
+//                animator.animateTo(forView: vi_controllers, bottomConstant: -(vi_controllers.frame.height + (UIScreen.main.bounds.height - vi_controllers.frame.origin.y)))
             }
         }
         

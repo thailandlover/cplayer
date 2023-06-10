@@ -123,7 +123,8 @@ class _MyAppState extends State<MyApp> {
     movieMedia = MovieMedia(
         title: "The Simpsons in Plusaversary",
         subTitle: "",
-        url: "https://thekee.gcdn.co/video/m-159n/English/Animation&Family/The.Simpsons.in.Plusaversary.2021.1080.mp4?md5=QA-5PWsq9OIEaa0EM79p9A&expires=1678670074",
+        url:
+            "https://thekee.gcdn.co/video/m-159n/English/Animation&Family/The.Simpsons.in.Plusaversary.2021.1080.mp4?md5=QA-5PWsq9OIEaa0EM79p9A&expires=1678670074",
         mediaId: "377530",
         mediaType: "movie",
         userId: "245394",
@@ -136,7 +137,8 @@ class _MyAppState extends State<MyApp> {
     downloadMovie = DownloadMovie(
         title: "The Simpsons in Plusaversary",
         subTitle: "",
-        url: "https://thekee.gcdn.co/video/m-159n/English/Animation&Family/The.Simpsons.in.Plusaversary.2021.1080.mp4?md5=QA-5PWsq9OIEaa0EM79p9A&expires=1678670074",
+        url:
+            "https://thekee.gcdn.co/video/m-159n/English/Animation&Family/The.Simpsons.in.Plusaversary.2021.1080.mp4?md5=QA-5PWsq9OIEaa0EM79p9A&expires=1678670074",
         mediaId: "377530",
         mediaType: "movie",
         userId: "245394",
@@ -150,8 +152,12 @@ class _MyAppState extends State<MyApp> {
   config() async {
     bool result;
     try {
-      result = await _dowplayPlugin.config(
-              {"user_id": "245394", "profile_id": "562674", "lang": "ar"}) ??
+      result = await _dowplayPlugin.config({
+            "user_id": "245394",
+            "profile_id": "562674",
+            "lang": "ar",
+            "access_token": accessToken
+          }) ??
           false;
       if (kDebugMode) {
         print("result : $result");
@@ -230,10 +236,10 @@ class _MyAppState extends State<MyApp> {
         "download_url":
             "https://thekee.gcdn.co/video/m-159n/English/Animation&Family/Tom.and.Jerry.1965/03.mp4?md5=eCp0VmIS_doipZ6lGVxwVg&expires=1678550892",
         "hd_url":
-            "https://thekee.gcdn.co/video/m-159n/English/Animation&Family/Tom.and.Jerry.1965/03.mp4?md5=eCp0VmIS_doipZ6lGVxwVg&expires=1678550892",
+            "https://thekee.gcdn.co/video/m-159n/English/Drama/The.Irishman.2019.720p.V1.mp4?md5=ZF34W64FwMoh3vIlOnfNXQ&expires=1685804927",
         "trailer_url": null,
         "media_url":
-            "https://thekee.gcdn.co/video/m-159n/English/Animation&Family/Tom.and.Jerry.1965/03.mp4?md5=eCp0VmIS_doipZ6lGVxwVg&expires=1678550892",
+            "https://thekee.gcdn.co/video/m-159n/English/Drama/The.Irishman.2019.720p.V1.mp4?md5=ZF34W64FwMoh3vIlOnfNXQ&expires=1685804927",
         "created_at": "2020-07-01 13:27:14",
         "release_date": "2020-07-01 00:00:00",
         "watching": null
@@ -352,6 +358,45 @@ class _MyAppState extends State<MyApp> {
     }
   }
 
+  Future<dynamic> getDownloadMovie() async {
+    dynamic result = await invokeGetDownloadMovie();
+    if (kDebugMode) {
+      printWrapped("Returned Movie  ${jsonEncode(result)}");
+    }
+  }
+
+  Future<dynamic> invokeGetDownloadMovie() async {
+    dynamic result;
+    try {
+      result =
+          await _dowplayPlugin.getDownloadMovie(movieObject['id'].toString());
+    } on PlatformException {
+      result = false;
+    }
+    return result;
+  }
+
+  Future<dynamic> getDownloadEpisode() async {
+    dynamic result = await invokeGetDownloadEpisode();
+    if (kDebugMode) {
+      printWrapped("Returned Episode  ${jsonEncode(result)}");
+    }
+  }
+
+  Future<dynamic> invokeGetDownloadEpisode() async {
+    dynamic result;
+    try {
+      result = await _dowplayPlugin.getDownloadEpisode(
+        "64864", //episond
+        "1532", //tvshow
+        "3236", //season
+      );
+    } on PlatformException {
+      result = false;
+    }
+    return result;
+  }
+
   Future<dynamic> getTvShowSeasonsDownloadList() async {
     dynamic result = await invokeGetTvShowSeasonsDownloadList();
     if (kDebugMode) {
@@ -407,7 +452,8 @@ class _MyAppState extends State<MyApp> {
       "poster_photo":
           "https://thekee-m.gcdn.co/images06012022/uploads/media/series/seasons/posters/2020-07-01/ZMx47Bf3sO03FprZ.jpg",
       "duration": "10 min",
-      "download_url": "https://thekee.gcdn.co/video/m-159n/English/Animation&Family/Tom.and.Jerry.1965/02.mp4?md5=eCp0VmIS_doipZ6lGVxwVg&expires=1678550892",
+      "download_url":
+          "https://thekee.gcdn.co/video/m-159n/English/Animation&Family/Tom.and.Jerry.1965/02.mp4?md5=eCp0VmIS_doipZ6lGVxwVg&expires=1678550892",
       "hd_url":
           "https://thekee.gcdn.co/video/m-159n/English/Animation&Family/Tom.and.Jerry.1965/02.mp4?md5=eCp0VmIS_doipZ6lGVxwVg&expires=1678550892",
       "trailer_url": null,
@@ -522,7 +568,7 @@ class _MyAppState extends State<MyApp> {
 
   Future<dynamic> cancelDownload() async {
     dynamic result =
-        await invokeCancelDownload(movieMedia.mediaId, movieMedia.mediaType);
+        await invokeCancelDownload("64864", "series ", "1532", "3236");
     if (kDebugMode) {
       List<dynamic> downloads = List.from(result as Iterable);
       if (mounted) {
@@ -648,10 +694,12 @@ class _MyAppState extends State<MyApp> {
     return result;
   }
 
-  Future<dynamic> invokeCancelDownload(String mediaId, String mediaType) async {
+  Future<dynamic> invokeCancelDownload(String mediaId, String mediaType,
+      dynamic tvShowId, dynamic seasonId) async {
     dynamic result;
     try {
-      result = await _dowplayPlugin.cancelDownload(mediaId, mediaType);
+      result = await _dowplayPlugin.cancelDownload(
+          mediaId, mediaType, tvShowId, seasonId);
     } on PlatformException {
       result = false;
     }
@@ -707,7 +755,8 @@ class _MyAppState extends State<MyApp> {
                       shrinkWrap: true,
                       itemCount: _downloadsList.length,
                       itemBuilder: (context, index) {
-                        return Text("Count::: ${_downloadsList.length}+ ${_downloadsList[index]}"
+                        return Text(
+                            "Count::: ${_downloadsList.length}+ ${_downloadsList[index]}"
                             // "[${index + 1}]-> (${_downloadsList[index]['mediaType']}) : ${_downloadsList[index]['mediaType'] == "movie" ? _downloadsList[index]['object']['title'] : _downloadsList[index]['object']['info']['title']} - ${_downloadsList[index]['status']} - ${_downloadsList[index]['progress']}",
                             );
                       },
@@ -718,7 +767,6 @@ class _MyAppState extends State<MyApp> {
                   onPressed: getTvShowSeasonsDownloadList,
                   child: const Text("Print TvShow Seasons Downloads List"),
                 ),
-
                 ElevatedButton(
                   onPressed: getSeasonEpisodesDownloadList,
                   child: const Text("Print Season Episodes Downloads List"),
@@ -742,6 +790,14 @@ class _MyAppState extends State<MyApp> {
                 ElevatedButton(
                   onPressed: cancelDownload,
                   child: const Text("Cancel Download Movie"),
+                ),
+                ElevatedButton(
+                  onPressed: getDownloadMovie,
+                  child: const Text("Get Download Movie"),
+                ),
+                ElevatedButton(
+                  onPressed: getDownloadEpisode,
+                  child: const Text("Get Download Episode"),
                 ),
               ],
             ),

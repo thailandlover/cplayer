@@ -96,7 +96,7 @@ public struct AppUtility {
         self.lockOrientation(orientation)
     
         UIDevice.current.setValue(rotateOrientation.rawValue, forKey: "orientation")
-        UINavigationController.attemptRotationToDeviceOrientation()
+        UINavigationController.attemptRotationToDeviceOrientation()        
     }
 
 }

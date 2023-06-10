@@ -16,24 +16,26 @@ enum MediaRetrivalType : String, Codable{
 
 public struct DownloadedMedia : Codable{
     var mediaRetrivalType : MediaRetrivalType = .MovieInfo
-    
+    var signature : String = ""
     var mediaId : String
     var mediaURL : URL?
     var mediaType : MediaManager.MediaType = .movie
     var path : URL{
         if let g = group {
             return FilesManager.shared.cache.appendingPathComponent(mediaType.version_3_value, isDirectory: true)
+                .appendingPathComponent(signature, isDirectory: true)
                 .appendingPathComponent(g.showId, isDirectory: true)
                 .appendingPathComponent(g.seasonId, isDirectory: true)
                 .appendingPathComponent("\(mediaId).mp4")
         }
         
-        return FilesManager.shared.cache.appendingPathComponent(mediaType.rawValue, isDirectory: true).appendingPathComponent("\(mediaId).mp4")
+        return FilesManager.shared.cache.appendingPathComponent(mediaType.version_3_value, isDirectory: true).appendingPathComponent(signature, isDirectory: true).appendingPathComponent("\(mediaId).mp4")
     }
     var episodeInfoPathURL : URL?{
         if self.mediaType == .series && self.mediaRetrivalType == .EpisodeInfo {
             if let g = group {
                 return FilesManager.shared.cache.appendingPathComponent(mediaType.version_3_value, isDirectory: true)
+                    .appendingPathComponent(signature, isDirectory: true)
                     .appendingPathComponent(g.showId, isDirectory: true)
                     .appendingPathComponent(g.seasonId, isDirectory: true)
                     .appendingPathComponent("\(mediaId).keeinfo")                
@@ -65,6 +67,7 @@ public struct DownloadedMedia : Codable{
     
     //Use only if the media is not downloaded yet (in progress)
     var status : URLSessionTask.State = .completed
+    var retrivalStatus : Int?
     var progress : Double = 1
     
     enum CodingKeys: CodingKey {
@@ -77,6 +80,7 @@ public struct DownloadedMedia : Codable{
         case data
         case progress
         case mediaRetrivalType
+        case retrivalStatus
     }
     
     init(mediaId: String, mediaURL: URL? = nil, mediaType: MediaManager.MediaType = .movie, name: String, tempPath: URL?) {
@@ -112,11 +116,44 @@ public struct DownloadedMedia : Codable{
             self.mediaType = .movie
         }
     }
+    
+    func reCallRequest()->String?{
+        if let url = mediaURL {
+            if let task = DownloadManager.shared.startDownload(url: url,
+                                                 forMediaId: Int(mediaId) ?? 0,
+                                                 mediaName: name,
+                                                 type: mediaType,
+                                                 mediaGroup: group,
+                                                               object: object,
+            shouldStart: !(retrivalStatus == 1)){
+                
+                DownloadManager.shared.updateTasks()
+                
+//                if retrivalStatus == 1 {
+//                    task.suspend()
+//                }
+                return task.mediaId
+            }
+        }
+        return nil
+    }
    
     
 //    var mediaDownloadName : String {
 //        return mediaType.rawValue + "/" + "\(mediaId)"
 //    }
+    
+    @discardableResult
+    mutating func setUser(signature: String)->DownloadedMedia {
+        self.signature = signature
+        return self
+    }
+    
+    mutating func saveDownloadStatus(taskId: String, signature: String, url: URL?){
+        self.retrivalStatus = status.rawValue
+        self.mediaURL = url
+        FilesManager.shared.saveTempData(id: taskId, data: self, user: signature)
+    }
     
     func store(signature: String) throws{
         try FilesManager.shared.forUser(signature).registerDownloadedMedia(self)
@@ -132,11 +169,13 @@ public struct DownloadedMedia : Codable{
     }
     
     static func getMovieByID(id : String, signature: String)throws->DownloadedMedia?{
-        return try FilesManager.shared.forUser(signature).getDownloadeMovieById(id)
+        var media = try FilesManager.shared.forUser(signature).getDownloadeMovieById(id)
+        return media?.setUser(signature: signature)
     }
     
     static func getEpisodeByID(id : String, season: String, series: String, signature: String)->DownloadedMedia?{
-        return FilesManager.shared.forUser(signature).getDownloadedEpisode(id: id, season: season, series: series)
+        var media = FilesManager.shared.forUser(signature).getDownloadedEpisode(id: id, season: season, series: series)
+        return media?.setUser(signature: signature)
     }
     
         
@@ -161,5 +200,39 @@ public struct DownloadedMedia : Codable{
 
 public struct Season {
     var mediaList : [DownloadedMedia] = []
+}
+
+
+public enum MediaSortKey {
+    case name
+    case id
+    case seasonNumber
+    //case episodeNumber
+}
+public  enum OrderType {
+    case asce
+    case desc
+}
+
+extension [DownloadedMedia] {
+    
+    public func sortMedia(_ key: MediaSortKey, type : OrderType = .asce)->[DownloadedMedia]{
+        return self.sorted { i1, i2 in
+            switch(key){
+            case .name:
+                return  type == .asce ? i1.name > i2.name : i1.name < i2.name
+            case .seasonNumber:
+                if i1.mediaRetrivalType == .SeasonInfo {
+                    if let a = i1.group?.seasonName, let b = i2.group?.seasonName{
+                        return  type == .asce ? a > b : a < b
+                    }
+                }
+                break
+            default:
+                return type == .asce ? i1.mediaId > i2.mediaId : i1.mediaId < i2.mediaId
+            }
+            return type == .asce ? i1.mediaId > i2.mediaId : i1.mediaId < i2.mediaId
+        }
+    }    
 }
 
