@@ -10,7 +10,7 @@ import UIKit
 
 
 public class DownloadManager: NSObject/*, ObservableObject */{
-    static var shared = DownloadManager()
+    public static var shared = DownloadManager()
     public static var backgroundCompletionHandler : (() -> Void)?
     
     private var urlSession: URLSession!
