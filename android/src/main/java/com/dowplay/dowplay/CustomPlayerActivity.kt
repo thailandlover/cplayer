@@ -142,18 +142,18 @@ class CustomPlayerActivity() : FlutterActivity() {
             if (mediaType == movie) {
                 movieMedia?.info?.watching?.currentTime?.toLong()?.let {
                     player?.seekTo(it * 1000)
-                    print("B7b creent time :::: " + it * 1000)
+                    //print("B7b creent time :::: " + it * 1000)
                 }
             } else if (mediaType == series) {
                 episodeMedia?.mediaGroup?.episodes?.get(startVideoPosition)?.watching?.currentTime?.toLong()
                     ?.let {
                         player?.seekTo(it * 1000)
-                        print("B7b creent time :::: " + it * 1000)
+                        //print("B7b creent time :::: " + it * 1000)
                     }
             }
         } else {
             player?.seekTo(playbackPosition)
-            print("B7b creent time :::: $playbackPosition")
+            //print("B7b creent time :::: $playbackPosition")
         }
     }
 
@@ -304,7 +304,7 @@ class CustomPlayerActivity() : FlutterActivity() {
             }
         } else {*/
         if (DowplayPlugin.myResultCallback != null) {
-            Log.d("Player Result::: ",watchedMediaDataArray.toString())
+            //Log.d("Player Result::: ",watchedMediaDataArray.toString())
             DowplayPlugin.myResultCallback.success(watchedMediaDataArray)
             DowplayPlugin.myResultCallback = null
         }
@@ -586,7 +586,7 @@ class CustomPlayerActivity() : FlutterActivity() {
     ) {
         //var audios = 0;
         //var subtitlesTracks = 0;
-        Log.d("TAG", "Track Changed " + trackGroups.length)
+        //Log.d("TAG", "Track Changed " + trackGroups.length)
         //Log.d("TAG", "Track selection : " + trackSelections.length)
         val mappedTrackInfo: MappingTrackSelector.MappedTrackInfo? =
             trackSelection?.currentMappedTrackInfo
@@ -619,10 +619,10 @@ class CustomPlayerActivity() : FlutterActivity() {
                         arrayIndex,
                         groupIndex
                     ) == C.FORMAT_HANDLED
-                    Log.d(
+                    /*Log.d(
                         "Booom2023",
                         "Aaaaaaa:::item " + groupIndex + ": trackName: " + trackName + ", isTrackSupported: " + isTrackSupported
-                    )
+                    )*/
                     /////
                     val sampleMimeType =
                         trackGroups[arrayIndex].getFormat(groupIndex).sampleMimeType
@@ -636,7 +636,7 @@ class CustomPlayerActivity() : FlutterActivity() {
                             bindingMF.englishAudioRadioButton.visibility = View.VISIBLE
                         }
                         if (trackName.lowercase().contains("Arabic".lowercase())) {
-                            print("Bom Arabic")
+                            //print("Bom Arabic")
                             bindingMF.audioTitle.visibility = View.VISIBLE
                             bindingMF.arabicAudioRadioButton.visibility = View.VISIBLE
                         }
@@ -836,7 +836,7 @@ class CustomPlayerActivity() : FlutterActivity() {
     private var isReadyPlayer = false
     private fun initToGetDataFromIntentAndTypeMedia() {
         //System.out.println("Bom Gson::: "+json);
-        print("Bom 101:::")
+        //print("Bom 101:::")
         jsonPlayMovieData = intent.getStringExtra("PlayMovieData")
         jsonPlayEpisodeData = intent.getStringExtra("PlayEpisodeData")
         if (jsonPlayMovieData != null) {
@@ -884,7 +884,7 @@ class CustomPlayerActivity() : FlutterActivity() {
             viewBinding.videoTitle.text = episodeMedia?.mediaGroup?.tvShow?.title.toString()
 
             for ((index, item) in episodeMedia?.mediaGroup?.episodes?.withIndex()!!) {
-                println("Item $index is $item")
+                //println("Item $index is $item")
                 videoMediaID += arrayOf(item?.id.toString())
                 videoUris += (item?.mediaUrl.toString())
                 videoSubTitle += (item?.title.toString())
@@ -896,7 +896,7 @@ class CustomPlayerActivity() : FlutterActivity() {
             if (0 > startVideoPosition) {
                 startVideoPosition = 0
             }
-            print("what the hell ? " + startVideoPosition)
+            //print("what the hell ? " + startVideoPosition)
             /*startVideoPosition = episodeMedia?.info?.order?.toIntOrNull() ?: 0
             if (startVideoPosition > 0) {
                 startVideoPosition -= 1

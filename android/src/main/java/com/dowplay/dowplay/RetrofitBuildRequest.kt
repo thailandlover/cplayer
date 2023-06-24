@@ -47,11 +47,13 @@ class RetrofitBuildRequest {
                 response: Response<ResponseBody>
             ) {
                 // handle success
-                Log.d("onResponse is success", "Watching API: $response")
+                //Log.d("onResponse is success", "Watching API: $response")
+                Log.d("onResponse is success", "Watching API: Added")
             }
             override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
                 // handle failure
-                Log.d("onFailure is failure", "Watching API: ${t.message}")
+                //Log.d("onFailure is failure", "Watching API: ${t.message}")
+                Log.d("onFailure is failure","Watching API: Not Added")
             }
         })
     }
