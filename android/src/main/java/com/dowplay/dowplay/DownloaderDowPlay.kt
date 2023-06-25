@@ -304,8 +304,8 @@ import java.security.SecureRandom
                 }
                 val dirPath = context.filesDir.path + "/downplay"
                 val videoName = generateRandomToken(50) + ".mp4"
-                println("Bom Dir: $dirPath")
-                println("Bom Dir: ${"$dirPath/$videoName"}")
+                //println("Bom Dir: $dirPath")
+                //println("Bom Dir: ${"$dirPath/$videoName"}")
                 val intent = Intent(context, DownloadService::class.java).apply {
                     putExtra("url", url)
                     putExtra("dir_path", dirPath)
