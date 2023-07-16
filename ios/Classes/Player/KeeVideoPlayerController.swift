@@ -913,7 +913,7 @@ public class KeeVideoPlayerController: UIViewController {
         return .landscape
     }
     public override var preferredInterfaceOrientationForPresentation: UIInterfaceOrientation {
-        return .landscapeLeft
+        return .landscapeRight
     }
     
     
