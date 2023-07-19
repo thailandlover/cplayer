@@ -118,6 +118,11 @@ public class DowplayPlugin extends FlutterActivity implements FlutterPlugin, Met
     @Override
     public void onMethodCall(@NonNull MethodCall call, @NonNull Result result) {
         if (call.method.equals("config_downloader")) {
+            /*try {
+                MyCrypto.DecryptExample();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }*/
             Log.d(TAG, "onMethodCall: config_downloader");
             //Log.d(TAG, "onMethodCall: " + call.arguments.toString());
             ///{user_id=245394, profile_id=562674, lang=ar}
