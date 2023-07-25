@@ -28,7 +28,11 @@ import androidx.media3.common.*
 import androidx.media3.common.util.Assertions
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.common.util.Util
+import androidx.media3.datasource.DataSource
+import androidx.media3.datasource.DefaultDataSourceFactory
+import androidx.media3.datasource.DefaultHttpDataSource
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
 import androidx.media3.exoplayer.source.TrackGroupArray
 import androidx.media3.exoplayer.trackselection.DefaultTrackSelector
 import androidx.media3.exoplayer.trackselection.MappingTrackSelector
@@ -87,9 +91,30 @@ class CustomPlayerActivity() : FlutterActivity() {
 
         initializeBinding()
     }
+    private fun chunkVideoStream(): DefaultMediaSourceFactory {
+        //This code for :
+        // The code you provided shows a custom implementation of DataSource.Factory in Kotlin
+        //for ExoPlayer in Android. The custom dataSourceFactory is used to create DataSource
+        //objects that can handle HTTP requests with specific range headers. This is typically
+        //used to implement adaptive streaming or loading media in chunks (e.g., for video streaming).
+        val dataSourceFactory = object : DataSource.Factory {
+            private var nextRangeStartBytes = 0L
+
+            override fun createDataSource(): DataSource {
+                val httpDataSource = DefaultHttpDataSource()
+                val rangeHeader = "bytes=$nextRangeStartBytes-${nextRangeStartBytes + 25 * 1024 * 1024 - 1}"
+                httpDataSource.setRequestProperty("Range", rangeHeader)
+                nextRangeStartBytes += 25 * 1024 * 1024
+                return httpDataSource
+            }
+        }
+        val defaultDataSourceFactory = DefaultDataSourceFactory(applicationContext, null, dataSourceFactory)
+        return DefaultMediaSourceFactory(defaultDataSourceFactory)
+    }
 
     private fun initializePlayer() {
-
+        player = null
+        /////////////////////////////
         /*val loadControl: LoadControl = DefaultLoadControl.Builder()
             .setAllocator(DefaultAllocator(true, C.DEFAULT_BUFFER_SEGMENT_SIZE))
             .setBufferDurationsMs(
@@ -107,9 +132,10 @@ class CustomPlayerActivity() : FlutterActivity() {
             //setParameters(buildUponParameters().setRendererDisabled(C.TRACK_TYPE_VIDEO, false))
         }
         player = ExoPlayer.Builder(this)
-            .setVideoScalingMode(2)
+            //.setVideoScalingMode(2) //MediaCodec.VIDEO_SCALING_MODE_SCALE_TO_FIT
             .setAudioAttributes(AudioAttributes.DEFAULT, false)
             .setTrackSelector(trackSelection)
+            .setMediaSourceFactory(chunkVideoStream())
             //.setLoadControl(loadControl)
             .build()
             .also { exoPlayer ->
@@ -436,9 +462,17 @@ class CustomPlayerActivity() : FlutterActivity() {
             startVideoPosition = (startVideoPosition - 1 + videoUris.size) % videoUris.size
             setGreenColorForDownloadButtonIfIsDownloaded(mediaType)
             //player?.seekToPreviousMediaItem()
-            player?.seekToDefaultPosition(startVideoPosition)
+            //player?.seekToDefaultPosition(startVideoPosition)
             viewBinding.videoSubTitle.text = videoSubTitle[startVideoPosition]
             playbackPosition = 0L
+            //////////////////////////
+            //For chunk video stream
+            viewBinding.progressLoadingVideo.visibility = View.VISIBLE
+            player?.let { exoPlayer ->
+                exoPlayer.release()
+            }
+            initializePlayer()
+            //////////////////////////
             seekToLastWatching()
         } else {
             Toast.makeText(
@@ -455,9 +489,17 @@ class CustomPlayerActivity() : FlutterActivity() {
             startVideoPosition = (startVideoPosition + 1) % videoUris.size
             setGreenColorForDownloadButtonIfIsDownloaded(mediaType)
             //player?.seekToNextMediaItem()
-            player?.seekToDefaultPosition(startVideoPosition)
+            //player?.seekToDefaultPosition(startVideoPosition)
             viewBinding.videoSubTitle.text = videoSubTitle[startVideoPosition]
             playbackPosition = 0L
+            ////////////////////////
+            //For chunk video stream
+            viewBinding.progressLoadingVideo.visibility = View.VISIBLE
+            player?.let { exoPlayer ->
+                exoPlayer.release()
+            }
+            initializePlayer()
+            ////////////////////////
             seekToLastWatching()
         } else {
             Toast.makeText(
