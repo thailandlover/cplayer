@@ -879,6 +879,7 @@ class CustomPlayerActivity() : FlutterActivity() {
     private fun initToGetDataFromIntentAndTypeMedia() {
         //System.out.println("Bom Gson::: "+json);
         //print("Bom 101:::")
+        try{
         jsonPlayMovieData = intent.getStringExtra("PlayMovieData")
         jsonPlayEpisodeData = intent.getStringExtra("PlayEpisodeData")
         if (jsonPlayMovieData != null) {
@@ -975,6 +976,14 @@ class CustomPlayerActivity() : FlutterActivity() {
         }
         ////////////////////////////////////////////////////////////////////////////////////////////
         ///////
+        }catch (e:Exception){
+            isReadyPlayer = false
+            Toast.makeText(
+                this,
+                if (currentLanguage == "en") "There is no content to display" else "لا يوجد محتوى للعرض",
+                Toast.LENGTH_LONG
+            ).show()
+        }
     }
 
     private fun setGreenColorForDownloadButtonIfIsDownloaded(mediaType: String) {
