@@ -329,6 +329,7 @@ class _MyAppState extends State<MyApp> {
         token: accessToken,
         apiBaseUrl: "https://v4.kaayapp.com/api",
         lang: "ar",
+        startAt: 3,
         info: episodeToStart,
         mediaGroup: mediaGroup);
     dynamic result = await invokePlayEpisode(media);

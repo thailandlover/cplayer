@@ -12,6 +12,7 @@ class EpisodeMedia {
     required this.token,
     required this.apiBaseUrl,
     required this.lang,
+    required this.startAt,
     required this.info,
     this.mediaGroup,
   });
@@ -22,6 +23,7 @@ class EpisodeMedia {
   String token;
   String apiBaseUrl;
   String lang;
+  double startAt;
   Map<String,dynamic> info;
   Map<String,dynamic>? mediaGroup;
 
@@ -32,6 +34,7 @@ class EpisodeMedia {
     token: json["token"],
     apiBaseUrl: json["api_base_url"],
     lang: json["lang"],
+    startAt: json["start_at"],
     info: json["info"],
     mediaGroup: json["media_group"],
   );
@@ -43,6 +46,7 @@ class EpisodeMedia {
     "token": token,
     "api_base_url": apiBaseUrl,
     "lang": lang,
+    "start_at": startAt,
     "info": info,
     "media_group": mediaGroup,
   };
