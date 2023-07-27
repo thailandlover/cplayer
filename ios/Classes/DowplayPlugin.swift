@@ -58,6 +58,7 @@ public class DowplayPlugin: NSObject, FlutterPlugin {
            let api_base_url : String = myArgs["api_base_url"] as? String,
            let media_group : [String:Any] = myArgs["media_group"] as? [String:Any],
            let info : [String:Any] = myArgs["info"] as? [String:Any],
+           let start_at : Float = myArgs["start_at"] as? Float,
            let lang : String = myArgs["lang"] as? String {
             Task {
                 let keeUser = KeeUser(userID: user_id, profileID: profile_id,token: token)
@@ -84,6 +85,7 @@ public class DowplayPlugin: NSObject, FlutterPlugin {
                     }
                     if(playingId == episode["id"] as! Int){
                         playingIndex = index
+                        startAt = start_at
                     }
                     let downloadUrl:String? = episode["download_url"] as? String ?? nil
                     let mediaItem = Media(title: episode["title"] as! String,subTitle: season["title"] as? String, urlToPlay: episode["media_url"] as! String,downloadURL: downloadUrl ,keeId: mediaId,type: mediaType, startAt: startAt,mediaGroup: mediaGroup,info: episode)
