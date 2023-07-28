@@ -243,9 +243,9 @@ public class DowplayPlugin: NSObject, FlutterPlugin {
         {
             let url : URL = URL(string: myArgs["url"] as! String)!
             let mediaId: Int = Int(myArgs["media_id"] as! String)!
-            
-            DownloadManager.shared.startDownload(url: url, forMediaId: mediaId, type: .movie,mediaGroup: nil, object:myArgs)
-            
+            let title : String = myArgs["title"] as! String
+
+            DownloadManager.shared.startDownload(url: url, forMediaId: mediaId,mediaName: title, type: .movie,mediaGroup: nil, object:myArgs)
             let downloadsList : [[String : Any]] = DownloadManager.shared.getAllMediaDecoded()
             
             result(downloadsList)
