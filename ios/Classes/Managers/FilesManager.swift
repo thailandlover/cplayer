@@ -114,7 +114,8 @@ public class FilesManager {
     
     public func deleteMovieBy(id : String)throws{
         var dmListContent = try self.getDMList()
-        if let deletedItem = dmListContent.removeValue(forKey: id){
+        if var deletedItem = dmListContent.removeValue(forKey: id){
+            deletedItem.signature = self.userSignature
             try? fm.removeItem(at: deletedItem.tempPath!)
             try? fm.removeItem(at: deletedItem.path)
             saveDMListContent(dmListContent)
