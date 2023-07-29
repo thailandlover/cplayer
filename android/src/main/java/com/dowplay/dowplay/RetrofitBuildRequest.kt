@@ -18,43 +18,49 @@ class RetrofitBuildRequest {
 
         /*Log.d("Send Post Data Watch","profileId $profileId mediaId $mediaId mediaType $mediaType duration $duration time $time" +
                 "url $url acceptLanguage $acceptLanguage authorization $authorization")*/
-        val fullApiUrl = "$url/"
 
-        val contentType = "application/x-www-form-urlencoded"
-        val acceptType  = "android"
-        val retrofit = Retrofit.Builder()
-            .baseUrl(fullApiUrl)
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
+        try {
+            val fullApiUrl = "$url/"
 
-        val apiService = retrofit.create(ApiService::class.java)
+            val contentType = "application/x-www-form-urlencoded"
+            val acceptType = "android"
+            val retrofit = Retrofit.Builder()
+                .baseUrl(fullApiUrl)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build()
 
-        val call = apiService.sendPostData(
-            contentType,
-            "Bearer $authorization",
-            acceptLanguage,
-            acceptType,
-            profileId,
-            mediaType,
-            mediaId,
-            duration,
-            time
-        )
+            val apiService = retrofit.create(ApiService::class.java)
 
-        call.enqueue(object : Callback<ResponseBody> {
-            override fun onResponse(
-                call: Call<ResponseBody>,
-                response: Response<ResponseBody>
-            ) {
-                // handle success
-                //Log.d("onResponse is success", "Watching API: $response")
-                Log.d("onResponse is success", "Watching API: Added")
-            }
-            override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
-                // handle failure
-                //Log.d("onFailure is failure", "Watching API: ${t.message}")
-                Log.d("onFailure is failure","Watching API: Not Added")
-            }
-        })
+            val call = apiService.sendPostData(
+                contentType,
+                "Bearer $authorization",
+                acceptLanguage,
+                acceptType,
+                profileId,
+                mediaType,
+                mediaId,
+                duration,
+                time
+            )
+
+            call.enqueue(object : Callback<ResponseBody> {
+                override fun onResponse(
+                    call: Call<ResponseBody>,
+                    response: Response<ResponseBody>
+                ) {
+                    // handle success
+                    //Log.d("onResponse is success", "Watching API: $response")
+                    Log.d("onResponse is success", "Watching API: Added")
+                }
+
+                override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
+                    // handle failure
+                    //Log.d("onFailure is failure", "Watching API: ${t.message}")
+                    Log.d("onFailure is failure", "Watching API: Not Added")
+                }
+            })
+        }catch (e:Exception){
+            Log.d("onResponse is failure", "Watching API: Not Added..."+e.message)
+        }
     }
 }
