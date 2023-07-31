@@ -124,9 +124,11 @@ public class DowplayPlugin: NSObject, FlutterPlugin {
                 let hostAppSettings = HostAppSettings(KeeUser:keeUser, lang: lang,baseURL: api_base_url,apiVersion: 4,baseType: "mobile",baseVersion: "v4",acceptType: "ios")
                 let mediaType : MediaManager.MediaType = media_type == "movie" ? .movie : .series
                 
+                let downloadUrl:String? = info["download_url"] as? String ?? nil
+                
                 var media : [Media] = []
                 
-                    let mediaItem = Media(title: title,subTitle: sub_title, urlToPlay: url,downloadURL:info["download_url"] as! String,keeId: media_id,type: mediaType, startAt: start_at,info: myArgs)
+                    let mediaItem = Media(title: title,subTitle: sub_title, urlToPlay: url,downloadURL:downloadUrl,keeId: media_id,type: mediaType, startAt: start_at,info: myArgs)
                 media.append(mediaItem)
                 
                 let playerResult : [[String:Any]] = await MediaManager.default.openMediaPlayer(usingMediaList: media,usingSettings: hostAppSettings, forViewController: flutterViewController)
