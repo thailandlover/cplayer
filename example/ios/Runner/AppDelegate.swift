@@ -17,7 +17,7 @@ import dowplay
     }
     
     override func application(_ application: UIApplication, supportedInterfaceOrientationsFor window: UIWindow?) -> UIInterfaceOrientationMask {
-                return KeeVideoPlayerController.orientationLock
+                return VideoPlayerViewController.orientationLock
         }
     
 }

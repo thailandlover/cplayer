@@ -9,7 +9,7 @@
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
-        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="KeeVideoPlayerController" customModule="dowplay" customModuleProvider="target">
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="VideoPlayerViewController" customModule="dowplay" customModuleProvider="target">
             <connections>
                 <outlet property="bottomView" destination="zZa-7F-1nJ" id="ySz-ad-rz7"/>
                 <outlet property="btn_airPlay" destination="s45-Ow-wxF" id="ph6-mw-Pf2"/>

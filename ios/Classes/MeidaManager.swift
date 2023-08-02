@@ -12,7 +12,7 @@ import AVKit
 public class MediaManager {
     
     static var `default` = MediaManager()
-    private var currentPlayer : KeeVideoPlayerController?
+    private var currentPlayer : VideoPlayerViewController?
     private var once = false
     
     private init(){}
@@ -36,7 +36,7 @@ public class MediaManager {
             NSException(name: name, reason: "Media list range is from 0 ... to \(list.count - 1), and the playing index is \(playMediaIndex)").raise()
         }
         
-        let vc = await KeeVideoPlayerController(nibName: "KeeVideoPlayerController", bundle: .packageBundle)
+        let vc = await VideoPlayerViewController(nibName: "VideoPlayerViewController", bundle: .packageBundle)
         await vc.setPresentationStyle(.fullScreen)
         await vc.setSettings(settings)
         await vc.setMediaList(mediaList: list)
@@ -55,14 +55,14 @@ public class MediaManager {
     
     
     @discardableResult
-    public func openMediaPlayer(usingMediaList list : [Media],playMediaIndex: Int = 0, usingSettings settings: HostAppSettings,  forViewController mvc: UIViewController)->KeeVideoPlayerController {
+    public func openMediaPlayer(usingMediaList list : [Media],playMediaIndex: Int = 0, usingSettings settings: HostAppSettings,  forViewController mvc: UIViewController)->VideoPlayerViewController {
         
         if playMediaIndex < 0 || playMediaIndex >= list.count {
             let name = NSExceptionName("Playing index is not in the media list range")
             NSException(name: name, reason: "Media list range is from 0 ... to \(list.count - 1), and the playing index is \(playMediaIndex)").raise()
         }
         
-        let vc = KeeVideoPlayerController(nibName: "KeeVideoPlayerController", bundle: .packageBundle)
+        let vc = VideoPlayerViewController(nibName: "VideoPlayerViewController", bundle: .packageBundle)
         vc.settings = settings
         vc.setMediaList(mediaList: list)
         vc.setPlayingIndex(playMediaIndex)

@@ -1,5 +1,5 @@
 //
-//  KeeVideoPlayerSettingsViewController.swift
+//  VideoPlayerSettingsViewController.swift
 //  KeeCustomPlayer
 //
 //  Created by Ahmed Qazzaz on 21/11/2022.
@@ -8,7 +8,7 @@
 import UIKit
 import AVFoundation
 
-public class KeeVideoPlayerSettingsViewController: UIViewController {
+public class VideoPlayerSettingsViewController: UIViewController {
 
     @IBOutlet weak private var mainStack : UIStackView!
     

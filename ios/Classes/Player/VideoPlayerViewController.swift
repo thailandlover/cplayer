@@ -1,5 +1,5 @@
 //
-//  KeeVideoPlayerController.swift
+//  VideoPlayerViewController.swift
 //  KeeCustomPlayer
 //
 //  Created by Ahmed Qazzaz on 11/11/2022.
@@ -17,7 +17,7 @@ struct PlayingInfo : Codable{
 }
 
 
-public class KeeVideoPlayerController: UIViewController {
+public class VideoPlayerViewController: UIViewController {
     public var settings : HostAppSettings = .default
     public static var orientationLock = UIInterfaceOrientationMask.portrait
     public var controllersStayTime : Double = 5
@@ -99,7 +99,7 @@ public class KeeVideoPlayerController: UIViewController {
     private var pipController: AVPictureInPictureController!
     private var pipPossibleObservation: NSKeyValueObservation?
     
-    private var settingsController : KeeVideoPlayerSettingsViewController!
+    private var settingsController : VideoPlayerSettingsViewController!
     
     @IBOutlet weak private var bottomView : UIView!
     @IBOutlet weak private var topView : UIView!
@@ -131,7 +131,7 @@ public class KeeVideoPlayerController: UIViewController {
 //        playerView.backgroundColor = .red
         
         self.setPlayingItemInfo()
-        settingsController = KeeVideoPlayerSettingsViewController(nibName: "KeeVideoPlayerSettingsViewController", bundle: .packageBundle)
+        settingsController = VideoPlayerSettingsViewController(nibName: "VideoPlayerSettingsViewController", bundle: .packageBundle)
                         
         playerView.layer.addSublayer(playerLayer)
         self.view.addSubview(playerView)
@@ -884,8 +884,12 @@ public class KeeVideoPlayerController: UIViewController {
     
       
     @IBAction func topOnPlayer(_ sender: UITapGestureRecognizer) {
-        self.showViews()
-        setTimerToHideControllers()
+        if (vi_infoView.topConstraint?.constant ?? 0) >= 0 {
+            self.hideViews()
+        }else{
+            self.showViews()
+            setTimerToHideControllers()
+        }
     }
     
     private func setTimerToHideControllers(){
@@ -980,7 +984,7 @@ public class KeeVideoPlayerController: UIViewController {
     
 }
 
-extension KeeVideoPlayerController : AVPictureInPictureControllerDelegate {
+extension VideoPlayerViewController : AVPictureInPictureControllerDelegate {
     public func pictureInPictureController(_ pictureInPictureController: AVPictureInPictureController,
                                     restoreUserInterfaceForPictureInPictureStopWithCompletionHandler completionHandler: @escaping (Bool) -> Void) {
         // Restore the user interface.
@@ -1000,7 +1004,7 @@ extension KeeVideoPlayerController : AVPictureInPictureControllerDelegate {
 
 
 //Public Functions
-extension KeeVideoPlayerController {
+extension VideoPlayerViewController {
     
     func setSettings(_ settings : HostAppSettings){
         self.settings = settings

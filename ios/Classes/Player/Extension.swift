@@ -87,7 +87,7 @@ public struct AppUtility {
 
     static func lockOrientation(_ orientation: UIInterfaceOrientationMask) {
     
-        KeeVideoPlayerController.orientationLock = orientation
+        VideoPlayerViewController.orientationLock = orientation
     }
 
     /// OPTIONAL Added method to adjust lock and rotate to the desired orientation
