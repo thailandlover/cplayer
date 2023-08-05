@@ -512,6 +512,7 @@ class CustomPlayerActivity() : FlutterActivity() {
 
     var radioButtonAudioSelected = 0;
     var radioButtonSubtitleSelected = 0;
+    var radioButtonPlayBackSpeedSelected = 1;
     private fun settingScreen() {
         pauseVideo()
 
@@ -522,17 +523,22 @@ class CustomPlayerActivity() : FlutterActivity() {
         bindingMF.subtitleRadioGroup.visibility = View.GONE
         bindingMF.englishAudioRadioButton.visibility = View.GONE
         bindingMF.arabicAudioRadioButton.visibility = View.GONE
+        bindingMF.viewAudio.visibility = View.GONE
         bindingMF.englishSubtitleRadioButton.visibility = View.GONE
         bindingMF.arabicSubtitleRadioButton.visibility = View.GONE
         bindingMF.offSubtitleRadioButton.visibility = View.GONE
         bindingMF.audioTitle.visibility = View.GONE
         bindingMF.subtitleTitle.visibility = View.GONE
+        bindingMF.viewSubtitle.visibility = View.GONE
         bindingMF.noSettingsForVideoTitle.visibility = View.GONE
         (bindingMF.audioRadioGroup.getChildAt(radioButtonAudioSelected) as RadioButton).isChecked =
             true
         (bindingMF.subtitleRadioGroup.getChildAt(radioButtonSubtitleSelected) as RadioButton).isChecked =
             true
+        (bindingMF.playbackSpeedRadioGroup.getChildAt(radioButtonPlayBackSpeedSelected) as RadioButton).isChecked =
+            true
         setPlayerLanguage(currentLanguage, bindingMF)
+
         ////////////////////////////////////////////////////////////////////////////////////////////
         try {
             var mappedTrackInfo: MappingTrackSelector.MappedTrackInfo =
@@ -597,7 +603,35 @@ class CustomPlayerActivity() : FlutterActivity() {
                         true
                 }
             }
-
+            //////////////////////////////////////////////
+            bindingMF.playbackSpeedRadioGroup.setOnCheckedChangeListener { _, checkedId ->
+                if (checkedId == bindingMF.playbackSpeedX05RadioButton.id) {
+                    player?.setPlaybackSpeed(0.5f)
+                    radioButtonPlayBackSpeedSelected = 0
+                    (bindingMF.playbackSpeedRadioGroup.getChildAt(radioButtonPlayBackSpeedSelected) as RadioButton).isChecked =
+                        true
+                } else if (checkedId == bindingMF.playbackSpeedX10RadioButton.id) {
+                    player?.setPlaybackSpeed(1.0f)
+                    radioButtonPlayBackSpeedSelected = 1
+                    (bindingMF.playbackSpeedRadioGroup.getChildAt(radioButtonPlayBackSpeedSelected) as RadioButton).isChecked =
+                        true
+                } else if (checkedId == bindingMF.playbackSpeedX125RadioButton.id) {
+                    player?.setPlaybackSpeed(1.25f)
+                    radioButtonPlayBackSpeedSelected = 2
+                    (bindingMF.playbackSpeedRadioGroup.getChildAt(radioButtonPlayBackSpeedSelected) as RadioButton).isChecked =
+                        true
+                }else if (checkedId == bindingMF.playbackSpeedX15RadioButton.id) {
+                    player?.setPlaybackSpeed(1.5f)
+                    radioButtonPlayBackSpeedSelected = 3
+                    (bindingMF.playbackSpeedRadioGroup.getChildAt(radioButtonPlayBackSpeedSelected) as RadioButton).isChecked =
+                        true
+                }else if (checkedId == bindingMF.playbackSpeedX20RadioButton.id) {
+                    player?.setPlaybackSpeed(2.0f)
+                    radioButtonPlayBackSpeedSelected = 4
+                    (bindingMF.playbackSpeedRadioGroup.getChildAt(radioButtonPlayBackSpeedSelected) as RadioButton).isChecked =
+                        true
+                }
+            }
             //////////////////////////////////////////////
             val builderDialog = AlertDialog.Builder(context, R.style.FullScreenDialogTheme)
             builderDialog.setView(customDialog)
@@ -676,11 +710,13 @@ class CustomPlayerActivity() : FlutterActivity() {
                         if (trackName.lowercase().contains("English".lowercase())) {
                             bindingMF.audioTitle.visibility = View.VISIBLE
                             bindingMF.englishAudioRadioButton.visibility = View.VISIBLE
+                            bindingMF.viewAudio.visibility = View.VISIBLE
                         }
                         if (trackName.lowercase().contains("Arabic".lowercase())) {
                             //print("Bom Arabic")
                             bindingMF.audioTitle.visibility = View.VISIBLE
                             bindingMF.arabicAudioRadioButton.visibility = View.VISIBLE
+                            bindingMF.viewAudio.visibility = View.VISIBLE
                         }
                     }
                     if (sampleMimeType != null && sampleMimeType.contains("x-quicktime-tx3g")) {
@@ -690,22 +726,24 @@ class CustomPlayerActivity() : FlutterActivity() {
                             bindingMF.subtitleTitle.visibility = View.VISIBLE
                             bindingMF.offSubtitleRadioButton.visibility = View.VISIBLE
                             bindingMF.englishSubtitleRadioButton.visibility = View.VISIBLE
+                            bindingMF.viewSubtitle.visibility = View.VISIBLE
                         }
                         if (trackName.lowercase().contains("Arabic".lowercase())) {
                             bindingMF.subtitleTitle.visibility = View.VISIBLE
                             bindingMF.offSubtitleRadioButton.visibility = View.VISIBLE
                             bindingMF.arabicSubtitleRadioButton.visibility = View.VISIBLE
+                            bindingMF.viewSubtitle.visibility = View.VISIBLE
                         }
                     }
                 }
             }
             ///////////////////////////////////////////////////////////////////////////////////////
         }
-        if (!bindingMF.audioTitle.isVisible && !bindingMF.subtitleTitle.isVisible) {
+        /*if (!bindingMF.audioTitle.isVisible && !bindingMF.subtitleTitle.isVisible) {
             bindingMF.noSettingsForVideoTitle.visibility = View.VISIBLE
         } else {
             bindingMF.noSettingsForVideoTitle.visibility = View.GONE
-        }
+        }*/
     }
 
     private fun setPlayerLanguage(lang: String, bindingMF: SettingBinding?) {
@@ -716,13 +754,16 @@ class CustomPlayerActivity() : FlutterActivity() {
                 bindingMF.subtitleTitle.text = "الترجمة"
                 bindingMF.offSubtitleRadioButton.text = "ايقاف"
                 bindingMF.noSettingsForVideoTitle.text = "لا يوجد اعدادات لهذا الفيديو"
+                bindingMF.playBackSpeed.text = "سرعة التشغيل"
             }
         } else {
             viewBinding.playerSettingText.text = "Setting"
             if (bindingMF != null) {
+                bindingMF.audioTitle.text = "Audio"
                 bindingMF.subtitleTitle.text = "Subtitle"
                 bindingMF.offSubtitleRadioButton.text = "Off"
                 bindingMF.noSettingsForVideoTitle.text = "No settings for this video"
+                bindingMF.playBackSpeed.text = "Playback speed"
             }
         }
     }
