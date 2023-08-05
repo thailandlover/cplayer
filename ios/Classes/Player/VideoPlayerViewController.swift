@@ -378,14 +378,30 @@ public class VideoPlayerViewController: UIViewController {
             player.replaceCurrentItem(with: nil)
             // load new item
             let item = AVPlayerItem(url: url)
+            item.preferredForwardBufferDuration = TimeInterval(5)
             item.addObserver(self,
                              forKeyPath: #keyPath(AVPlayerItem.status),
                              options:  [.old, .new],
                              context: &playerItemContext)
+            
+            item.addObserver(self, forKeyPath: #keyPath(AVPlayerItem.isPlaybackLikelyToKeepUp), options:  [.old, .new],
+                             context: &playerItemContext)
+            
+            item.addObserver(self, forKeyPath: #keyPath(AVPlayerItem.isPlaybackLikelyToKeepUp), options:  [.old, .new],
+                             context: &playerItemContext)
+            
+            item.addObserver(self, forKeyPath: #keyPath(AVPlayerItem.isPlaybackBufferEmpty), options:  [.old, .new],
+                             context: &playerItemContext)
+            
+            item.addObserver(self, forKeyPath: #keyPath(AVPlayerItem.isPlaybackBufferFull), options:  [.old, .new],
+                             context: &playerItemContext)
+                        
+
             NotificationCenter.default.addObserver(self, selector: #selector(playerDidFinishPlaying(note:)), name: NSNotification.Name.AVPlayerItemDidPlayToEndTime, object: item)
                 //.addObserver(self, selector: "playerDidFinishPlaying:", name: AVPlayerItemDidPlayToEndTimeNotification, object: item)
             self.initSubtitleStyle(forItem: item)
             player.replaceCurrentItem(with: item)
+            player.automaticallyWaitsToMinimizeStalling = item.isPlaybackBufferEmpty
             didInitialized = true
             moveToNextTime?.invalidate()
             moveToNextTime = nil
@@ -711,7 +727,6 @@ public class VideoPlayerViewController: UIViewController {
             switch status {
             case .readyToPlay:
                 // Player item is ready to play.
-                print("video is ready to play")
                 self.viewsShouldBeHidden = true
                 self.updateItemInfo(self.player.currentItem!)
                 self.play()
@@ -761,9 +776,29 @@ public class VideoPlayerViewController: UIViewController {
                 break
             }
         }
+        
+        if keyPath == #keyPath(AVPlayerItem.isPlaybackLikelyToKeepUp) ||
+            keyPath == #keyPath(AVPlayerItem.isPlaybackBufferFull){
+            self.updateBufferTimeInterval()
+        }
 
     }
         
+    private func updateBufferTimeInterval(){
+        var isPlaying: Bool {
+            if (self.player.rate != 0 && self.player.error == nil) {
+                return true
+            } else {
+                return false
+            }
+        }
+        if(isPlaying){
+            self.player.currentItem?.preferredForwardBufferDuration = TimeInterval(5)
+            self.player.automaticallyWaitsToMinimizeStalling = player.currentItem?.isPlaybackBufferEmpty ?? false
+            self.player.play()
+        }
+    }
+    
     
     func enableAll(){
         seekTimeSlider.isEnabled = true
