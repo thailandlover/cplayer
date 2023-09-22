@@ -21,6 +21,7 @@ import android.widget.RadioButton
 import android.widget.TextView
 import android.widget.Toast
 import androidx.annotation.RequiresApi
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.view.*
 import androidx.lifecycle.Lifecycle
@@ -43,7 +44,6 @@ import com.dowplay.dowplay.databinding.ActivityCustomPlayerBinding
 import com.dowplay.dowplay.databinding.CustomControlViewBinding
 import com.dowplay.dowplay.databinding.SettingBinding
 import com.google.gson.Gson
-import io.flutter.embedding.android.FlutterActivity
 
 
 @UnstableApi
@@ -51,7 +51,7 @@ import io.flutter.embedding.android.FlutterActivity
  * A fullscreen activity to play audio or video streams.
  */
 
-class CustomPlayerActivity() : FlutterActivity() {
+class CustomPlayerActivity() : AppCompatActivity() {
 
     private val viewBinding by lazy(LazyThreadSafetyMode.NONE) {
         ActivityCustomPlayerBinding.inflate(layoutInflater)
@@ -397,7 +397,7 @@ class CustomPlayerActivity() : FlutterActivity() {
         }
         viewBinding.pictureOnPictureButton.setOnClickListener {
             vibratePhone()
-            if (isPiPSupported(activity)) {
+            if (isPiPSupported(this@CustomPlayerActivity)) {
                 showVideoAsPictureOnPicture()
             } else {
                 Toast.makeText(
@@ -633,7 +633,7 @@ class CustomPlayerActivity() : FlutterActivity() {
                 }
             }
             //////////////////////////////////////////////
-            val builderDialog = AlertDialog.Builder(context, R.style.FullScreenDialogTheme)
+            val builderDialog = AlertDialog.Builder(applicationContext, R.style.FullScreenDialogTheme)
             builderDialog.setView(customDialog)
             val alertDialog = builderDialog.create()
             alertDialog.show()
@@ -771,7 +771,7 @@ class CustomPlayerActivity() : FlutterActivity() {
     private fun download() {
         var result = 0
         if (mediaType == movie) {
-            result = DownloaderDowPlay(context, activity, currentLanguage).startDownload(
+            result = DownloaderDowPlay(applicationContext, this@CustomPlayerActivity, currentLanguage).startDownload(
                 movieMedia?.info?.downloadUrl.toString(),
                 movieMedia?.title.toString(),
                 movieMedia?.mediaType.toString(),
@@ -797,7 +797,7 @@ class CustomPlayerActivity() : FlutterActivity() {
             val episodeJson =
                 gson.toJson(episodeMedia?.mediaGroup?.episodes?.get(startVideoPosition))
 
-            result = DownloaderDowPlay(context, activity, currentLanguage).startDownload(
+            result = DownloaderDowPlay(applicationContext, this@CustomPlayerActivity, currentLanguage).startDownload(
                 episodeMedia?.mediaGroup?.episodes?.get(startVideoPosition)?.downloadUrl.toString(),
                 episodeMedia?.mediaGroup?.tvShow?.title ?: "",
                 episodeMedia?.mediaType ?: "",
@@ -818,7 +818,7 @@ class CustomPlayerActivity() : FlutterActivity() {
         if (result == 1) {
             viewBinding.downloadButton.setColorFilter(
                 ContextCompat.getColor(
-                    context,
+                    applicationContext,
                     R.color.blue_download
                 )
             );
@@ -873,8 +873,8 @@ class CustomPlayerActivity() : FlutterActivity() {
             viewBinding.bottomController.visibility = View.GONE
             viewBinding.playerView.hideController()
         }*/
-        val supportsPiP = isPiPSupported(activity)
-        val isSettingsEnabled = isPiPSettingsEnabled(activity)
+        val supportsPiP = isPiPSupported(this@CustomPlayerActivity)
+        val isSettingsEnabled = isPiPSettingsEnabled(this@CustomPlayerActivity)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             if (supportsPiP) {
@@ -1030,13 +1030,13 @@ class CustomPlayerActivity() : FlutterActivity() {
     private fun setGreenColorForDownloadButtonIfIsDownloaded(mediaType: String) {
         var downloadInfo = HashMap<String, Any>()
         if (mediaType == series) {
-            downloadInfo = DatabaseHelper(context).getDownloadInfoFromDB(
+            downloadInfo = DatabaseHelper(applicationContext).getDownloadInfoFromDB(
                 episodeMedia?.mediaGroup?.episodes?.get(startVideoPosition)?.id.toString(),
                 mediaType
             )
             //videoUris[startVideoPosition] = downloadInfo["video_path"].toString()
         } else {
-            downloadInfo = DatabaseHelper(context).getDownloadInfoFromDB(
+            downloadInfo = DatabaseHelper(applicationContext).getDownloadInfoFromDB(
                 movieMedia?.mediaId.toString(),
                 mediaType
             )
@@ -1048,7 +1048,7 @@ class CustomPlayerActivity() : FlutterActivity() {
                 videoUris[startVideoPosition] = downloadInfo["video_path"].toString()
                 viewBinding.downloadButton.setColorFilter(
                     ContextCompat.getColor(
-                        context,
+                        applicationContext,
                         R.color.green_download
                     )
                 );
@@ -1061,14 +1061,14 @@ class CustomPlayerActivity() : FlutterActivity() {
         } else if (downloadInfo["status"] == DownloadManagerSTATUS.STATUS_RUNNING && downloadInfo["status"] != null) {
             viewBinding.downloadButton.setColorFilter(
                 ContextCompat.getColor(
-                    context,
+                    applicationContext,
                     R.color.blue_download
                 )
             );
         } else if (downloadInfo["status"] == DownloadManagerSTATUS.STATUS_FAILED && downloadInfo["status"] != null) {
             viewBinding.downloadButton.setColorFilter(
                 ContextCompat.getColor(
-                    context,
+                    applicationContext,
                     R.color.red_download
                 )
             );
@@ -1157,7 +1157,9 @@ class CustomPlayerActivity() : FlutterActivity() {
         isInPictureInPictureMode: Boolean,
         newConfig: Configuration
     ) {
-        super.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            super.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig)
+        }
         if (lifecycle.currentState == Lifecycle.State.CREATED) {
             //user clicked on close button of PiP window
             //Log.d("PiP-is-close", "PiP is close by click on close button")
