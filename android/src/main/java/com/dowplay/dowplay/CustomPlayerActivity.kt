@@ -164,22 +164,30 @@ class CustomPlayerActivity() : AppCompatActivity() {
     }
 
     private fun seekToLastWatching() {
-        if (playbackPosition == 0L) {
-            if (mediaType == movie) {
-                movieMedia?.info?.watching?.currentTime?.toLong()?.let {
-                    player?.seekTo(it * 1000)
-                    //print("B7b creent time :::: " + it * 1000)
-                }
-            } else if (mediaType == series) {
-                episodeMedia?.mediaGroup?.episodes?.get(startVideoPosition)?.watching?.currentTime?.toLong()
-                    ?.let {
+        try {
+            if (playbackPosition == 0L) {
+                if (mediaType == movie) {
+                    movieMedia?.info?.watching?.currentTime?.toLong()?.let {
                         player?.seekTo(it * 1000)
                         //print("B7b creent time :::: " + it * 1000)
                     }
+                } else if (mediaType == series) {
+                    episodeMedia?.mediaGroup?.episodes?.get(startVideoPosition)?.watching?.currentTime?.toLong()
+                        ?.let {
+                            player?.seekTo(it * 1000)
+                            //print("B7b creent time :::: " + it * 1000)
+                        }
+                }
+            } else {
+                player?.seekTo(playbackPosition)
+                //print("B7b creent time :::: $playbackPosition")
             }
-        } else {
-            player?.seekTo(playbackPosition)
-            //print("B7b creent time :::: $playbackPosition")
+        }catch (e:Exception){
+            Toast.makeText(
+                this,
+                if (currentLanguage == "en") "There is no content to display" else "لا يوجد محتوى للعرض",
+                Toast.LENGTH_LONG
+            ).show()
         }
     }
 
