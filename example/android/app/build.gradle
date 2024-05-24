@@ -50,6 +50,7 @@ android {
             signingConfig signingConfigs.debug
         }
     }
+    namespace 'com.dowplay.dowplay_example'
 }
 
 flutter {
