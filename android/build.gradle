@@ -23,7 +23,7 @@ apply plugin: 'com.android.library'
 apply plugin: 'org.jetbrains.kotlin.android'
 
 android {
-    namespace 'com.dowplay.dowplay_example'
+    namespace 'com.dowplay.dowplay'
     compileSdkVersion 33
 
     buildFeatures {
