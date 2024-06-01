@@ -35,7 +35,8 @@
         android:supportsPictureInPicture="true"
         android:largeHeap="true"
         android:theme="@style/Theme.CustomPlayerActivity"
-        android:windowSoftInputMode="adjustResize">
+        android:windowSoftInputMode="adjustResize"
+        tools:replace="android:icon,android:theme">
         <activity
             tools:replace="android:theme"
             android:name=".CustomPlayerActivity"
