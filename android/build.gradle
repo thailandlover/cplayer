@@ -24,7 +24,7 @@ apply plugin: 'org.jetbrains.kotlin.android'
 
 android {
     namespace "com.dowplay.dowplay"
-    compileSdkVersion 33
+    compileSdkVersion 34
 
     buildFeatures {
         viewBinding true
