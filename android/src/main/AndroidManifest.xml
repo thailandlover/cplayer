@@ -36,7 +36,7 @@
         android:largeHeap="true"
         android:theme="@style/Theme.CustomPlayerActivity"
         android:windowSoftInputMode="adjustResize"
-        tools:replace="android:icon, android:label, android:theme, android:name,android:allowBackup">
+        tools:replace="android:theme">
         <activity
             tools:replace="android:theme"
             android:name=".CustomPlayerActivity"
