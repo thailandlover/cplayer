@@ -26,12 +26,16 @@ apply plugin: 'kotlin-android'
 apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
 
 android {
-    compileSdkVersion localProperties.getProperty('flutter.compileSdkVersion').toInteger()
-    ndkVersion flutter.ndkVersion
+    namespace "com.dowplay.dowplay_example"
+    compileSdk localProperties.getProperty('flutter.compileSdkVersion').toInteger()
+    ndkVersion localProperties.getProperty('flutter.ndkVersion')
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
+    }
+    kotlinOptions {
+        jvmTarget = "1.8"
     }
 
     defaultConfig {

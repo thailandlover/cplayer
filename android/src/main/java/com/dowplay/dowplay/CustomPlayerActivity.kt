@@ -550,7 +550,7 @@ class CustomPlayerActivity() : AppCompatActivity() {
         ////////////////////////////////////////////////////////////////////////////////////////////
         try {
             var mappedTrackInfo: MappingTrackSelector.MappedTrackInfo =
-                Assertions.checkNotNull(trackSelection?.currentMappedTrackInfo);
+                Assertions.checkNotNull(trackSelection.currentMappedTrackInfo);
             //var parameters: DefaultTrackSelector.Parameters = trackSelection?.parameters!!
             for (rendererIndex in 0 until mappedTrackInfo.rendererCount) {
                 //var trackType: Int = mappedTrackInfo.getRendererType(rendererIndex)
@@ -564,13 +564,13 @@ class CustomPlayerActivity() : AppCompatActivity() {
 
 
             var builder: DefaultTrackSelector.Parameters.Builder =
-                trackSelection!!.buildUponParameters()
+                trackSelection.buildUponParameters()
             bindingMF.audioRadioGroup.setOnCheckedChangeListener { _, checkedId ->
                 if (checkedId == bindingMF.englishAudioRadioButton.id) {
                     builder.setMaxVideoSizeSd()
                         //.setPreferredTextLanguage("en")
                         .setPreferredAudioLanguage("en")
-                    trackSelection?.setParameters(builder)
+                    trackSelection.setParameters(builder)
                     radioButtonAudioSelected = 0
                     (bindingMF.audioRadioGroup.getChildAt(radioButtonAudioSelected) as RadioButton).isChecked =
                         true
@@ -578,7 +578,7 @@ class CustomPlayerActivity() : AppCompatActivity() {
                     builder.setMaxVideoSizeSd()
                         //.setPreferredTextLanguage("ar")
                         .setPreferredAudioLanguage("ar")
-                    trackSelection?.setParameters(builder)
+                    trackSelection.setParameters(builder)
                     radioButtonAudioSelected = 1
                     (bindingMF.audioRadioGroup.getChildAt(radioButtonAudioSelected) as RadioButton).isChecked =
                         true
@@ -589,7 +589,7 @@ class CustomPlayerActivity() : AppCompatActivity() {
                     builder.setMaxVideoSizeSd()
                         .setPreferredTextLanguage("en")
                     //.setPreferredAudioLanguage("en")
-                    trackSelection?.setParameters(builder)
+                    trackSelection.setParameters(builder)
                     radioButtonSubtitleSelected = 0
                     (bindingMF.subtitleRadioGroup.getChildAt(radioButtonSubtitleSelected) as RadioButton).isChecked =
                         true
@@ -597,7 +597,7 @@ class CustomPlayerActivity() : AppCompatActivity() {
                     builder.setMaxVideoSizeSd()
                         .setPreferredTextLanguage("ar")
                     //.setPreferredAudioLanguage("ar")
-                    trackSelection?.setParameters(builder)
+                    trackSelection.setParameters(builder)
                     radioButtonSubtitleSelected = 1
                     (bindingMF.subtitleRadioGroup.getChildAt(radioButtonSubtitleSelected) as RadioButton).isChecked =
                         true
@@ -605,7 +605,7 @@ class CustomPlayerActivity() : AppCompatActivity() {
                     builder.setMaxVideoSizeSd()
                         .setPreferredTextLanguage(null)
                     //.setPreferredAudioLanguage("ar")
-                    trackSelection?.setParameters(builder)
+                    trackSelection.setParameters(builder)
                     radioButtonSubtitleSelected = 2
                     (bindingMF.subtitleRadioGroup.getChildAt(radioButtonSubtitleSelected) as RadioButton).isChecked =
                         true
@@ -641,7 +641,7 @@ class CustomPlayerActivity() : AppCompatActivity() {
                 }
             }
             //////////////////////////////////////////////
-            val builderDialog = AlertDialog.Builder(applicationContext, R.style.FullScreenDialogTheme)
+            val builderDialog = AlertDialog.Builder(this@CustomPlayerActivity, R.style.FullScreenDialogTheme)
             builderDialog.setView(customDialog)
             val alertDialog = builderDialog.create()
             alertDialog.show()
@@ -652,7 +652,7 @@ class CustomPlayerActivity() : AppCompatActivity() {
             }
             //////////////////////////////////////////////
         } catch (e: Exception) {
-
+            println("A7a ${e.toString()}")
             Toast.makeText(
                 this,
                 if (currentLanguage == "en") "Please wait..." else "يرجى الانتظار...",
@@ -673,7 +673,7 @@ class CustomPlayerActivity() : AppCompatActivity() {
         //Log.d("TAG", "Track Changed " + trackGroups.length)
         //Log.d("TAG", "Track selection : " + trackSelections.length)
         val mappedTrackInfo: MappingTrackSelector.MappedTrackInfo? =
-            trackSelection?.currentMappedTrackInfo
+            trackSelection.currentMappedTrackInfo
         if (mappedTrackInfo != null) {
             if (mappedTrackInfo.getTypeSupport(C.TRACK_TYPE_VIDEO)
                 == MappingTrackSelector.MappedTrackInfo.RENDERER_SUPPORT_UNSUPPORTED_TRACKS
@@ -1097,7 +1097,7 @@ class CustomPlayerActivity() : AppCompatActivity() {
         }
 
         val exoPositionView = viewBinding.playerView.findViewById<TextView>(R.id.exo_position)
-        val exoDurationView = viewBinding.playerView.findViewById<TextView>(R.id.exo_duration)
+        val exoDurationView = viewBinding.playerView.findViewById<TextView>(androidx.media3.ui.R.id.exo_duration)
         val exoContentTimeBar =
             viewBinding.playerView.findViewById<LinearLayout>(R.id.exo_content_time_bar)
         viewBinding.playerView.showController()
