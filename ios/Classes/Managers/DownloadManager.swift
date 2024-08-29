@@ -88,11 +88,12 @@ public class DownloadManager: NSObject/*, ObservableObject */{
         tasks.forEach({ task in
             if let downloadTask = task as? URLSessionDownloadTask{
                 var media = self.extractMedia(usingTask: downloadTask)
-                media.saveDownloadStatus(taskId: task.mediaId!, signature: userSignature, url: task.originalRequest?.url)
-                task.cancel()
+                if(task != nil && task.mediaId != nil && userSignature != nil && ((task.originalRequest?.url) != nil)){
+                    media.saveDownloadStatus(taskId: task.mediaId!, signature: userSignature, url: task.originalRequest?.url)
+                    task.cancel()
+                }
             }
-        })
-        
+        }) 
     }
     
     //MARK: - Getting Download Task Progress
