@@ -46,6 +46,8 @@
             android:screenOrientation="landscape"
             android:supportsPictureInPicture="true"
             android:largeHeap="true"
+            android:supportsRtl="false"
+            tools:replace="android:supportsRtl"
             android:theme="@style/Theme.CustomPlayerActivity"
             android:windowSoftInputMode="adjustResize"/>
         <service
