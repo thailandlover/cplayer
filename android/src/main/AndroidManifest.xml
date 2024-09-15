@@ -36,8 +36,7 @@
         android:largeHeap="true"
         android:theme="@style/Theme.CustomPlayerActivity"
         android:windowSoftInputMode="adjustResize"
-        tools:replace="android:theme"
-        android:supportsRtl="false">
+        tools:replace="android:theme">
         <activity
             android:name=".CustomPlayerActivity"
             android:configChanges="uiMode|orientation|screenSize|screenLayout|smallestScreenSize|screenLayout|density"
@@ -48,8 +47,7 @@
             android:supportsPictureInPicture="true"
             android:largeHeap="true"
             android:theme="@style/Theme.CustomPlayerActivity"
-            android:windowSoftInputMode="adjustResize"
-            android:supportsRtl="false"/>
+            android:windowSoftInputMode="adjustResize"/>
         <service
             android:name=".DownloadService"
             android:enabled="true"
