@@ -43,7 +43,7 @@ android {
     }
     buildTypes {
         release {
-            minifyEnabled false // Set to false to disable ProGuard/R8
+            //minifyEnabled false // Set to false to disable ProGuard/R8
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
