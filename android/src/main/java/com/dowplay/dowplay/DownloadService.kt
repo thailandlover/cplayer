@@ -314,7 +314,7 @@ class DownloadService : Service() {
 
     private fun stopService() {
         // Stop the foreground service
-        stopForeground(true)
+        stopForeground(STOP_FOREGROUND_REMOVE)
         stopSelf()
     }
 

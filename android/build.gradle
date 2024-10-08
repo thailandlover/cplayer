@@ -39,11 +39,12 @@ android {
     }
 
     defaultConfig {
-        minSdkVersion 21
+        minSdk 24
     }
     buildTypes {
         release {
             minifyEnabled false // Set to false to disable ProGuard/R8
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
 }
