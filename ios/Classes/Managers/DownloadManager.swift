@@ -87,10 +87,14 @@ public class DownloadManager: NSObject/*, ObservableObject */{
     public func saveDownloadStatus(){
         tasks.forEach({ task in
             if let downloadTask = task as? URLSessionDownloadTask{
-                var media = self.extractMedia(usingTask: downloadTask)
-                if(task != nil && task.mediaId != nil && userSignature != nil && ((task.originalRequest?.url) != nil)){
-                    media.saveDownloadStatus(taskId: task.mediaId!, signature: userSignature, url: task.originalRequest?.url)
-                    task.cancel()
+                if(downloadTask != nil){
+                    var media = self.extractMedia(usingTask: downloadTask)
+                    if(media != nil){
+                        if(task != nil && task.mediaId != nil && userSignature != nil && ((task.originalRequest?.url) != nil)){
+                            media.saveDownloadStatus(taskId: task.mediaId!, signature: userSignature, url: task.originalRequest?.url)
+                            task.cancel()
+                        }
+                    }
                 }
             }
         }) 
