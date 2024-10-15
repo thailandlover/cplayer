@@ -19,7 +19,7 @@ public class MediaManager {
 
     //MARK: -Media Player Functions.
     
-    public func openMediaPlayer(usingMediaList list : [Media],playMediaIndex: Int = 0, usingSettings settings: HostAppSettings,  forViewController mvc: UIViewController) async ->[[String:Any]]{
+    public func openMediaPlayer(usingMediaList list : [Media],playMediaIndex: Int = 0, usingSettings settings: HostAppSettings,  forViewController mvc: UIViewController, myArgs: [String: Any]? = nil, myMediaGroup: [String: Any]? = nil, myInfo: [String: Any]? = nil) async ->[[String:Any]]{
         
         if !once {
             once = true
@@ -41,6 +41,13 @@ public class MediaManager {
         await vc.setSettings(settings)
         await vc.setMediaList(mediaList: list)
         await vc.setPlayingIndex(playMediaIndex)
+        await MainActor.run {
+            vc.myReceivedArgs = myArgs
+            vc.myReceivedMediaGroup = myMediaGroup
+            vc.myReceibedInfo = myInfo
+        }
+        
+        
         
         if let nvc = await mvc.navigationController {
             await nvc.pushViewController(vc, animated: true)
@@ -55,7 +62,7 @@ public class MediaManager {
     
     
     @discardableResult
-    public func openMediaPlayer(usingMediaList list : [Media],playMediaIndex: Int = 0, usingSettings settings: HostAppSettings,  forViewController mvc: UIViewController)->VideoPlayerViewController {
+    public func openMediaPlayer(usingMediaList list : [Media],playMediaIndex: Int = 0, usingSettings settings: HostAppSettings,  forViewController mvc: UIViewController, myArgs: [String: Any]? = nil, myMediaGroup: [String: Any]? = nil, myInfo: [String: Any]? = nil)->VideoPlayerViewController {
         
         if playMediaIndex < 0 || playMediaIndex >= list.count {
             let name = NSExceptionName("Playing index is not in the media list range")
@@ -66,6 +73,10 @@ public class MediaManager {
         vc.settings = settings
         vc.setMediaList(mediaList: list)
         vc.setPlayingIndex(playMediaIndex)
+        vc.myReceivedArgs = myArgs
+        vc.myReceivedMediaGroup = myMediaGroup
+        vc.myReceibedInfo = myInfo
+        
         if let nvc = mvc.navigationController {
             nvc.pushViewController(vc, animated: true)
         }else{

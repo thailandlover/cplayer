@@ -18,6 +18,10 @@ struct PlayingInfo : Codable{
 
 
 public class VideoPlayerViewController: UIViewController {
+    var myReceivedArgs : [String:Any]?
+    var myReceivedMediaGroup : [String:Any]?
+    var myReceibedInfo : [String:Any]?
+    
     public var settings : HostAppSettings = .default
     public static var orientationLock = UIInterfaceOrientationMask.portrait
     public var controllersStayTime : Double = 5
@@ -111,7 +115,6 @@ public class VideoPlayerViewController: UIViewController {
     
     public override func viewDidLoad() {
         super.viewDidLoad()
-        
 
         
         AppUtility.lockOrientation(.landscape)
@@ -656,12 +659,17 @@ public class VideoPlayerViewController: UIViewController {
         if btn_download.tag == 0 {
             //        DownloadManager.shared.download(link: media?.urlToPlay ?? "")
             if let url = URL(string: media?.downloadURL ?? "") {
-                DownloadManager.shared.startDownload(url: url,
-                                                     forMediaId: Int(media?.keeId ?? "") ?? -1 ,
-                                                     mediaName: media?.title ?? "Untitled",
-                                                     type: media?.type ?? .movie,
-                                                     mediaGroup: media?.mediaGroup,
-                                                     object: media?.info)
+                if(media?.type == .series){
+                    let mediaGroup : MediaGroup = MediaGroup(showId: media?.mediaGroup?.showId as! String, seasonId: media?.mediaGroup?.seasonId as! String, episodeId: media?.keeId as! String,seasonName: media?.mediaGroup?.seasonName as! String,showName: media?.mediaGroup?.showName as! String ,data: self.myReceivedMediaGroup)
+                    DownloadManager.shared.startDownload(url: url, forMediaId: Int(media?.keeId ?? "") ?? -1,mediaName: media?.title ?? "Untitled", type: .series,mediaGroup: mediaGroup, object:self.myReceivedArgs)
+                } else {
+                    DownloadManager.shared.startDownload(url: url,
+                                                         forMediaId: Int(media?.keeId ?? "") ?? -1 ,
+                                                         mediaName: media?.title ?? "Untitled",
+                                                         type: media?.type ?? .movie,
+                                                         mediaGroup: media?.mediaGroup,
+                                                         object: media?.info)
+                }
                 
                 try? validateDownloadButton()
             }
