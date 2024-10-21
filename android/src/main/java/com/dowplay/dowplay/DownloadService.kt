@@ -12,6 +12,7 @@ import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import androidx.media3.common.util.UnstableApi
 import com.downloader.*
+import android.content.pm.ServiceInfo
 
 
 @UnstableApi
@@ -260,7 +261,13 @@ class DownloadService : Service() {
             .setSmallIcon(R.drawable.play_icon)
             .setAutoCancel(true)
             .build()
-        startForeground(downloadId, notification)
+//        startForeground(downloadId, notification)
+        // For Android 10 (API 29) and above, set the foreground service type
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            startForeground(downloadId, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC)
+        } else {
+            startForeground(downloadId, notification)
+        }
     }
 
     private fun updateStatusDownloadInDB(
