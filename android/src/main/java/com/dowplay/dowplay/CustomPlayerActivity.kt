@@ -1020,14 +1020,18 @@ class CustomPlayerActivity() : AppCompatActivity() {
         if (mediaType == movie) {
             viewBinding.downloadButton.visibility =
                 if (movieMedia?.info?.downloadUrl.toString().trim()
-                        .isEmpty() || movieMedia?.info?.downloadUrl == null
+                        .isEmpty() || movieMedia?.info?.downloadUrl == null ||
+                    movieMedia?.isDownloadEnabled == null ||
+                    movieMedia?.isDownloadEnabled == false
                 ) View.GONE else View.VISIBLE;
         } else {
             viewBinding.downloadButton.visibility =
                 if (episodeMedia?.mediaGroup?.episodes?.get(startVideoPosition)?.downloadUrl.toString()
                         .trim()
                         .isEmpty()
-                    || episodeMedia?.mediaGroup?.episodes?.get(startVideoPosition)?.downloadUrl == null
+                    || episodeMedia?.mediaGroup?.episodes?.get(startVideoPosition)?.downloadUrl == null ||
+                    episodeMedia?.isDownloadEnabled == null ||
+                    episodeMedia?.isDownloadEnabled == false
                 ) View.GONE else View.VISIBLE;
         }
         ////////////////////////////////////////////////////////////////////////////////////////////

@@ -42,7 +42,10 @@ data class MovieMedia(
     val url: String?,
     @SerializedName("user_id")
     @Expose
-    val userId: String?
+    val userId: String?,
+    @SerializedName("is_download_enabled")
+    @Expose
+    val isDownloadEnabled: Boolean?
 ) {
     @Keep
     data class Info(

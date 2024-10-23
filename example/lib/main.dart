@@ -133,7 +133,8 @@ class _MyAppState extends State<MyApp> {
         apiBaseUrl: "https://v4.kaayapp.com/api",
         lang: "ar",
         startAt: 3,
-        info: movieObject);
+        info: movieObject,
+        isDownloadEnabled: false);
     downloadMovie = DownloadMovie(
         title: "The Simpsons in Plusaversary",
         subTitle: "",
@@ -143,7 +144,8 @@ class _MyAppState extends State<MyApp> {
         mediaType: "movie",
         userId: "245394",
         profileId: "562674",
-        info: movieObject);
+        info: movieObject,
+    isDownloadEnabled: false);
 
     // Should be called on the app start
     config();
@@ -331,7 +333,8 @@ class _MyAppState extends State<MyApp> {
         lang: "ar",
         startAt: 3,
         info: episodeToStart,
-        mediaGroup: mediaGroup);
+        mediaGroup: mediaGroup,
+    isDownloadEnabled: false);
     dynamic result = await invokePlayEpisode(media);
     if (kDebugMode) {
       printWrapped("Play episode result : $result");
@@ -526,7 +529,8 @@ class _MyAppState extends State<MyApp> {
         userId: "245394",
         profileId: "562674",
         info: episodeToDownload,
-        mediaGroup: mediaGroup);
+        mediaGroup: mediaGroup,
+        isDownloadEnabled: false);
 
     dynamic result = await invokeStartDownloadEpisode(type, media);
     List<dynamic> downloads = List.from(result as Iterable);
