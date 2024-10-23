@@ -36,7 +36,7 @@ class DownloadMovie {
     userId: json["user_id"],
     profileId: json["profile_id"],
     info: json["info"],
-    isDownloadEnabled: json["isDownloadEnabled"]
+    isDownloadEnabled: json["is_download_enabled"]
   );
 
   Map<String, dynamic> toJson() => {
@@ -48,6 +48,6 @@ class DownloadMovie {
     "user_id": userId,
     "profile_id": profileId,
     "info": info,
-    "isDownloadEnabled": isDownloadEnabled
+    "is_download_enabled": isDownloadEnabled
   };
 }

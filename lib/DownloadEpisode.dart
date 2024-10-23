@@ -27,7 +27,7 @@ class DownloadEpisode {
     profileId: json["profile_id"],
     info: json["info"],
     mediaGroup: json["media_group"],
-    isDownloadEnabled: json["isDownloadEnabled"]
+    isDownloadEnabled: json["is_download_enabled"]
   );
 
   Map<String, dynamic> toJson() => {
@@ -36,6 +36,6 @@ class DownloadEpisode {
     "profile_id": profileId,
     "info": info,
     "media_group": mediaGroup,
-    "isDownloadEnabled": isDownloadEnabled
+    "is_download_enabled": isDownloadEnabled
   };
 }

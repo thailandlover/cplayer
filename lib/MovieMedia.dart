@@ -18,6 +18,7 @@ class MovieMedia {
     required this.lang,
     required this.startAt,
     required this.info,
+    required this.isDownloadEnabled
   });
 
   String title;
@@ -32,6 +33,7 @@ class MovieMedia {
   String lang;
   double startAt;
   Map<String,dynamic> info;
+  bool isDownloadEnabled;
 
   factory MovieMedia.fromJson(Map<String, dynamic> json) => MovieMedia(
     title: json["title"],
@@ -46,6 +48,7 @@ class MovieMedia {
     lang: json["lang"],
     startAt: json["start_at"],
     info: json["info"],
+    isDownloadEnabled: json["is_download_enabled"]
   );
 
   Map<String, dynamic> toJson() => {
@@ -61,5 +64,6 @@ class MovieMedia {
     "lang": lang,
     "start_at": startAt,
     "info": info,
+    "is_download_enabled": isDownloadEnabled
   };
 }

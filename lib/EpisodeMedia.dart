@@ -15,6 +15,7 @@ class EpisodeMedia {
     required this.startAt,
     required this.info,
     this.mediaGroup,
+    this.isDownloadEnabled
   });
 
   String mediaType;
@@ -26,6 +27,7 @@ class EpisodeMedia {
   double startAt;
   Map<String,dynamic> info;
   Map<String,dynamic>? mediaGroup;
+  bool? isDownloadEnabled;
 
   factory EpisodeMedia.fromJson(Map<String, dynamic> json) => EpisodeMedia(
     mediaType: json["media_type"],
@@ -37,6 +39,7 @@ class EpisodeMedia {
     startAt: json["start_at"],
     info: json["info"],
     mediaGroup: json["media_group"],
+    isDownloadEnabled: json["is_download_enabled"]
   );
 
   Map<String, dynamic> toJson() => {
@@ -49,5 +52,6 @@ class EpisodeMedia {
     "start_at": startAt,
     "info": info,
     "media_group": mediaGroup,
+    "is_download_enabled": isDownloadEnabled
   };
 }
