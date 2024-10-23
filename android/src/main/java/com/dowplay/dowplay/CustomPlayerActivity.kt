@@ -101,10 +101,17 @@ class CustomPlayerActivity() : AppCompatActivity() {
             private var nextRangeStartBytes = 0L
 
             override fun createDataSource(): DataSource {
-                val httpDataSource = DefaultHttpDataSource()
+                // Create a factory to configure the HTTP data source
+                val httpDataSourceFactory = DefaultHttpDataSource.Factory()
+                val httpDataSource = httpDataSourceFactory.createDataSource()
                 val rangeHeader = "bytes=$nextRangeStartBytes-${nextRangeStartBytes + 25 * 1024 * 1024 - 1}"
                 httpDataSource.setRequestProperty("Range", rangeHeader)
                 nextRangeStartBytes += 25 * 1024 * 1024
+                //old code mediaVersion v-1.3.1
+                /*val httpDataSource = DefaultHttpDataSource()
+                val rangeHeader = "bytes=$nextRangeStartBytes-${nextRangeStartBytes + 25 * 1024 * 1024 - 1}"
+                httpDataSource.setRequestProperty("Range", rangeHeader)
+                nextRangeStartBytes += 25 * 1024 * 1024*/
                 return httpDataSource
             }
         }
