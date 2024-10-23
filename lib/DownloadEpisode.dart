@@ -11,6 +11,7 @@ class DownloadEpisode {
     required this.profileId,
     required this.info,
     this.mediaGroup,
+    required this.isDownloadEnabled
   });
 
   String mediaType;
@@ -18,6 +19,7 @@ class DownloadEpisode {
   String profileId;
   Map<String,dynamic> info;
   Map<String,dynamic>? mediaGroup;
+  bool isDownloadEnabled;
 
   factory DownloadEpisode.fromJson(Map<String, dynamic> json) => DownloadEpisode(
     mediaType: json["media_type"],
@@ -25,6 +27,7 @@ class DownloadEpisode {
     profileId: json["profile_id"],
     info: json["info"],
     mediaGroup: json["media_group"],
+    isDownloadEnabled: json["isDownloadEnabled"]
   );
 
   Map<String, dynamic> toJson() => {
@@ -33,5 +36,6 @@ class DownloadEpisode {
     "profile_id": profileId,
     "info": info,
     "media_group": mediaGroup,
+    "isDownloadEnabled": isDownloadEnabled
   };
 }

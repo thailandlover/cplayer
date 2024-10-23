@@ -14,6 +14,7 @@ class DownloadMovie {
     required this.userId,
     required this.profileId,
     required this.info,
+    required this.isDownloadEnabled
   });
 
   String title;
@@ -24,6 +25,7 @@ class DownloadMovie {
   String userId;
   String profileId;
   Map<String,dynamic> info;
+  bool isDownloadEnabled;
 
   factory DownloadMovie.fromJson(Map<String, dynamic> json) => DownloadMovie(
     title: json["title"],
@@ -34,6 +36,7 @@ class DownloadMovie {
     userId: json["user_id"],
     profileId: json["profile_id"],
     info: json["info"],
+    isDownloadEnabled: json["isDownloadEnabled"]
   );
 
   Map<String, dynamic> toJson() => {
@@ -45,5 +48,6 @@ class DownloadMovie {
     "user_id": userId,
     "profile_id": profileId,
     "info": info,
+    "isDownloadEnabled": isDownloadEnabled
   };
 }
