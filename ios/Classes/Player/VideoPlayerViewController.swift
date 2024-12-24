@@ -708,7 +708,8 @@ public class VideoPlayerViewController: UIViewController {
                 self.showViews()
             }else{
                 if viewsShouldBeHidden {
-                    self.hideViews()
+                    self.setTimerToHideControllers()
+                    // self.hideViews()
                 }
             }
             return
